@@ -394,14 +394,14 @@ void Context::MakeRequestSSL(httplib::Request& request, const URLInfo& url_info,
     const unsigned char* key_data = nullptr;
     long cert_size = 0;
     long key_size = 0;
-    SCOPE_EXIT({
+    SCOPE_EXIT {
         if (cert) {
             X509_free(cert);
         }
         if (key) {
             EVP_PKEY_free(key);
         }
-    });
+    };
 
     if (uses_default_client_cert) {
         cert_data = clcert_data->certificate.data();

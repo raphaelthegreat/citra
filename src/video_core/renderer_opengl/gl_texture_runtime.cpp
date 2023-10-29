@@ -501,7 +501,9 @@ bool Surface::DownloadWithoutFbo(const VideoCore::BufferTextureCopy& download,
 
     glActiveTexture(TEMP_UNIT);
     glPixelStorei(GL_PACK_ROW_LENGTH, unscaled_width);
-    SCOPE_EXIT({ glPixelStorei(GL_PACK_ROW_LENGTH, 0); });
+    SCOPE_EXIT {
+        glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+    };
 
     // Prefer glGetTextureSubImage in most cases since it's the fastest and most convenient option
     const bool is_full_download = download.texture_rect == GetRect();

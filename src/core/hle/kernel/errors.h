@@ -110,4 +110,6 @@ constexpr Result ResultNoPendingSessions(ErrCodes::NoPendingSessions, ErrorModul
                                          ErrorSummary::WouldBlock,
                                          ErrorLevel::Permanent); // 0xD8401823
 
+constexpr Result ResultInvalidBlockState(0xD900060C);
+
 } // namespace Kernel

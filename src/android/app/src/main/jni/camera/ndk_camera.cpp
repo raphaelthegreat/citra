@@ -112,7 +112,9 @@ static void OnError(void* context, ACameraDevice* device, int error) {
 void ImageCallback(void* context, AImageReader* reader) {
     AImage* image{};
     MEDIA_CALL(AImageReader_acquireLatestImage(reader, &image));
-    SCOPE_EXIT({ AImage_delete(image); });
+    SCOPE_EXIT {
+        AImage_delete(image);
+    };
 
     std::array<std::shared_ptr<u8>, 3> data;
     std::array<int, 3> row_stride;
@@ -458,7 +460,9 @@ std::unique_ptr<CameraInterface> Factory::Create(const std::string& config,
         return std::make_unique<Camera::BlankCamera>();
     }
 
-    SCOPE_EXIT({ ACameraManager_deleteCameraIdList(id_list); });
+    SCOPE_EXIT {
+        ACameraManager_deleteCameraIdList(id_list);
+    };
 
     if (id_list->numCameras <= 0) {
         LOG_WARNING(Service_CAM, "No camera devices found, falling back to StillImage");
@@ -500,7 +504,9 @@ std::unique_ptr<CameraInterface> Factory::Create(const std::string& config,
 
         ACameraMetadata* metadata;
         ACameraManager_getCameraCharacteristics(manager.get(), id, &metadata);
-        SCOPE_EXIT({ ACameraMetadata_free(metadata); });
+        SCOPE_EXIT {
+            ACameraMetadata_free(metadata);
+        };
 
         ACameraMetadata_const_entry entry;
         ACameraMetadata_getConstEntry(metadata, ACAMERA_LENS_FACING, &entry);

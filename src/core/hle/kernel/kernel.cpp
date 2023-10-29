@@ -3,9 +3,11 @@
 // Refer to the license.txt file included.
 
 #include "core/hle/kernel/client_port.h"
-#include "core/hle/kernel/config_mem.h"
-#include "core/hle/kernel/handle_table.h"
 #include "core/hle/kernel/ipc_debugger/recorder.h"
+#include "core/hle/kernel/k_linked_list.h"
+#include "core/hle/kernel/k_memory_block.h"
+#include "core/hle/kernel/k_page_group.h"
+#include "core/hle/kernel/k_slab_heap.h"
 #include "core/hle/kernel/kernel.h"
 #include "core/hle/kernel/memory.h"
 #include "core/hle/kernel/process.h"
@@ -24,6 +26,7 @@ KernelSystem::KernelSystem(Memory::MemorySystem& memory, Core::Timing& timing,
     : memory(memory), timing(timing),
       prepare_reschedule_callback(std::move(prepare_reschedule_callback)), memory_mode(memory_mode),
       n3ds_hw_caps(n3ds_hw_caps) {
+    slab_heap_container = std::make_unique<SlabHeapContainer>();
     std::generate(memory_regions.begin(), memory_regions.end(),
                   [] { return std::make_shared<MemoryRegionInfo>(); });
     MemoryInit(memory_mode, n3ds_hw_caps.memory_mode, override_init_time);
@@ -155,5 +158,26 @@ u32 KernelSystem::NewThreadId() {
 void KernelSystem::ResetThreadIDs() {
     next_thread_id = 0;
 }
+
+struct KernelSystem::SlabHeapContainer {
+    KSlabHeap<KLinkedListNode> linked_list_node;
+    KSlabHeap<KBlockInfo> block_info;
+    KSlabHeap<KMemoryBlock> memory_block;
+};
+
+template <typename T>
+KSlabHeap<T>& KernelSystem::SlabHeap() {
+    if constexpr (std::is_same_v<T, KLinkedListNode>) {
+        return slab_heap_container->linked_list_node;
+    } else if constexpr (std::is_same_v<T, KBlockInfo>) {
+        return slab_heap_container->block_info;
+    } else if constexpr (std::is_same_v<T, KMemoryBlock>) {
+        return slab_heap_container->memory_block;
+    }
+}
+
+template KSlabHeap<KLinkedListNode>& KernelSystem::SlabHeap();
+template KSlabHeap<KBlockInfo>& KernelSystem::SlabHeap();
+template KSlabHeap<KMemoryBlock>& KernelSystem::SlabHeap();
 
 } // namespace Kernel

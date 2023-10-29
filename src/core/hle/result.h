@@ -392,14 +392,130 @@ private:
         return CONCAT2(check_result_L, __LINE__).Code();                                           \
     target = std::move(*CONCAT2(check_result_L, __LINE__))
 
+/**
+ * Analogous to CASCADE_RESULT, but for a bare Result. The code will be propagated if
+ * non-success, or discarded otherwise.
+ */
+#define CASCADE_CODE(source)                                                                       \
+    auto CONCAT2(check_result_L, __LINE__) = source;                                               \
+    if (CONCAT2(check_result_L, __LINE__).IsError())                                               \
+        return CONCAT2(check_result_L, __LINE__);
+
 #define R_SUCCEEDED(res) (static_cast<Result>(res).IsSuccess())
-#define R_FAILED(res) (static_cast<Result>(res).IsError())
+#define R_FAILED(res) (!static_cast<Result>(res).IsSuccess())
+
+namespace ResultImpl {
+template <auto EvaluateResult, class F>
+class ScopedResultGuard {
+private:
+    Result& m_ref;
+    F m_f;
+
+public:
+    constexpr ScopedResultGuard(Result& ref, F f) : m_ref(ref), m_f(std::move(f)) {}
+    constexpr ~ScopedResultGuard() {
+        if (EvaluateResult(m_ref)) {
+            m_f();
+        }
+    }
+};
+
+template <auto EvaluateResult>
+class ResultReferenceForScopedResultGuard {
+private:
+    Result& m_ref;
+
+public:
+    constexpr ResultReferenceForScopedResultGuard(Result& r) : m_ref(r) {}
+    constexpr operator Result&() const {
+        return m_ref;
+    }
+};
+
+template <auto EvaluateResult, typename F>
+constexpr ScopedResultGuard<EvaluateResult, F> operator+(
+    ResultReferenceForScopedResultGuard<EvaluateResult> ref, F&& f) {
+    return ScopedResultGuard<EvaluateResult, F>(static_cast<Result&>(ref), std::forward<F>(f));
+}
+
+constexpr bool EvaluateResultSuccess(const Result& r) {
+    return R_SUCCEEDED(r);
+}
+constexpr bool EvaluateResultFailure(const Result& r) {
+    return R_FAILED(r);
+}
+
+template <typename T>
+constexpr void UpdateCurrentResultReference(T result_reference, Result result) = delete;
+// Intentionally not defined
+
+template <>
+constexpr void UpdateCurrentResultReference<Result&>(Result& result_reference, Result result) {
+    result_reference = result;
+}
+
+template <>
+constexpr void UpdateCurrentResultReference<const Result>(Result result_reference, Result result) {}
+} // namespace ResultImpl
+
+#define DECLARE_CURRENT_RESULT_REFERENCE_AND_STORAGE(COUNTER_VALUE)                                \
+    [[maybe_unused]] constexpr bool CONCAT2(HasPrevRef_, COUNTER_VALUE) =                          \
+        std::same_as<decltype(__TmpCurrentResultReference), Result&>;                              \
+    [[maybe_unused]] Result CONCAT2(PrevRef_, COUNTER_VALUE) = __TmpCurrentResultReference;        \
+    [[maybe_unused]] Result CONCAT2(__tmp_result_, COUNTER_VALUE) = ResultSuccess;                 \
+    Result& __TmpCurrentResultReference = CONCAT2(HasPrevRef_, COUNTER_VALUE)                      \
+                                              ? CONCAT2(PrevRef_, COUNTER_VALUE)                   \
+                                              : CONCAT2(__tmp_result_, COUNTER_VALUE)
+
+#define ON_RESULT_RETURN_IMPL(...)                                                                 \
+    static_assert(std::same_as<decltype(__TmpCurrentResultReference), Result&>);                   \
+    auto CONCAT2(RESULT_GUARD_STATE_, __COUNTER__) =                                               \
+        ResultImpl::ResultReferenceForScopedResultGuard<__VA_ARGS__>(                              \
+            __TmpCurrentResultReference) +                                                         \
+        [&]()
+
+#define ON_RESULT_FAILURE_2 ON_RESULT_RETURN_IMPL(ResultImpl::EvaluateResultFailure)
+
+#define ON_RESULT_FAILURE                                                                          \
+    DECLARE_CURRENT_RESULT_REFERENCE_AND_STORAGE(__COUNTER__);                                     \
+    ON_RESULT_FAILURE_2
+
+#define ON_RESULT_SUCCESS_2 ON_RESULT_RETURN_IMPL(ResultImpl::EvaluateResultSuccess)
+
+#define ON_RESULT_SUCCESS                                                                          \
+    DECLARE_CURRENT_RESULT_REFERENCE_AND_STORAGE(__COUNTER__);                                     \
+    ON_RESULT_SUCCESS_2
+
+constexpr inline Result __TmpCurrentResultReference = ResultSuccess;
+
+/// Returns a result.
+#define R_RETURN(res_expr)                                                                         \
+    {                                                                                              \
+        const Result _tmp_r_throw_rc = (res_expr);                                                 \
+        ResultImpl::UpdateCurrentResultReference<decltype(__TmpCurrentResultReference)>(           \
+            __TmpCurrentResultReference, _tmp_r_throw_rc);                                         \
+        return _tmp_r_throw_rc;                                                                    \
+    }
+
+/// Returns ResultSuccess()
+#define R_SUCCEED() R_RETURN(ResultSuccess)
+
+/// Throws a result.
+#define R_THROW(res_expr) R_RETURN(res_expr)
 
 /// Evaluates a boolean expression, and returns a result unless that expression is true.
 #define R_UNLESS(expr, res)                                                                        \
     {                                                                                              \
         if (!(expr)) {                                                                             \
-            return (res);                                                                          \
+            R_THROW(res);                                                                          \
+        }                                                                                          \
+    }
+
+/// Evaluates a boolean expression, and returns a result unless that expression is true.
+#define R_THROW_IF(expr, res)                                                                      \
+    {                                                                                              \
+        if (expr) {                                                                                \
+            R_THROW(res);                                                                          \
         }                                                                                          \
     }
 
@@ -408,7 +524,7 @@ private:
     {                                                                                              \
         const auto _tmp_r_try_rc = (res_expr);                                                     \
         if (R_FAILED(_tmp_r_try_rc)) {                                                             \
-            return (_tmp_r_try_rc);                                                                \
+            R_THROW(_tmp_r_try_rc);                                                                \
         }                                                                                          \
     }
 

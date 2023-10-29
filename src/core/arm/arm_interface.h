@@ -10,9 +10,8 @@
 #include "core/arm/skyeye_common/arm_regformat.h"
 #include "core/arm/skyeye_common/vfp/asm_vfp.h"
 #include "core/core_timing.h"
-#include "core/memory.h"
 
-namespace Memory {
+namespace Common {
 struct PageTable;
 };
 
@@ -74,7 +73,7 @@ public:
     virtual void ClearExclusiveState() = 0;
 
     /// Notify CPU emulation that page tables have changed
-    virtual void SetPageTable(const std::shared_ptr<Memory::PageTable>& page_table) = 0;
+    virtual void SetPageTable(const Common::PageTable* page_table) = 0;
 
     /**
      * Set the Program Counter to an address

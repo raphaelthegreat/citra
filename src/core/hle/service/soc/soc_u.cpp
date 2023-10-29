@@ -899,14 +899,14 @@ void SOC_U::Fcntl(Kernel::HLERequestContext& ctx) {
     SocketHolder& holder = socket_holder_optional->get();
 
     u32 posix_ret = 0; // TODO: Check what hardware returns for F_SETFL (unspecified by POSIX)
-    SCOPE_EXIT({
+    SCOPE_EXIT {
         LOG_DEBUG(Service_SOC, "called, pid={}, fd={}, ret={}", pid, socket_handle,
                   static_cast<s32>(posix_ret));
 
         IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
         rb.Push(ResultSuccess);
         rb.Push(posix_ret);
-    });
+    };
 
     if (ctr_cmd == 3) { // F_GETFL
         posix_ret = 0;

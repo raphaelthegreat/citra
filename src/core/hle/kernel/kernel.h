@@ -123,6 +123,9 @@ struct New3dsHwCapabilities {
     New3dsMemoryMode memory_mode; ///< The New 3DS memory mode.
 };
 
+template <typename T>
+class KSlabHeap;
+
 class KernelSystem {
 public:
     explicit KernelSystem(Memory::MemorySystem& memory, Core::Timing& timing,
@@ -254,6 +257,10 @@ public:
                                                               MemoryPermission permissions,
                                                               MemoryPermission other_permissions,
                                                               std::string name = "Unknown Applet");
+
+    /// Gets the slab heap for the specified kernel object type.
+    template <typename T>
+    KSlabHeap<T>& SlabHeap();
 
     u32 GenerateObjectID();
 
@@ -395,6 +402,10 @@ private:
      * to load and setup themselves before the game starts.
      */
     bool main_thread_extended_sleep = false;
+
+    /// Helper to encapsulate all slab heaps in a single heap allocated container
+    struct SlabHeapContainer;
+    std::unique_ptr<SlabHeapContainer> slab_heap_container;
 };
 
 } // namespace Kernel

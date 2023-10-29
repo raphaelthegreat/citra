@@ -326,7 +326,9 @@ int main(int argc, char** argv) {
 #endif
 
     MicroProfileOnThreadCreate("EmuThread");
-    SCOPE_EXIT({ MicroProfileShutdown(); });
+    SCOPE_EXIT {
+        MicroProfileShutdown();
+    };
 
     if (filepath.empty()) {
         LOG_CRITICAL(Frontend, "Failed to load ROM: No ROM specified");

@@ -106,7 +106,9 @@ void FS_USER::OpenFileDirectly(Kernel::HLERequestContext& ctx) {
         rb.PushMoveObjects<Kernel::Object>(nullptr);
         return;
     }
-    SCOPE_EXIT({ archives.CloseArchive(*archive_handle); });
+    SCOPE_EXIT {
+        archives.CloseArchive(*archive_handle);
+    };
 
     const auto [file_res, open_timeout_ns] =
         archives.OpenFileFromArchive(*archive_handle, file_path, mode);

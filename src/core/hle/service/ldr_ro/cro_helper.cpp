@@ -1277,7 +1277,7 @@ Result CROHelper::Link(VAddr crs_address, bool link_on_load_bug_fix) {
                 SetEntry(system.Memory(), 2, entry);
             }
         }
-        SCOPE_EXIT({
+        SCOPE_EXIT {
             // Restore the new .data segment address after importing
             if (link_on_load_bug_fix) {
                 if (GetField(SegmentNum) >= 2) {
@@ -1287,7 +1287,7 @@ Result CROHelper::Link(VAddr crs_address, bool link_on_load_bug_fix) {
                     SetEntry(system.Memory(), 2, entry);
                 }
             }
-        });
+        };
 
         // Imports named symbols from other modules
         result = ApplyImportNamedSymbol(crs_address);

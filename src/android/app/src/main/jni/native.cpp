@@ -219,7 +219,9 @@ static Core::System::ResultStatus RunCitra(const std::string& filepath) {
 
     LoadDiskCacheProgress(VideoCore::LoadCallbackStage::Complete, 0, 0);
 
-    SCOPE_EXIT({ TryShutdown(); });
+    SCOPE_EXIT {
+        TryShutdown();
+    };
 
     // Start running emulation
     while (!stop_run) {
@@ -241,7 +243,9 @@ static Core::System::ResultStatus RunCitra(const std::string& filepath) {
         } else {
             // Ensure no audio bleeds out while game is paused
             const float volume = Settings::values.volume.GetValue();
-            SCOPE_EXIT({ Settings::values.volume = volume; });
+            SCOPE_EXIT {
+                Settings::values.volume = volume;
+            };
             Settings::values.volume = 0;
 
             std::unique_lock pause_lock{paused_mutex};

@@ -189,8 +189,6 @@ void Process::Run(s32 main_thread_priority, u32 stack_size) {
     }
 
     status = ProcessStatus::Running;
-
-    vm_manager.LogLayout(Common::Log::Level::Debug);
     Kernel::SetupMainThread(kernel, codeset->entrypoint, main_thread_priority, SharedFrom(this));
 }
 
@@ -561,9 +559,10 @@ void Process::FreeAllMemory() {
 }
 
 Kernel::Process::Process(KernelSystem& kernel)
-    : Object(kernel), handle_table(kernel), vm_manager(kernel.memory, *this), kernel(kernel) {
+    : Object(kernel), handle_table(kernel), kernel(kernel) {
     kernel.memory.RegisterPageTable(vm_manager.page_table);
 }
+
 Kernel::Process::~Process() {
     LOG_INFO(Kernel, "Cleaning up process {}", process_id);
 

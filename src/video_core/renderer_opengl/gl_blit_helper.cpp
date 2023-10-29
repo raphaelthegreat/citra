@@ -84,7 +84,9 @@ BlitHelper::~BlitHelper() = default;
 bool BlitHelper::ConvertDS24S8ToRGBA8(Surface& source, Surface& dest,
                                       const VideoCore::TextureCopy& copy) {
     OpenGLState prev_state = OpenGLState::GetCurState();
-    SCOPE_EXIT({ prev_state.Apply(); });
+    SCOPE_EXIT {
+        prev_state.Apply();
+    };
 
     state.texture_units[0].texture_2d = source.Handle();
     state.texture_units[0].sampler = 0;
@@ -141,7 +143,9 @@ bool BlitHelper::ConvertDS24S8ToRGBA8(Surface& source, Surface& dest,
 bool BlitHelper::ConvertRGBA4ToRGB5A1(Surface& source, Surface& dest,
                                       const VideoCore::TextureCopy& copy) {
     OpenGLState prev_state = OpenGLState::GetCurState();
-    SCOPE_EXIT({ prev_state.Apply(); });
+    SCOPE_EXIT {
+        prev_state.Apply();
+    };
 
     state.texture_units[0].texture_2d = source.Handle();
 
@@ -193,7 +197,9 @@ void BlitHelper::FilterAnime4K(Surface& surface, const VideoCore::TextureBlit& b
     static constexpr u8 internal_scale_factor = 2;
 
     const OpenGLState prev_state = OpenGLState::GetCurState();
-    SCOPE_EXIT({ prev_state.Apply(); });
+    SCOPE_EXIT {
+        prev_state.Apply();
+    };
 
     const auto& tuple = surface.Tuple();
     const u32 src_width = blit.src_rect.GetWidth();
@@ -246,7 +252,9 @@ void BlitHelper::FilterAnime4K(Surface& surface, const VideoCore::TextureBlit& b
 
 void BlitHelper::FilterBicubic(Surface& surface, const VideoCore::TextureBlit& blit) {
     const OpenGLState prev_state = OpenGLState::GetCurState();
-    SCOPE_EXIT({ prev_state.Apply(); });
+    SCOPE_EXIT {
+        prev_state.Apply();
+    };
     state.texture_units[0].texture_2d = surface.Handle(0);
     SetParams(bicubic_program, surface.RealExtent(false), blit.src_rect);
     Draw(bicubic_program, surface.Handle(), draw_fbo.handle, blit.dst_level, blit.dst_rect);
@@ -254,7 +262,9 @@ void BlitHelper::FilterBicubic(Surface& surface, const VideoCore::TextureBlit& b
 
 void BlitHelper::FilterScaleForce(Surface& surface, const VideoCore::TextureBlit& blit) {
     const OpenGLState prev_state = OpenGLState::GetCurState();
-    SCOPE_EXIT({ prev_state.Apply(); });
+    SCOPE_EXIT {
+        prev_state.Apply();
+    };
     state.texture_units[0].texture_2d = surface.Handle(0);
     SetParams(scale_force_program, surface.RealExtent(false), blit.src_rect);
     Draw(scale_force_program, surface.Handle(), draw_fbo.handle, blit.dst_level, blit.dst_rect);
@@ -262,7 +272,9 @@ void BlitHelper::FilterScaleForce(Surface& surface, const VideoCore::TextureBlit
 
 void BlitHelper::FilterXbrz(Surface& surface, const VideoCore::TextureBlit& blit) {
     const OpenGLState prev_state = OpenGLState::GetCurState();
-    SCOPE_EXIT({ prev_state.Apply(); });
+    SCOPE_EXIT {
+        prev_state.Apply();
+    };
     state.texture_units[0].texture_2d = surface.Handle(0);
     glProgramUniform1f(xbrz_program.handle, 2, static_cast<GLfloat>(surface.res_scale));
     SetParams(xbrz_program, surface.RealExtent(false), blit.src_rect);
@@ -271,7 +283,9 @@ void BlitHelper::FilterXbrz(Surface& surface, const VideoCore::TextureBlit& blit
 
 void BlitHelper::FilterMMPX(Surface& surface, const VideoCore::TextureBlit& blit) {
     const OpenGLState prev_state = OpenGLState::GetCurState();
-    SCOPE_EXIT({ prev_state.Apply(); });
+    SCOPE_EXIT {
+        prev_state.Apply();
+    };
     state.texture_units[0].texture_2d = surface.Handle(0);
     SetParams(mmpx_program, surface.RealExtent(false), blit.src_rect);
     Draw(mmpx_program, surface.Handle(), draw_fbo.handle, blit.dst_level, blit.dst_rect);

@@ -337,7 +337,9 @@ bool Copy(const std::string& srcFilename, const std::string& destFilename) {
                   destFilename, GetLastErrorMsg());
         return false;
     }
-    SCOPE_EXIT({ fclose(input); });
+    SCOPE_EXIT {
+        fclose(input);
+    };
 
     // open output file
     FILE* output = fopen(destFilename.c_str(), "wb");
@@ -346,7 +348,9 @@ bool Copy(const std::string& srcFilename, const std::string& destFilename) {
                   destFilename, GetLastErrorMsg());
         return false;
     }
-    SCOPE_EXIT({ fclose(output); });
+    SCOPE_EXIT {
+        fclose(output);
+    };
 
     // copy loop
     std::array<char, 1024> buffer;

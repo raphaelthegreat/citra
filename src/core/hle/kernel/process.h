@@ -15,7 +15,7 @@
 #include "common/common_types.h"
 #include "core/hle/kernel/handle_table.h"
 #include "core/hle/kernel/object.h"
-#include "core/hle/kernel/vm_manager.h"
+#include "core/hle/kernel/k_page_table.h"
 
 namespace Kernel {
 
@@ -125,34 +125,6 @@ public:
         return HANDLE_TYPE;
     }
 
-    HandleTable handle_table;
-
-    std::shared_ptr<CodeSet> codeset;
-    /// Resource limit descriptor for this process
-    std::shared_ptr<ResourceLimit> resource_limit;
-
-    /// The process may only call SVCs which have the corresponding bit set.
-    std::bitset<0x80> svc_access_mask;
-    /// Maximum size of the handle table for the process.
-    unsigned int handle_table_size = 0x200;
-    /// Special memory ranges mapped into this processes address space. This is used to give
-    /// processes access to specific I/O regions and device memory.
-    boost::container::static_vector<AddressMapping, 8> address_mappings;
-    ProcessFlags flags;
-    bool no_thread_restrictions = false;
-    /// Kernel compatibility version for this process
-    u16 kernel_version = 0;
-    /// The default CPU for this process, threads are scheduled on this cpu by default.
-    u8 ideal_processor = 0;
-    /// Current status of the process
-    ProcessStatus status;
-
-    /// The id of this process
-    u32 process_id;
-
-    // Creation time in ticks of the process.
-    u64 creation_time_ticks;
-
     /**
      * Parses a list of kernel capability descriptors (as found in the ExHeader) and applies them
      * to this process.
@@ -174,10 +146,37 @@ public:
      */
     void Exit();
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Memory Management
+public:
+    HandleTable handle_table;
 
-    VMManager vm_manager;
+    std::shared_ptr<CodeSet> codeset;
+    /// Resource limit descriptor for this process
+    std::shared_ptr<ResourceLimit> resource_limit;
+
+    /// The process may only call SVCs which have the corresponding bit set.
+    std::bitset<0x80> svc_access_mask;
+    /// Maximum size of the handle table for the process.
+    u32 handle_table_size = 0x200;
+    /// Special memory ranges mapped into this processes address space. This is used to give
+    /// processes access to specific I/O regions and device memory.
+    boost::container::static_vector<AddressMapping, 8> address_mappings;
+    ProcessFlags flags;
+    bool no_thread_restrictions = false;
+    /// Kernel compatibility version for this process
+    u16 kernel_version = 0;
+    /// The default CPU for this process, threads are scheduled on this cpu by default.
+    u8 ideal_processor = 0;
+    /// Current status of the process
+    ProcessStatus status;
+
+    /// The id of this process
+    u32 process_id;
+
+    // Creation time in ticks of the process.
+    u64 creation_time_ticks;
+
+
+    KPageTable page_table;
 
     u32 memory_used = 0;
 

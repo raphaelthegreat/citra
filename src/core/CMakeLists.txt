@@ -149,6 +149,29 @@ add_library(citra_core STATIC
     hle/kernel/ipc_debugger/recorder.h
     hle/kernel/kernel.cpp
     hle/kernel/kernel.h
+    hle/kernel/k_auto_object.cpp
+    hle/kernel/k_auto_object.h
+    hle/kernel/k_capability.cpp
+    hle/kernel/k_capability.h
+    hle/kernel/k_class_token.cpp
+    hle/kernel/k_class_token.h
+    hle/kernel/k_linked_list.cpp
+    hle/kernel/k_linked_list.h
+    hle/kernel/k_memory_block.cpp
+    hle/kernel/k_memory_block.h
+    hle/kernel/k_memory_block_manager.cpp
+    hle/kernel/k_memory_block_manager.h
+    hle/kernel/k_memory_manager.cpp
+    hle/kernel/k_memory_manager.h
+    hle/kernel/k_page_group.cpp
+    hle/kernel/k_page_group.h
+    hle/kernel/k_page_heap.cpp
+    hle/kernel/k_page_heap.h
+    hle/kernel/k_page_manager.cpp
+    hle/kernel/k_page_manager.h
+    hle/kernel/k_page_table.cpp
+    hle/kernel/k_page_table.h
+    hle/kernel/k_slab_heap.h
     hle/kernel/memory.cpp
     hle/kernel/memory.h
     hle/kernel/mutex.cpp
@@ -469,6 +492,7 @@ add_library(citra_core STATIC
     tracer/citrace.h
     tracer/recorder.cpp
     tracer/recorder.h
+    hle/kernel/slab_helpers.h
 )
 
 create_target_directory_groups(citra_core)

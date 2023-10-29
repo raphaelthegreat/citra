@@ -75,7 +75,9 @@ void FFmpegStream::SendFrame(AVFrame* frame) {
     if (!packet) {
         LOG_ERROR(Render, "Frame dropped: av_packet_alloc failed");
     }
-    SCOPE_EXIT({ FFmpeg::av_packet_free(&packet); });
+    SCOPE_EXIT {
+        FFmpeg::av_packet_free(&packet);
+    };
 
     packet->data = nullptr;
     packet->size = 0;
@@ -307,7 +309,9 @@ bool FFmpegVideoStream::InitHWContext(const AVCodec* codec) {
 
         // Create HW device context
         AVBufferRef* hw_device_context;
-        SCOPE_EXIT({ FFmpeg::av_buffer_unref(&hw_device_context); });
+        SCOPE_EXIT {
+            FFmpeg::av_buffer_unref(&hw_device_context);
+        };
 
         // TODO: Provide the argument here somehow.
         // This is necessary for some devices like CUDA where you must supply the GPU name.
@@ -322,7 +326,9 @@ bool FFmpegVideoStream::InitHWContext(const AVCodec* codec) {
         // Get the SW format
         AVHWFramesConstraints* constraints =
             FFmpeg::av_hwdevice_get_hwframe_constraints(hw_device_context, nullptr);
-        SCOPE_EXIT({ FFmpeg::av_hwframe_constraints_free(&constraints); });
+        SCOPE_EXIT {
+            FFmpeg::av_hwframe_constraints_free(&constraints);
+        };
 
         if (constraints) {
             sw_pixel_format = constraints->valid_sw_formats ? constraints->valid_sw_formats[0]
@@ -342,7 +348,9 @@ bool FFmpegVideoStream::InitHWContext(const AVCodec* codec) {
 
         // Create HW frames context
         AVBufferRef* hw_frames_context_ref;
-        SCOPE_EXIT({ FFmpeg::av_buffer_unref(&hw_frames_context_ref); });
+        SCOPE_EXIT {
+            FFmpeg::av_buffer_unref(&hw_frames_context_ref);
+        };
 
         if (!(hw_frames_context_ref = FFmpeg::av_hwframe_ctx_alloc(hw_device_context))) {
             LOG_ERROR(Render, "Failed to create HW frames context");
@@ -425,10 +433,10 @@ bool FFmpegVideoStream::InitFilters() {
     inputs->pad_idx = 0;
     inputs->next = nullptr;
 
-    SCOPE_EXIT({
+    SCOPE_EXIT {
         FFmpeg::avfilter_inout_free(&outputs);
         FFmpeg::avfilter_inout_free(&inputs);
-    });
+    };
 
     if (FFmpeg::avfilter_graph_parse_ptr(filter_graph.get(), filter_graph_desc.data(), &inputs,
                                          &outputs, nullptr) < 0) {

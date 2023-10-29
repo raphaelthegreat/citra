@@ -3143,7 +3143,9 @@ static Qt::HighDpiScaleFactorRoundingPolicy GetHighDpiRoundingPolicy() {
 int main(int argc, char* argv[]) {
     Common::DetachedTasks detached_tasks;
     MicroProfileOnThreadCreate("Frontend");
-    SCOPE_EXIT({ MicroProfileShutdown(); });
+    SCOPE_EXIT {
+        MicroProfileShutdown();
+    };
 
     // Init settings params
     QCoreApplication::setOrganizationName(QStringLiteral("Citra team"));

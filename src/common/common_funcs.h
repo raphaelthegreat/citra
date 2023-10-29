@@ -102,3 +102,11 @@ __declspec(dllimport) void __stdcall DebugBreak(void);
         using T = std::underlying_type_t<type>;                                                    \
         return static_cast<T>(key) == 0;                                                           \
     }
+
+#define CITRA_NON_COPYABLE(cls)                                                                    \
+    cls(const cls&) = delete;                                                                      \
+    cls& operator=(const cls&) = delete
+
+#define CITRA_NON_MOVEABLE(cls)                                                                    \
+    cls(cls&&) = delete;                                                                           \
+    cls& operator=(cls&&) = delete

@@ -3,11 +3,16 @@
 // Refer to the license.txt file included.
 
 #pragma once
+
 #include <array>
 #include <cstddef>
 #include <string>
 #include "common/common_types.h"
-#include "common/memory_ref.h"
+
+namespace Common {
+enum class PageType : u8;
+struct PageTable;
+}
 
 namespace Kernel {
 class Process;
@@ -31,75 +36,6 @@ constexpr u32 CITRA_PAGE_SIZE = 0x1000;
 constexpr u32 CITRA_PAGE_MASK = CITRA_PAGE_SIZE - 1;
 constexpr int CITRA_PAGE_BITS = 12;
 constexpr std::size_t PAGE_TABLE_NUM_ENTRIES = 1 << (32 - CITRA_PAGE_BITS);
-
-enum class PageType {
-    /// Page is unmapped and should cause an access error.
-    Unmapped,
-    /// Page is mapped to regular memory. This is the only type you can get pointers to.
-    Memory,
-    /// Page is mapped to regular memory, but also needs to check for rasterizer cache flushing and
-    /// invalidation
-    RasterizerCachedMemory,
-};
-
-/**
- * A (reasonably) fast way of allowing switchable and remappable process address spaces. It loosely
- * mimics the way a real CPU page table works, but instead is optimized for minimal decoding and
- * fetching requirements when accessing. In the usual case of an access to regular memory, it only
- * requires an indexed fetch and a check for NULL.
- */
-struct PageTable {
-    /**
-     * Array of memory pointers backing each page. An entry can only be non-null if the
-     * corresponding entry in the `attributes` array is of type `Memory`.
-     */
-
-    // The reason for this rigmarole is to keep the 'raw' and 'refs' arrays in sync.
-    // We need 'raw' for dynarmic and 'refs' for serialization
-    struct Pointers {
-
-        struct Entry {
-            Entry(Pointers& pointers_, VAddr idx_) : pointers(pointers_), idx(idx_) {}
-
-            Entry& operator=(MemoryRef value) {
-                pointers.raw[idx] = value.GetPtr();
-                pointers.refs[idx] = std::move(value);
-                return *this;
-            }
-
-            operator u8*() {
-                return pointers.raw[idx];
-            }
-
-        private:
-            Pointers& pointers;
-            VAddr idx;
-        };
-
-        Entry operator[](std::size_t idx) {
-            return Entry(*this, static_cast<VAddr>(idx));
-        }
-
-    private:
-        std::array<u8*, PAGE_TABLE_NUM_ENTRIES> raw;
-        std::array<MemoryRef, PAGE_TABLE_NUM_ENTRIES> refs;
-        friend struct PageTable;
-    };
-
-    Pointers pointers;
-
-    /**
-     * Array of fine grained page attributes. If it is set to any value other than `Memory`, then
-     * the corresponding entry in `pointers` MUST be set to null.
-     */
-    std::array<PageType, PAGE_TABLE_NUM_ENTRIES> attributes;
-
-    std::array<u8*, PAGE_TABLE_NUM_ENTRIES>& GetPointerArray() {
-        return pointers.raw;
-    }
-
-    void Clear();
-};
 
 /// Physical memory regions as seen from the ARM11
 enum : PAddr {
@@ -235,13 +171,20 @@ public:
      * @param size The amount of bytes to map. Must be page-aligned.
      * @param target Buffer with the memory backing the mapping. Must be of length at least `size`.
      */
-    void MapMemoryRegion(PageTable& page_table, VAddr base, u32 size, MemoryRef target);
+    void MapMemoryRegion(Common::PageTable& page_table, VAddr base, u32 size, PAddr target);
 
-    void UnmapRegion(PageTable& page_table, VAddr base, u32 size);
+    /**
+     * Unmaps a region of the emulated process address space.
+     *
+     * @param page_table The page table of the emulated process.
+     * @param base The address to start mapping at. Must be page-aligned.
+     * @param size The amount of bytes to map. Must be page-aligned.
+     */
+    void UnmapRegion(Common::PageTable& page_table, VAddr base, u32 size);
 
     /// Currently active page table
-    void SetCurrentPageTable(std::shared_ptr<PageTable> page_table);
-    std::shared_ptr<PageTable> GetCurrentPageTable() const;
+    void SetCurrentPageTable(Common::PageTable* page_table);
+    Common::PageTable* GetCurrentPageTable() const;
 
     /**
      * Gets a pointer to the given address.
@@ -252,6 +195,11 @@ public:
      *          If the address is not valid, nullptr will be returned.
      */
     u8* GetPointer(VAddr vaddr);
+
+    template <typename T>
+    T* GetPointer(VAddr vaddr) {
+        return reinterpret_cast<T*>(GetPointer(vaddr));
+    }
 
     /**
      * Gets a pointer to the given address.
@@ -398,7 +346,7 @@ public:
      * @post The range [dest_buffer, size) contains the read bytes from the
      *       process' address space.
      */
-    void ReadBlock(const Kernel::Process& process, VAddr src_addr, void* dest_buffer,
+    void ReadBlock(Common::PageTable& page_table, VAddr src_addr, void* dest_buffer,
                    std::size_t size);
 
     /**
@@ -439,7 +387,7 @@ public:
      *       and will mark that region as invalidated to caches that the active
      *       graphics backend may be maintaining over the course of execution.
      */
-    void WriteBlock(const Kernel::Process& process, VAddr dest_addr, const void* src_buffer,
+    void WriteBlock(Common::PageTable& page_table, VAddr dest_addr, const void* src_buffer,
                     std::size_t size);
 
     /**
@@ -467,14 +415,14 @@ public:
      * Zeros a range of bytes within the current process' address space at the specified
      * virtual address.
      *
-     * @param process   The process that will have data zeroed within its address space.
-     * @param dest_addr The destination virtual address to zero the data from.
-     * @param size      The size of the range to zero out, in bytes.
+     * @param page_table The address space where to zero the data.
+     * @param dest_addr  The destination virtual address to zero the data from.
+     * @param size       The size of the range to zero out, in bytes.
      *
      * @post The range [dest_addr, size) within the process' address space contains the
      *       value 0.
      */
-    void ZeroBlock(const Kernel::Process& process, VAddr dest_addr, const std::size_t size);
+    void ZeroBlock(Common::PageTable& page_table, VAddr dest_addr, const std::size_t size);
 
     /**
      * Copies data within a process' address space to another location within the
@@ -488,9 +436,9 @@ public:
      * @post The range [dest_addr, size) within the process' address space contains the
      *       same data within the range [src_addr, size).
      */
-    void CopyBlock(const Kernel::Process& process, VAddr dest_addr, VAddr src_addr,
+    void CopyBlock(Common::PageTable& page_table, VAddr dest_addr, VAddr src_addr,
                    std::size_t size);
-    void CopyBlock(const Kernel::Process& dest_process, const Kernel::Process& src_process,
+    void CopyBlock(Common::PageTable& dest_page_table, Common::PageTable& src_page_table,
                    VAddr dest_addr, VAddr src_addr, std::size_t size);
 
     /**
@@ -510,7 +458,7 @@ public:
     u8* GetPhysicalPointer(PAddr address) const;
 
     /// Returns a reference to the memory region beginning at the specified physical address
-    MemoryRef GetPhysicalRef(PAddr address) const;
+    std::span<u8> GetPhysicalSpan(PAddr address) const;
 
     /// Determines if the given VAddr is valid for the specified process.
     bool IsValidVirtualAddress(const Kernel::Process& process, VAddr vaddr);
@@ -527,14 +475,11 @@ public:
     /// Gets pointer in FCRAM with given offset
     const u8* GetFCRAMPointer(std::size_t offset) const;
 
-    /// Gets a serializable ref to FCRAM with the given offset
-    MemoryRef GetFCRAMRef(std::size_t offset) const;
-
     /// Registers page table for rasterizer cache marking
-    void RegisterPageTable(std::shared_ptr<PageTable> page_table);
+    void RegisterPageTable(Common::PageTable* page_table);
 
     /// Unregisters page table for rasterizer cache marking
-    void UnregisterPageTable(std::shared_ptr<PageTable> page_table);
+    void UnregisterPageTable(Common::PageTable* page_table);
 
     void SetDSP(AudioCore::DspInterface& dsp);
 
@@ -556,17 +501,13 @@ private:
      * Since the cache only happens on linear heap or VRAM, we know the exact physical address and
      * pointer of such virtual address
      */
-    MemoryRef GetPointerForRasterizerCache(VAddr addr) const;
+    u8* GetPointerForRasterizerCache(VAddr addr) const;
 
-    void MapPages(PageTable& page_table, u32 base, u32 size, MemoryRef memory, PageType type);
+    void MapPages(Common::PageTable& page_table, u32 base, u32 size, MemoryRef memory, Common::PageType type);
 
 private:
     class Impl;
     std::unique_ptr<Impl> impl;
-
-public:
-    template <Region R>
-    class BackingMemImpl;
 };
 
 } // namespace Memory

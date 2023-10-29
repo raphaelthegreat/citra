@@ -1252,7 +1252,9 @@ void RasterizerCache<T>::FlushRegion(PAddr addr, u32 size, SurfaceId flush_surfa
                                "RasterizerCache::FlushRegion (from {:#x} to {:#x})",
                                interval.lower(), interval.upper()};
 
-        SCOPE_EXIT({ flushed_intervals += interval; });
+        SCOPE_EXIT {
+            flushed_intervals += interval;
+        };
         if (surface.type == SurfaceType::Fill) {
             DownloadFillSurface(surface, interval);
             continue;

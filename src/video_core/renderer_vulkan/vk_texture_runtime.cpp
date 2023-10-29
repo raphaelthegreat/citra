@@ -975,10 +975,10 @@ void Surface::UploadCustom(const VideoCore::Material* material, u32 level) {
 
 void Surface::Download(const VideoCore::BufferTextureCopy& download,
                        const VideoCore::StagingData& staging) {
-    SCOPE_EXIT({
+    SCOPE_EXIT {
         scheduler->Finish();
         runtime->download_buffer.Commit(staging.size);
-    });
+    };
 
     runtime->renderpass_cache.EndRendering();
 
