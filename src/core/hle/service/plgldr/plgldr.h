@@ -23,6 +23,7 @@
 
 #include <memory>
 #include <boost/serialization/export.hpp>
+#include "core/hle/service/kernel_helpers.h"
 #include "core/hle/service/service.h"
 
 namespace Core {
@@ -112,6 +113,7 @@ public:
 
 private:
     Core::System& system;
+    KernelHelpers::ServiceContext service_context;
 
     PluginLoaderContext plgldr_context;
 

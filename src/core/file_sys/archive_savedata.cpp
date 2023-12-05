@@ -6,7 +6,7 @@
 #include "common/archives.h"
 #include "core/core.h"
 #include "core/file_sys/archive_savedata.h"
-#include "core/hle/kernel/process.h"
+#include "core/hle/kernel/k_process.h"
 
 SERIALIZE_EXPORT_IMPL(FileSys::ArchiveFactory_SaveData)
 

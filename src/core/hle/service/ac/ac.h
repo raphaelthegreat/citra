@@ -257,9 +257,9 @@ protected:
 
     bool ac_connected = false;
 
-    std::shared_ptr<Kernel::Event> close_event;
-    std::shared_ptr<Kernel::Event> connect_event;
-    std::shared_ptr<Kernel::Event> disconnect_event;
+    Kernel::KEvent* close_event;
+    Kernel::KEvent* connect_event;
+    Kernel::KEvent* disconnect_event;
     Result connect_result = ResultSuccess;
     Result close_result = ResultSuccess;
     std::set<u32> connected_pids;

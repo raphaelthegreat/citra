@@ -10,6 +10,7 @@
 #include "common/common_types.h"
 #include "core/file_sys/errors.h"
 #include "core/hle/service/fs/archive.h"
+#include "core/hle/service/kernel_helpers.h"
 #include "core/hle/service/service.h"
 
 namespace Core {
@@ -720,6 +721,7 @@ private:
     u32 priority = -1; ///< For SetPriority and GetPriority service functions
 
     Core::System& system;
+    KernelHelpers::ServiceContext service_context;
     ArchiveManager& archives;
 
     template <class Archive>

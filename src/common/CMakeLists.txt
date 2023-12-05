@@ -88,6 +88,7 @@ add_library(citra_common STATIC
     file_util.cpp
     file_util.h
     hash.h
+    intrusive_list.h
     literals.h
     logging/backend.cpp
     logging/backend.h
@@ -109,6 +110,7 @@ add_library(citra_common STATIC
     microprofileui.h
     param_package.cpp
     param_package.h
+    parent_of_member.h
     polyfill_thread.h
     precompiled_headers.h
     quaternion.h

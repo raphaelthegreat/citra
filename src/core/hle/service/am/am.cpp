@@ -19,10 +19,10 @@
 #include "core/file_sys/ncch_container.h"
 #include "core/file_sys/title_metadata.h"
 #include "core/hle/ipc_helpers.h"
-#include "core/hle/kernel/client_session.h"
 #include "core/hle/kernel/errors.h"
-#include "core/hle/kernel/server_session.h"
-#include "core/hle/kernel/session.h"
+#include "core/hle/kernel/k_client_session.h"
+#include "core/hle/kernel/k_server_session.h"
+#include "core/hle/kernel/k_session.h"
 #include "core/hle/service/am/am.h"
 #include "core/hle/service/am/am_app.h"
 #include "core/hle/service/am/am_net.h"
@@ -1372,7 +1372,7 @@ void Module::Interface::BeginImportProgramTemporarily(Kernel::HLERequestContext&
 
 void Module::Interface::EndImportProgram(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
-    [[maybe_unused]] const auto cia = rp.PopObject<Kernel::ClientSession>();
+    [[maybe_unused]] const auto cia = rp.PopObject<Kernel::KClientSession>();
 
     am->ScanForAllTitles();
 
@@ -1383,7 +1383,7 @@ void Module::Interface::EndImportProgram(Kernel::HLERequestContext& ctx) {
 
 void Module::Interface::EndImportProgramWithoutCommit(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
-    [[maybe_unused]] const auto cia = rp.PopObject<Kernel::ClientSession>();
+    [[maybe_unused]] const auto cia = rp.PopObject<Kernel::KClientSession>();
 
     // Note: This function is basically a no-op for us since we don't use title.db or ticket.db
     // files to keep track of installed titles.
@@ -1442,24 +1442,16 @@ private:
     std::size_t file_size;
 };
 
-ResultVal<std::unique_ptr<AMFileWrapper>> GetFileFromSession(
-    std::shared_ptr<Kernel::ClientSession> file_session) {
+ResultVal<std::unique_ptr<AMFileWrapper>> GetFileFromSession(Kernel::KClientSession* file_session) {
     // Step up the chain from ClientSession->ServerSession and then
     // cast to File. For AM on 3DS, invalid handles actually hang the system.
-
-    if (file_session->parent == nullptr) {
+    if (file_session->GetParent() == nullptr) {
         LOG_WARNING(Service_AM, "Invalid file handle!");
         return Kernel::ResultInvalidHandle;
     }
 
-    std::shared_ptr<Kernel::ServerSession> server =
-        Kernel::SharedFrom(file_session->parent->server);
-    if (server == nullptr) {
-        LOG_WARNING(Service_AM, "File handle ServerSession disconnected!");
-        return Kernel::ResultSessionClosed;
-    }
-
-    if (server->hle_handler != nullptr) {
+    Kernel::KServerSession* server = &file_session->GetParent()->GetServerSession();
+    if (server->GetHleHandler() != nullptr) {
         auto file = std::dynamic_pointer_cast<Service::FS::File>(server->hle_handler);
 
         // TODO(shinyquagsire23): This requires RTTI, use service calls directly instead?
@@ -1484,7 +1476,7 @@ ResultVal<std::unique_ptr<AMFileWrapper>> GetFileFromSession(
 void Module::Interface::GetProgramInfoFromCia(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
     [[maybe_unused]] const auto media_type = static_cast<FS::MediaType>(rp.Pop<u8>());
-    auto cia = rp.PopObject<Kernel::ClientSession>();
+    auto cia = rp.PopObject<Kernel::KClientSession>();
 
     auto file_res = GetFileFromSession(cia);
     if (!file_res.Succeeded()) {
@@ -1520,7 +1512,7 @@ void Module::Interface::GetProgramInfoFromCia(Kernel::HLERequestContext& ctx) {
 
 void Module::Interface::GetSystemMenuDataFromCia(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
-    auto cia = rp.PopObject<Kernel::ClientSession>();
+    auto cia = rp.PopObject<Kernel::KClientSession>();
     auto& output_buffer = rp.PopMappedBuffer();
 
     auto file_res = GetFileFromSession(cia);
@@ -1564,7 +1556,7 @@ void Module::Interface::GetSystemMenuDataFromCia(Kernel::HLERequestContext& ctx)
 
 void Module::Interface::GetDependencyListFromCia(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
-    auto cia = rp.PopObject<Kernel::ClientSession>();
+    auto cia = rp.PopObject<Kernel::KClientSession>();
 
     auto file_res = GetFileFromSession(cia);
     if (!file_res.Succeeded()) {
@@ -1591,7 +1583,7 @@ void Module::Interface::GetDependencyListFromCia(Kernel::HLERequestContext& ctx)
 
 void Module::Interface::GetTransferSizeFromCia(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
-    auto cia = rp.PopObject<Kernel::ClientSession>();
+    auto cia = rp.PopObject<Kernel::KClientSession>();
 
     auto file_res = GetFileFromSession(cia);
     if (!file_res.Succeeded()) {
@@ -1615,7 +1607,7 @@ void Module::Interface::GetTransferSizeFromCia(Kernel::HLERequestContext& ctx) {
 
 void Module::Interface::GetCoreVersionFromCia(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
-    auto cia = rp.PopObject<Kernel::ClientSession>();
+    auto cia = rp.PopObject<Kernel::KClientSession>();
 
     auto file_res = GetFileFromSession(cia);
     if (!file_res.Succeeded()) {
@@ -1640,7 +1632,7 @@ void Module::Interface::GetCoreVersionFromCia(Kernel::HLERequestContext& ctx) {
 void Module::Interface::GetRequiredSizeFromCia(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
     [[maybe_unused]] const auto media_type = static_cast<FS::MediaType>(rp.Pop<u8>());
-    auto cia = rp.PopObject<Kernel::ClientSession>();
+    auto cia = rp.PopObject<Kernel::KClientSession>();
 
     auto file_res = GetFileFromSession(cia);
     if (!file_res.Succeeded()) {
@@ -1704,7 +1696,7 @@ void Module::Interface::GetSystemUpdaterMutex(Kernel::HLERequestContext& ctx) {
 
 void Module::Interface::GetMetaSizeFromCia(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
-    auto cia = rp.PopObject<Kernel::ClientSession>();
+    auto cia = rp.PopObject<Kernel::KClientSession>();
 
     auto file_res = GetFileFromSession(cia);
     if (!file_res.Succeeded()) {
@@ -1731,7 +1723,7 @@ void Module::Interface::GetMetaDataFromCia(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
 
     u32 output_size = rp.Pop<u32>();
-    auto cia = rp.PopObject<Kernel::ClientSession>();
+    auto cia = rp.PopObject<Kernel::KClientSession>();
     auto& output_buffer = rp.PopMappedBuffer();
 
     auto file_res = GetFileFromSession(cia);
@@ -1786,7 +1778,7 @@ void Module::Interface::BeginImportTicket(Kernel::HLERequestContext& ctx) {
 
 void Module::Interface::EndImportTicket(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
-    [[maybe_unused]] const auto ticket = rp.PopObject<Kernel::ClientSession>();
+    [[maybe_unused]] const auto ticket = rp.PopObject<Kernel::KClientSession>();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
     rb.Push(ResultSuccess);
@@ -1802,9 +1794,9 @@ void Module::serialize(Archive& ar, const unsigned int) {
 }
 SERIALIZE_IMPL(Module)
 
-Module::Module(Core::System& system) : system(system) {
+Module::Module(Core::System& system) : system(system), service_context(system) {
     ScanForAllTitles();
-    system_updater_mutex = system.Kernel().CreateMutex(false, "AM::SystemUpdaterMutex");
+    system_updater_mutex = service_context.CreateMutex(false, "AM::SystemUpdaterMutex");
 }
 
 Module::~Module() = default;
