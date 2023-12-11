@@ -22,7 +22,7 @@ Result MiiSelector::ReceiveParameterImpl(const Service::APT::MessageParameter& p
         LOG_ERROR(Service_APT, "unsupported signal {}", parameter.signal);
         UNIMPLEMENTED();
         // TODO(Subv): Find the right error code
-        return Result(-1);
+        return ResultUnknown;
     }
 
     // The LibAppJustStarted message contains a buffer with the size of the framebuffer shared
@@ -47,7 +47,7 @@ Result MiiSelector::ReceiveParameterImpl(const Service::APT::MessageParameter& p
         .object = framebuffer_memory,
     });
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result MiiSelector::Start(const Service::APT::MessageParameter& parameter) {
@@ -63,7 +63,7 @@ Result MiiSelector::Start(const Service::APT::MessageParameter& parameter) {
     MiiSelectorConfig frontend_config = ToFrontendConfig(config);
     frontend_applet->Setup(frontend_config);
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 void MiiSelector::Update() {
@@ -82,7 +82,7 @@ Result MiiSelector::Finalize() {
     std::vector<u8> buffer(sizeof(MiiResult));
     std::memcpy(buffer.data(), &result, buffer.size());
     CloseApplet(nullptr, buffer);
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 MiiResult MiiSelector::GetStandardMiiResult() {

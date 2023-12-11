@@ -125,7 +125,7 @@ TEST_CASE("HLERequestContext::PopulateFromIncomingCommandBuffer", "[core][kernel
 
         auto result = context.PopulateFromIncomingCommandBuffer(input, process);
 
-        REQUIRE(result == RESULT_SUCCESS);
+        REQUIRE(result == ResultSuccess);
         auto* output = context.CommandBuffer();
         REQUIRE(context.GetIncomingHandle(output[2]) == nullptr);
     }
@@ -150,7 +150,7 @@ TEST_CASE("HLERequestContext::PopulateFromIncomingCommandBuffer", "[core][kernel
         VAddr target_address = 0x10000000;
         auto result = process->vm_manager.MapBackingMemory(
             target_address, buffer, static_cast<u32>(buffer.GetSize()), MemoryState::Private);
-        REQUIRE(result.Code() == RESULT_SUCCESS);
+        REQUIRE(result.Code() == ResultSuccess);
 
         const u32_le input[]{
             IPC::MakeHeader(0, 0, 2),
@@ -163,7 +163,7 @@ TEST_CASE("HLERequestContext::PopulateFromIncomingCommandBuffer", "[core][kernel
         CHECK(context.GetStaticBuffer(0) == mem->Vector());
 
         REQUIRE(process->vm_manager.UnmapRange(
-                    target_address, static_cast<u32>(buffer.GetSize())) == RESULT_SUCCESS);
+                    target_address, static_cast<u32>(buffer.GetSize())) == ResultSuccess);
     }
 
     SECTION("translates MappedBuffer descriptors") {
@@ -174,7 +174,7 @@ TEST_CASE("HLERequestContext::PopulateFromIncomingCommandBuffer", "[core][kernel
         VAddr target_address = 0x10000000;
         auto result = process->vm_manager.MapBackingMemory(
             target_address, buffer, static_cast<u32>(buffer.GetSize()), MemoryState::Private);
-        REQUIRE(result.Code() == RESULT_SUCCESS);
+        REQUIRE(result.Code() == ResultSuccess);
 
         const u32_le input[]{
             IPC::MakeHeader(0, 0, 2),
@@ -190,7 +190,7 @@ TEST_CASE("HLERequestContext::PopulateFromIncomingCommandBuffer", "[core][kernel
         CHECK(other_buffer == mem->Vector());
 
         REQUIRE(process->vm_manager.UnmapRange(
-                    target_address, static_cast<u32>(buffer.GetSize())) == RESULT_SUCCESS);
+                    target_address, static_cast<u32>(buffer.GetSize())) == ResultSuccess);
     }
 
     SECTION("translates mixed params") {
@@ -206,13 +206,13 @@ TEST_CASE("HLERequestContext::PopulateFromIncomingCommandBuffer", "[core][kernel
         auto result = process->vm_manager.MapBackingMemory(
             target_address_static, buffer_static, static_cast<u32>(buffer_static.GetSize()),
             MemoryState::Private);
-        REQUIRE(result.Code() == RESULT_SUCCESS);
+        REQUIRE(result.Code() == ResultSuccess);
 
         VAddr target_address_mapped = 0x20000000;
         result = process->vm_manager.MapBackingMemory(target_address_mapped, buffer_mapped,
                                                       static_cast<u32>(buffer_mapped.GetSize()),
                                                       MemoryState::Private);
-        REQUIRE(result.Code() == RESULT_SUCCESS);
+        REQUIRE(result.Code() == ResultSuccess);
 
         auto a = MakeObject(kernel);
         Handle a_handle;
@@ -245,10 +245,10 @@ TEST_CASE("HLERequestContext::PopulateFromIncomingCommandBuffer", "[core][kernel
 
         REQUIRE(process->vm_manager.UnmapRange(target_address_static,
                                                static_cast<u32>(buffer_static.GetSize())) ==
-                RESULT_SUCCESS);
+                ResultSuccess);
         REQUIRE(process->vm_manager.UnmapRange(target_address_mapped,
                                                static_cast<u32>(buffer_mapped.GetSize())) ==
-                RESULT_SUCCESS);
+                ResultSuccess);
     }
 }
 
@@ -309,7 +309,7 @@ TEST_CASE("HLERequestContext::WriteToOutgoingCommandBuffer", "[core][kernel]") {
 
         auto result = context.WriteToOutgoingCommandBuffer(output, *process);
 
-        REQUIRE(result == RESULT_SUCCESS);
+        REQUIRE(result == ResultSuccess);
         REQUIRE(output[2] == 0);
     }
 
@@ -344,7 +344,7 @@ TEST_CASE("HLERequestContext::WriteToOutgoingCommandBuffer", "[core][kernel]") {
         auto result = process->vm_manager.MapBackingMemory(
             target_address, output_buffer, static_cast<u32>(output_buffer.GetSize()),
             MemoryState::Private);
-        REQUIRE(result.Code() == RESULT_SUCCESS);
+        REQUIRE(result.Code() == ResultSuccess);
 
         input[0] = IPC::MakeHeader(0, 0, 2);
         input[1] = IPC::StaticBufferDesc(input_buffer.size(), 0);
@@ -362,7 +362,7 @@ TEST_CASE("HLERequestContext::WriteToOutgoingCommandBuffer", "[core][kernel]") {
 
         CHECK(output_mem->Vector() == input_buffer);
         REQUIRE(process->vm_manager.UnmapRange(
-                    target_address, static_cast<u32>(output_buffer.GetSize())) == RESULT_SUCCESS);
+                    target_address, static_cast<u32>(output_buffer.GetSize())) == ResultSuccess);
     }
 
     SECTION("translates StaticBuffer descriptors") {
@@ -376,7 +376,7 @@ TEST_CASE("HLERequestContext::WriteToOutgoingCommandBuffer", "[core][kernel]") {
         auto result = process->vm_manager.MapBackingMemory(
             target_address, output_buffer, static_cast<u32>(output_buffer.GetSize()),
             MemoryState::Private);
-        REQUIRE(result.Code() == RESULT_SUCCESS);
+        REQUIRE(result.Code() == ResultSuccess);
 
         const u32_le input_cmdbuff[]{
             IPC::MakeHeader(0, 0, 2),
@@ -398,7 +398,7 @@ TEST_CASE("HLERequestContext::WriteToOutgoingCommandBuffer", "[core][kernel]") {
         CHECK(output[2] == target_address);
         CHECK(output_mem->Vector() == input_buffer);
         REQUIRE(process->vm_manager.UnmapRange(
-                    target_address, static_cast<u32>(output_buffer.GetSize())) == RESULT_SUCCESS);
+                    target_address, static_cast<u32>(output_buffer.GetSize())) == ResultSuccess);
     }
 }
 

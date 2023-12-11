@@ -171,16 +171,16 @@ Result AddressArbiter::ArbitrateAddress(std::shared_ptr<Thread> thread, Arbitrat
 
     default:
         LOG_ERROR(Kernel, "unknown type={}", type);
-        return ERR_INVALID_ENUM_VALUE_FND;
+        return ResultInvalidEnumValueFnd;
     }
 
     // The calls that use a timeout seem to always return a Timeout error even if they did not put
     // the thread to sleep
     if (type == ArbitrationType::WaitIfLessThanWithTimeout ||
         type == ArbitrationType::DecrementAndWaitIfLessThanWithTimeout) {
-        return RESULT_TIMEOUT;
+        return ResultTimeout;
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 } // namespace Kernel

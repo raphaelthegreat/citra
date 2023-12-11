@@ -25,11 +25,11 @@ ServerPort::ServerPort(KernelSystem& kernel) : WaitObject(kernel) {}
 ServerPort::~ServerPort() {}
 
 Result ServerPort::Accept(std::shared_ptr<ServerSession>& session) {
-    R_UNLESS(!pending_sessions.empty(), ERR_NO_PENDING_SESSIONS);
+    R_UNLESS(!pending_sessions.empty(), ResultNoPendingSessions);
 
     session = std::move(pending_sessions.back());
     pending_sessions.pop_back();
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 bool ServerPort::ShouldWait(const Thread* thread) const {

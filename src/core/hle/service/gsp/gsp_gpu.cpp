@@ -37,15 +37,15 @@ enum {
 };
 }
 
-constexpr Result RESULT_FIRST_INITIALIZATION(ErrCodes::FirstInitialization, ErrorModule::GX,
-                                             ErrorSummary::Success, ErrorLevel::Success);
-constexpr Result ERR_REGS_OUTOFRANGE_OR_MISALIGNED(ErrCodes::OutofRangeOrMisalignedAddress,
-                                                   ErrorModule::GX, ErrorSummary::InvalidArgument,
-                                                   ErrorLevel::Usage); // 0xE0E02A01
-constexpr Result ERR_REGS_MISALIGNED(ErrorDescription::MisalignedSize, ErrorModule::GX,
-                                     ErrorSummary::InvalidArgument,
-                                     ErrorLevel::Usage); // 0xE0E02BF2
-constexpr Result ERR_REGS_INVALID_SIZE(ErrorDescription::InvalidSize, ErrorModule::GX,
+constexpr Result ResultFirstInitialization(ErrCodes::FirstInitialization, ErrorModule::GX,
+                                           ErrorSummary::Success, ErrorLevel::Success);
+constexpr Result ResultRegsOutOfRangeOrMisaligned(ErrCodes::OutofRangeOrMisalignedAddress,
+                                                  ErrorModule::GX, ErrorSummary::InvalidArgument,
+                                                  ErrorLevel::Usage); // 0xE0E02A01
+constexpr Result ResultRegsMisaligned(ErrorDescription::MisalignedSize, ErrorModule::GX,
+                                      ErrorSummary::InvalidArgument,
+                                      ErrorLevel::Usage); // 0xE0E02BF2
+constexpr Result ResultRegsInvalidSize(ErrorDescription::InvalidSize, ErrorModule::GX,
                                        ErrorSummary::InvalidArgument,
                                        ErrorLevel::Usage); // 0xE0E02BEC
 
@@ -93,7 +93,7 @@ void GSP_GPU::ClientDisconnected(std::shared_ptr<Kernel::ServerSession> server_s
  * @param base_address The address of the first register in the sequence
  * @param size_in_bytes The number of registers to update (size of data)
  * @param data A vector containing the source data
- * @return RESULT_SUCCESS if the parameters are valid, error code otherwise
+ * @return ResultSuccess if the parameters are valid, error code otherwise
  */
 static Result WriteHWRegs(u32 base_address, u32 size_in_bytes, std::span<const u8> data,
                               VideoCore::GPU& gpu) {
@@ -104,17 +104,17 @@ static Result WriteHWRegs(u32 base_address, u32 size_in_bytes, std::span<const u
         LOG_ERROR(Service_GSP,
                   "Write address was out of range or misaligned! (address=0x{:08x}, size=0x{:08x})",
                   base_address, size_in_bytes);
-        return ERR_REGS_OUTOFRANGE_OR_MISALIGNED;
+        return ResultRegsOutOfRangeOrMisaligned;
     }
 
     if (size_in_bytes > max_size_in_bytes) {
         LOG_ERROR(Service_GSP, "Out of range size 0x{:08x}", size_in_bytes);
-        return ERR_REGS_INVALID_SIZE;
+        return ResultRegsInvalidSize;
     }
 
     if (size_in_bytes & 3) {
         LOG_ERROR(Service_GSP, "Misaligned size 0x{:08x}", size_in_bytes);
-        return ERR_REGS_MISALIGNED;
+        return ResultRegsMisaligned;
     }
 
     std::size_t offset = 0;
@@ -128,7 +128,7 @@ static Result WriteHWRegs(u32 base_address, u32 size_in_bytes, std::span<const u
         base_address += 4;
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 /**
@@ -139,7 +139,7 @@ static Result WriteHWRegs(u32 base_address, u32 size_in_bytes, std::span<const u
  * @param size_in_bytes The number of registers to update (size of data)
  * @param data    A vector containing the data to write
  * @param masks   A vector containing the masks
- * @return RESULT_SUCCESS if the parameters are valid, error code otherwise
+ * @return ResultSuccess if the parameters are valid, error code otherwise
  */
 static Result WriteHWRegsWithMask(u32 base_address, u32 size_in_bytes, std::span<const u8> data,
                                       std::span<const u8> masks, VideoCore::GPU& gpu) {
@@ -150,17 +150,17 @@ static Result WriteHWRegsWithMask(u32 base_address, u32 size_in_bytes, std::span
         LOG_ERROR(Service_GSP,
                   "Write address was out of range or misaligned! (address=0x{:08x}, size=0x{:08x})",
                   base_address, size_in_bytes);
-        return ERR_REGS_OUTOFRANGE_OR_MISALIGNED;
+        return ResultRegsOutOfRangeOrMisaligned;
     }
 
     if (size_in_bytes > max_size_in_bytes) {
         LOG_ERROR(Service_GSP, "Out of range size 0x{:08x}", size_in_bytes);
-        return ERR_REGS_INVALID_SIZE;
+        return ResultRegsInvalidSize;
     }
 
     if (size_in_bytes & 3) {
         LOG_ERROR(Service_GSP, "Misaligned size 0x{:08x}", size_in_bytes);
-        return ERR_REGS_MISALIGNED;
+        return ResultRegsMisaligned;
     }
 
     std::size_t offset = 0;
@@ -181,7 +181,7 @@ static Result WriteHWRegsWithMask(u32 base_address, u32 size_in_bytes, std::span
         base_address += 4;
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 void GSP_GPU::WriteHWRegs(Kernel::HLERequestContext& ctx) {
@@ -215,7 +215,7 @@ void GSP_GPU::ReadHWRegs(Kernel::HLERequestContext& ctx) {
 
     if ((reg_addr % 4) != 0 || reg_addr >= 0x420000) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(ERR_REGS_OUTOFRANGE_OR_MISALIGNED);
+        rb.Push(ResultRegsOutOfRangeOrMisaligned);
         LOG_ERROR(Service_GSP, "Invalid address 0x{:08x}", reg_addr);
         return;
     }
@@ -223,7 +223,7 @@ void GSP_GPU::ReadHWRegs(Kernel::HLERequestContext& ctx) {
     // Size should be word-aligned
     if ((size % 4) != 0) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(ERR_REGS_MISALIGNED);
+        rb.Push(ResultRegsMisaligned);
         LOG_ERROR(Service_GSP, "Invalid size 0x{:08x}", size);
         return;
     }
@@ -235,7 +235,7 @@ void GSP_GPU::ReadHWRegs(Kernel::HLERequestContext& ctx) {
     }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushStaticBuffer(std::move(buffer), 0);
 }
 
@@ -247,7 +247,7 @@ void GSP_GPU::SetBufferSwap(Kernel::HLERequestContext& ctx) {
     system.GPU().SetBufferSwap(screen_id, fb_info);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void GSP_GPU::FlushDataCache(Kernel::HLERequestContext& ctx) {
@@ -259,7 +259,7 @@ void GSP_GPU::FlushDataCache(Kernel::HLERequestContext& ctx) {
     // TODO(purpasmart96): Verify return header on HW
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     LOG_TRACE(Service_GSP, "(STUBBED) called address=0x{:08X}, size=0x{:08X}, process={}", address,
               size, process->process_id);
@@ -274,7 +274,7 @@ void GSP_GPU::InvalidateDataCache(Kernel::HLERequestContext& ctx) {
     // TODO(purpasmart96): Verify return header on HW
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     LOG_TRACE(Service_GSP, "(STUBBED) called address=0x{:08X}, size=0x{:08X}, process={}", address,
               size, process->process_id);
@@ -285,7 +285,7 @@ void GSP_GPU::SetAxiConfigQoSMode(Kernel::HLERequestContext& ctx) {
     u32 mode = rp.Pop<u32>();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     LOG_DEBUG(Service_GSP, "(STUBBED) called mode=0x{:08X}", mode);
 }
@@ -308,9 +308,9 @@ void GSP_GPU::RegisterInterruptRelayQueue(Kernel::HLERequestContext& ctx) {
     if (first_initialization) {
         // This specific code is required for a successful initialization, rather than 0
         first_initialization = false;
-        rb.Push(RESULT_FIRST_INITIALIZATION);
+        rb.Push(ResultFirstInitialization);
     } else {
-        rb.Push(RESULT_SUCCESS);
+        rb.Push(ResultSuccess);
     }
 
     rb.Push(session_data->thread_id);
@@ -327,7 +327,7 @@ void GSP_GPU::UnregisterInterruptRelayQueue(Kernel::HLERequestContext& ctx) {
     session_data->registered = false;
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     LOG_DEBUG(Service_GSP, "called");
 }
@@ -402,7 +402,7 @@ void GSP_GPU::SetLcdForceBlack(Kernel::HLERequestContext& ctx) {
     system.GPU().SetColorFill(data);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void GSP_GPU::TriggerCmdReqQueue(Kernel::HLERequestContext& ctx) {
@@ -422,7 +422,7 @@ void GSP_GPU::TriggerCmdReqQueue(Kernel::HLERequestContext& ctx) {
     }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void GSP_GPU::ImportDisplayCaptureInfo(Kernel::HLERequestContext& ctx) {
@@ -461,7 +461,7 @@ void GSP_GPU::ImportDisplayCaptureInfo(Kernel::HLERequestContext& ctx) {
     bottom_entry.stride = bottom_screen->framebuffer_info[bottom_screen->index].stride;
 
     IPC::RequestBuilder rb = rp.MakeBuilder(9, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushRaw(top_entry);
     rb.PushRaw(bottom_entry);
 
@@ -536,7 +536,7 @@ void GSP_GPU::SaveVramSysArea(Kernel::HLERequestContext& ctx) {
     }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void GSP_GPU::RestoreVramSysArea(Kernel::HLERequestContext& ctx) {
@@ -553,10 +553,10 @@ void GSP_GPU::RestoreVramSysArea(Kernel::HLERequestContext& ctx) {
     }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
-ResultCode GSP_GPU::AcquireGpuRight(const Kernel::HLERequestContext& ctx,
+Result GSP_GPU::AcquireGpuRight(const Kernel::HLERequestContext& ctx,
                                     const std::shared_ptr<Kernel::Process>& process, u32 flag,
                                     bool blocking) {
     const auto session_data = GetSessionData(ctx.Session());
@@ -579,7 +579,7 @@ ResultCode GSP_GPU::AcquireGpuRight(const Kernel::HLERequestContext& ctx,
     }
 
     active_thread_id = session_data->thread_id;
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 void GSP_GPU::TryAcquireRight(Kernel::HLERequestContext& ctx) {
@@ -616,7 +616,7 @@ void GSP_GPU::ReleaseRight(Kernel::HLERequestContext& ctx) {
     ReleaseRight(session_data);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     LOG_WARNING(Service_GSP, "called");
 }
@@ -629,7 +629,7 @@ void GSP_GPU::StoreDataCache(Kernel::HLERequestContext& ctx) {
     auto process = rp.PopObject<Kernel::Process>();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     LOG_TRACE(Service_GSP, "(STUBBED) called address=0x{:08X}, size=0x{:08X}, process={}", address,
               size, process->process_id);
@@ -643,7 +643,7 @@ void GSP_GPU::SetLedForceOff(Kernel::HLERequestContext& ctx) {
     system.Kernel().GetSharedPageHandler().Set3DLed(state);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     LOG_DEBUG(Service_GSP, "(STUBBED) called");
 }
 

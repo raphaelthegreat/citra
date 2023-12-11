@@ -57,7 +57,7 @@ ResultVal<std::unique_ptr<ArchiveBackend>> ArchiveFactory_SystemSaveData::Open(c
     std::string fullpath = GetSystemSaveDataPath(base_path, path);
     if (!FileUtil::Exists(fullpath)) {
         // TODO(Subv): Check error code, this one is probably wrong
-        return ERROR_NOT_FOUND;
+        return ResultNotFound;
     }
     return std::make_unique<SaveDataArchive>(fullpath);
 }
@@ -68,14 +68,14 @@ Result ArchiveFactory_SystemSaveData::Format(const Path& path,
     std::string fullpath = GetSystemSaveDataPath(base_path, path);
     FileUtil::DeleteDirRecursively(fullpath);
     FileUtil::CreateFullPath(fullpath);
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 ResultVal<ArchiveFormatInfo> ArchiveFactory_SystemSaveData::GetFormatInfo(const Path& path,
                                                                           u64 program_id) const {
     // TODO(Subv): Implement
     LOG_ERROR(Service_FS, "Unimplemented GetFormatInfo archive {}", GetName());
-    return RESULT_UNKNOWN;
+    return ResultUnknown;
 }
 
 } // namespace FileSys

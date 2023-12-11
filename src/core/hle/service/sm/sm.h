@@ -31,19 +31,19 @@ namespace Service::SM {
 
 class SRV;
 
-constexpr Result ERR_SERVICE_NOT_REGISTERED(1, ErrorModule::SRV, ErrorSummary::WouldBlock,
+constexpr Result ResultServiceNotRegistered(1, ErrorModule::SRV, ErrorSummary::WouldBlock,
                                             ErrorLevel::Temporary); // 0xD0406401
-constexpr Result ERR_MAX_CONNECTIONS_REACHED(2, ErrorModule::SRV, ErrorSummary::WouldBlock,
+constexpr Result ResultMaxConnectionsReached(2, ErrorModule::SRV, ErrorSummary::WouldBlock,
                                              ErrorLevel::Temporary); // 0xD0406402
-constexpr Result ERR_INVALID_NAME_SIZE(5, ErrorModule::SRV, ErrorSummary::WrongArgument,
+constexpr Result ResultInvalidNameSize(5, ErrorModule::SRV, ErrorSummary::WrongArgument,
                                        ErrorLevel::Permanent); // 0xD9006405
-constexpr Result ERR_ACCESS_DENIED(6, ErrorModule::SRV, ErrorSummary::InvalidArgument,
-                                   ErrorLevel::Permanent); // 0xD8E06406
-constexpr Result ERR_NAME_CONTAINS_NUL(7, ErrorModule::SRV, ErrorSummary::WrongArgument,
+constexpr Result ResultAccessDenied(6, ErrorModule::SRV, ErrorSummary::InvalidArgument,
+                                    ErrorLevel::Permanent); // 0xD8E06406
+constexpr Result ResultNameContainsNul(7, ErrorModule::SRV, ErrorSummary::WrongArgument,
                                        ErrorLevel::Permanent); // 0xD9006407
-constexpr Result ERR_ALREADY_REGISTERED(ErrorDescription::AlreadyExists, ErrorModule::OS,
-                                        ErrorSummary::WrongArgument,
-                                        ErrorLevel::Permanent); // 0xD9001BFC
+constexpr Result ResultAlreadyRegistered(ErrorDescription::AlreadyExists, ErrorModule::OS,
+                                         ErrorSummary::WrongArgument,
+                                         ErrorLevel::Permanent); // 0xD9001BFC
 
 class ServiceManager {
 public:

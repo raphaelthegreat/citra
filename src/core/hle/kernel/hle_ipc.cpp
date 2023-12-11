@@ -203,7 +203,7 @@ Result HLERequestContext::PopulateFromIncomingCommandBuffer(const u32_le* src_cm
                                                std::move(translated_cmdbuf));
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result HLERequestContext::WriteToOutgoingCommandBuffer(u32_le* dst_cmdbuf,
@@ -281,7 +281,7 @@ Result HLERequestContext::WriteToOutgoingCommandBuffer(u32_le* dst_cmdbuf,
                                              std::move(translated_cmdbuf));
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 MappedBuffer& HLERequestContext::GetMappedBuffer(u32 id_from_cmdbuf) {

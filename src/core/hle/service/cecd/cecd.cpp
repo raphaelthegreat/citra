@@ -76,7 +76,7 @@ void Module::Interface::Open(Kernel::HLERequestContext& ctx) {
         if (dir_result.Failed()) {
             if (open_mode.create) {
                 cecd->cecd_system_save_data_archive->CreateDirectory(path);
-                rb.Push(RESULT_SUCCESS);
+                rb.Push(ResultSuccess);
             } else {
                 LOG_DEBUG(Service_CECD, "Failed to open directory: {}", path.AsString());
                 rb.Push(Result(ErrorDescription::NoData, ErrorModule::CEC, ErrorSummary::NotFound,
@@ -93,7 +93,7 @@ void Module::Interface::Open(Kernel::HLERequestContext& ctx) {
 
             LOG_DEBUG(Service_CECD, "Number of entries found: {}", entry_count);
 
-            rb.Push(RESULT_SUCCESS);
+            rb.Push(ResultSuccess);
             rb.Push<u32>(entry_count); // Entry count
             directory->Close();
         }
@@ -108,7 +108,7 @@ void Module::Interface::Open(Kernel::HLERequestContext& ctx) {
             rb.Push<u32>(0); // No file size
         } else {
             session_data->file = std::move(file_result).Unwrap();
-            rb.Push(RESULT_SUCCESS);
+            rb.Push(ResultSuccess);
             rb.Push<u32>(static_cast<u32>(session_data->file->GetSize())); // Return file size
         }
 
@@ -163,7 +163,7 @@ void Module::Interface::Read(Kernel::HLERequestContext& ctx) {
         write_buffer.Write(buffer.data(), 0, write_buffer_size);
         session_data->file->Close();
 
-        rb.Push(RESULT_SUCCESS);
+        rb.Push(ResultSuccess);
         rb.Push<u32>(bytes_read);
     }
     rb.PushMappedBuffer(write_buffer);
@@ -225,7 +225,7 @@ void Module::Interface::ReadMessage(Kernel::HLERequestContext& ctx) {
                   msg_header.sender_id, msg_header.sender_id2, msg_header.send_count,
                   msg_header.forward_count, msg_header.user_data);
 
-        rb.Push(RESULT_SUCCESS);
+        rb.Push(ResultSuccess);
         rb.Push<u32>(bytes_read);
     } else {
         rb.Push(Result(ErrorDescription::NoData, ErrorModule::CEC, ErrorSummary::NotFound,
@@ -317,7 +317,7 @@ void Module::Interface::ReadMessageWithHMAC(Kernel::HLERequestContext& ctx) {
         else
             LOG_DEBUG(Service_CECD, "Verification failed");
 
-        rb.Push(RESULT_SUCCESS);
+        rb.Push(ResultSuccess);
         rb.Push<u32>(bytes_read);
     } else {
         rb.Push(Result(ErrorDescription::NoData, ErrorModule::CEC, ErrorSummary::NotFound,
@@ -376,7 +376,7 @@ void Module::Interface::Write(Kernel::HLERequestContext& ctx) {
             session_data->file->Write(0, buffer.size(), true, buffer.data()).Unwrap());
         session_data->file->Close();
 
-        rb.Push(RESULT_SUCCESS);
+        rb.Push(ResultSuccess);
     }
     rb.PushMappedBuffer(read_buffer);
 
@@ -438,7 +438,7 @@ void Module::Interface::WriteMessage(Kernel::HLERequestContext& ctx) {
             static_cast<u32>(message->Write(0, buffer_size, true, buffer.data()).Unwrap());
         message->Close();
 
-        rb.Push(RESULT_SUCCESS);
+        rb.Push(ResultSuccess);
     } else {
         rb.Push(Result(ErrorDescription::NoData, ErrorModule::CEC, ErrorSummary::NotFound,
                        ErrorLevel::Status));
@@ -525,7 +525,7 @@ void Module::Interface::WriteMessageWithHMAC(Kernel::HLERequestContext& ctx) {
             static_cast<u32>(message->Write(0, buffer_size, true, buffer.data()).Unwrap());
         message->Close();
 
-        rb.Push(RESULT_SUCCESS);
+        rb.Push(ResultSuccess);
     } else {
         rb.Push(Result(ErrorDescription::NoData, ErrorModule::CEC, ErrorSummary::NotFound,
                        ErrorLevel::Status));
@@ -613,7 +613,7 @@ void Module::Interface::SetData(Kernel::HLERequestContext& ctx) {
     }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushMappedBuffer(read_buffer);
 
     LOG_DEBUG(Service_CECD, "called, ncch_program_id={:#010x}, buffer_size={:#x}, option={:#x}",
@@ -651,7 +651,7 @@ void Module::Interface::ReadData(Kernel::HLERequestContext& ctx) {
     dest_buffer.Write(buffer.data(), 0,
                       std::min(static_cast<size_t>(dest_buffer_size), buffer.size()));
 
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushMappedBuffer(param_buffer);
     rb.PushMappedBuffer(dest_buffer);
 
@@ -665,7 +665,7 @@ void Module::Interface::Start(Kernel::HLERequestContext& ctx) {
     const CecCommand command = rp.PopEnum<CecCommand>();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     LOG_WARNING(Service_CECD, "(STUBBED) called, command={}", cecd->GetCecCommandAsString(command));
 }
@@ -675,7 +675,7 @@ void Module::Interface::Stop(Kernel::HLERequestContext& ctx) {
     const CecCommand command = rp.PopEnum<CecCommand>();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     LOG_WARNING(Service_CECD, "(STUBBED) called, command={}", cecd->GetCecCommandAsString(command));
 }
@@ -687,7 +687,7 @@ void Module::Interface::GetCecInfoBuffer(Kernel::HLERequestContext& ctx) {
     auto& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushMappedBuffer(buffer);
 
     LOG_DEBUG(Service_CECD, "called, buffer_size={}, possible_info_type={}", buffer_size,
@@ -698,7 +698,7 @@ void Module::Interface::GetCecdState(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushEnum(CecdState::NdmStatusIdle);
 
     LOG_WARNING(Service_CECD, "(STUBBED) called");
@@ -708,7 +708,7 @@ void Module::Interface::GetCecInfoEventHandle(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushCopyObjects(cecd->cecinfo_event);
 
     LOG_WARNING(Service_CECD, "(STUBBED) called");
@@ -718,7 +718,7 @@ void Module::Interface::GetChangeStateEventHandle(Kernel::HLERequestContext& ctx
     IPC::RequestParser rp(ctx);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushCopyObjects(cecd->change_state_event);
 
     LOG_WARNING(Service_CECD, "(STUBBED) called");
@@ -768,7 +768,7 @@ void Module::Interface::OpenAndWrite(Kernel::HLERequestContext& ctx) {
                 static_cast<u32>(file->Write(0, buffer.size(), true, buffer.data()).Unwrap());
             file->Close();
 
-            rb.Push(RESULT_SUCCESS);
+            rb.Push(ResultSuccess);
         } else {
             rb.Push(Result(ErrorDescription::NoData, ErrorModule::CEC, ErrorSummary::NotFound,
                            ErrorLevel::Status));
@@ -819,7 +819,7 @@ void Module::Interface::OpenAndRead(Kernel::HLERequestContext& ctx) {
             write_buffer.Write(buffer.data(), 0, buffer_size);
             file->Close();
 
-            rb.Push(RESULT_SUCCESS);
+            rb.Push(ResultSuccess);
             rb.Push<u32>(bytes_read);
         } else {
             rb.Push(Result(ErrorDescription::NoData, ErrorModule::CEC, ErrorSummary::NotFound,
@@ -1404,7 +1404,7 @@ Module::Module(Core::System& system) : system(system) {
     auto archive_result = systemsavedata_factory.Open(archive_path, 0);
 
     // If the archive didn't exist, create the files inside
-    if (archive_result.Code() != FileSys::ERROR_NOT_FOUND) {
+    if (archive_result.Code() != FileSys::ResultNotFound) {
         ASSERT_MSG(archive_result.Succeeded(), "Could not open the CECD SystemSaveData archive!");
         cecd_system_save_data_archive = std::move(archive_result).Unwrap();
     } else {

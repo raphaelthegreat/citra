@@ -244,7 +244,7 @@ void ERR_F::ThrowFatalError(Kernel::HLERequestContext& ctx) {
     } // switch FatalErrType
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 ERR_F::ERR_F(Core::System& system) : ServiceFramework("err:f", 1), system(system) {

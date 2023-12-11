@@ -96,7 +96,7 @@ Result Mutex::Release(Thread* thread) {
         kernel.PrepareReschedule();
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 void Mutex::AddWaitingThread(std::shared_ptr<Thread> thread) {

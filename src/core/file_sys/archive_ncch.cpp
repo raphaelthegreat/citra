@@ -73,13 +73,13 @@ ResultVal<std::unique_ptr<FileBackend>> NCCHArchive::OpenFile(const Path& path,
                                                               const Mode& mode) const {
     if (path.GetType() != LowPathType::Binary) {
         LOG_ERROR(Service_FS, "Path need to be Binary");
-        return ERROR_INVALID_PATH;
+        return ResultInvalidPath;
     }
 
     std::vector<u8> binary = path.AsBinary();
     if (binary.size() != sizeof(NCCHFilePath)) {
         LOG_ERROR(Service_FS, "Wrong path size {}", binary.size());
-        return ERROR_INVALID_PATH;
+        return ResultInvalidPath;
     }
 
     NCCHFilePath openfile_path;
@@ -174,7 +174,7 @@ ResultVal<std::unique_ptr<FileBackend>> NCCHArchive::OpenFile(const Path& path,
             return std::make_unique<IVFCFileInMemory>(std::move(archive_data), romfs_offset,
                                                       romfs_size, std::move(delay_generator));
         }
-        return ERROR_NOT_FOUND;
+        return ResultNotFound;
     }
 
     return file;
@@ -190,21 +190,21 @@ Result NCCHArchive::DeleteFile(const Path& path) const {
 Result NCCHArchive::RenameFile(const Path& src_path, const Path& dest_path) const {
     LOG_CRITICAL(Service_FS, "Attempted to rename a file within an NCCH archive ({}).", GetName());
     // TODO(wwylele): Use correct error code
-    return RESULT_UNKNOWN;
+    return ResultUnknown;
 }
 
 Result NCCHArchive::DeleteDirectory(const Path& path) const {
     LOG_CRITICAL(Service_FS, "Attempted to delete a directory from an NCCH archive ({}).",
                  GetName());
     // TODO(wwylele): Use correct error code
-    return RESULT_UNKNOWN;
+    return ResultUnknown;
 }
 
 Result NCCHArchive::DeleteDirectoryRecursively(const Path& path) const {
     LOG_CRITICAL(Service_FS, "Attempted to delete a directory from an NCCH archive ({}).",
                  GetName());
     // TODO(wwylele): Use correct error code
-    return RESULT_UNKNOWN;
+    return ResultUnknown;
 }
 
 Result NCCHArchive::CreateFile(const Path& path, u64 size) const {
@@ -217,20 +217,20 @@ Result NCCHArchive::CreateFile(const Path& path, u64 size) const {
 Result NCCHArchive::CreateDirectory(const Path& path) const {
     LOG_CRITICAL(Service_FS, "Attempted to create a directory in an NCCH archive ({}).", GetName());
     // TODO(wwylele): Use correct error code
-    return RESULT_UNKNOWN;
+    return ResultUnknown;
 }
 
 Result NCCHArchive::RenameDirectory(const Path& src_path, const Path& dest_path) const {
     LOG_CRITICAL(Service_FS, "Attempted to rename a file within an NCCH archive ({}).", GetName());
     // TODO(wwylele): Use correct error code
-    return RESULT_UNKNOWN;
+    return ResultUnknown;
 }
 
 ResultVal<std::unique_ptr<DirectoryBackend>> NCCHArchive::OpenDirectory(const Path& path) const {
     LOG_CRITICAL(Service_FS, "Attempted to open a directory within an NCCH archive ({}).",
                  GetName().c_str());
     // TODO(shinyquagsire23): Use correct error code
-    return RESULT_UNKNOWN;
+    return ResultUnknown;
 }
 
 u64 NCCHArchive::GetFreeBytes() const {
@@ -276,13 +276,13 @@ ResultVal<std::unique_ptr<ArchiveBackend>> ArchiveFactory_NCCH::Open(const Path&
                                                                      u64 program_id) {
     if (path.GetType() != LowPathType::Binary) {
         LOG_ERROR(Service_FS, "Path need to be Binary");
-        return ERROR_INVALID_PATH;
+        return ResultInvalidPath;
     }
 
     std::vector<u8> binary = path.AsBinary();
     if (binary.size() != sizeof(NCCHArchivePath)) {
         LOG_ERROR(Service_FS, "Wrong path size {}", binary.size());
-        return ERROR_INVALID_PATH;
+        return ResultInvalidPath;
     }
 
     NCCHArchivePath open_path;
@@ -304,7 +304,7 @@ ResultVal<ArchiveFormatInfo> ArchiveFactory_NCCH::GetFormatInfo(const Path& path
                                                                 u64 program_id) const {
     // TODO(Subv): Implement
     LOG_ERROR(Service_FS, "Unimplemented GetFormatInfo archive {}", GetName());
-    return RESULT_UNKNOWN;
+    return ResultUnknown;
 }
 
 } // namespace FileSys

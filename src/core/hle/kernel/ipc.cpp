@@ -182,7 +182,7 @@ Result TranslateCommandBuffer(Kernel::KernelSystem& kernel, Memory::MemorySystem
                 Result result =
                     src_process->vm_manager.UnmapRange(page_start - Memory::CITRA_PAGE_SIZE,
                                                        (num_pages + 2) * Memory::CITRA_PAGE_SIZE);
-                ASSERT(result == RESULT_SUCCESS);
+                ASSERT(result == ResultSuccess);
 
                 mapped_buffer_context.erase(found);
 
@@ -215,11 +215,11 @@ Result TranslateCommandBuffer(Kernel::KernelSystem& kernel, Memory::MemorySystem
             ASSERT(dst_process->vm_manager.ChangeMemoryState(
                        low_guard_address, Memory::CITRA_PAGE_SIZE, Kernel::MemoryState::Shared,
                        Kernel::VMAPermission::ReadWrite, Kernel::MemoryState::Reserved,
-                       Kernel::VMAPermission::None) == RESULT_SUCCESS);
+                       Kernel::VMAPermission::None) == ResultSuccess);
             ASSERT(dst_process->vm_manager.ChangeMemoryState(
                        high_guard_address, Memory::CITRA_PAGE_SIZE, Kernel::MemoryState::Shared,
                        Kernel::VMAPermission::ReadWrite, Kernel::MemoryState::Reserved,
-                       Kernel::VMAPermission::None) == RESULT_SUCCESS);
+                       Kernel::VMAPermission::None) == ResultSuccess);
 
             // Get proper mapped buffer address and store it in the cmd buffer.
             target_address += Memory::CITRA_PAGE_SIZE;
@@ -248,6 +248,6 @@ Result TranslateCommandBuffer(Kernel::KernelSystem& kernel, Memory::MemorySystem
 
     memory.WriteBlock(*dst_process, dst_address, cmd_buf.data(), command_size * sizeof(u32));
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 } // namespace Kernel

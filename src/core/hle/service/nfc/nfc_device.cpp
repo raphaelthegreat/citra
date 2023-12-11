@@ -181,7 +181,7 @@ Result NfcDevice::StartCommunication() {
 
     // This is a hack. This mode needs to change when the tag reader has completed the initalization
     communication_state = CommunicationState::Initialized;
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::StopCommunication() {
@@ -201,7 +201,7 @@ Result NfcDevice::StopCommunication() {
 
     device_state = DeviceState::Initialized;
     communication_state = CommunicationState::Idle;
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::StartDetection(TagProtocol allowed_protocol) {
@@ -227,7 +227,7 @@ Result NfcDevice::StartDetection(TagProtocol allowed_protocol) {
         LoadAmiibo(amiibo_filename);
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::StopDetection() {
@@ -250,7 +250,7 @@ Result NfcDevice::StopDetection() {
         // TODO: Stop console search mode here
         device_state = DeviceState::Initialized;
         connection_state = ConnectionState::Success;
-        return RESULT_SUCCESS;
+        return ResultSuccess;
     }
 
     LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
@@ -282,7 +282,7 @@ Result NfcDevice::Flush() {
 
     if (is_write_protected) {
         LOG_ERROR(Service_NFC, "No keys available skipping write request");
-        return RESULT_SUCCESS;
+        return ResultSuccess;
     }
 
     if (!is_plain_amiibo) {
@@ -324,7 +324,7 @@ Result NfcDevice::Flush() {
 
     is_data_moddified = false;
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::Mount() {
@@ -345,7 +345,7 @@ Result NfcDevice::Mount() {
     // The loaded amiibo is not encrypted
     if (is_plain_amiibo) {
         device_state = DeviceState::TagMounted;
-        return RESULT_SUCCESS;
+        return ResultSuccess;
     }
 
     if (!AmiiboCrypto::DecodeAmiibo(encrypted_tag.file, tag.file)) {
@@ -354,7 +354,7 @@ Result NfcDevice::Mount() {
     }
 
     device_state = DeviceState::TagMounted;
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::MountAmiibo() {
@@ -390,7 +390,7 @@ Result NfcDevice::PartiallyMount() {
     // The loaded amiibo is not encrypted
     if (is_plain_amiibo) {
         device_state = DeviceState::TagPartiallyMounted;
-        return RESULT_SUCCESS;
+        return ResultSuccess;
     }
 
     if (!AmiiboCrypto::DecodeAmiibo(encrypted_tag.file, tag.file)) {
@@ -399,7 +399,7 @@ Result NfcDevice::PartiallyMount() {
     }
 
     device_state = DeviceState::TagPartiallyMounted;
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::PartiallyMountAmiibo() {
@@ -430,7 +430,7 @@ Result NfcDevice::ResetTagScanState() {
     device_state = DeviceState::TagFound;
     is_app_area_open = false;
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::GetTagInfo2(TagInfo2& tag_info) const {
@@ -443,7 +443,7 @@ Result NfcDevice::GetTagInfo2(TagInfo2& tag_info) const {
         .extra_data2 = {}, // Used on non amiibo tags
     };
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::GetTagInfo(TagInfo& tag_info) const {
@@ -465,7 +465,7 @@ Result NfcDevice::GetTagInfo(TagInfo& tag_info) const {
         .extra_data = {}, // Used on non amiibo tags
     };
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::GetCommonInfo(CommonInfo& common_info) const {
@@ -494,7 +494,7 @@ Result NfcDevice::GetCommonInfo(CommonInfo& common_info) const {
         .application_area_size = sizeof(ApplicationArea),
     };
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::GetModelInfo(ModelInfo& model_info) const {
@@ -517,7 +517,7 @@ Result NfcDevice::GetModelInfo(ModelInfo& model_info) const {
         .amiibo_type = model_info_data.amiibo_type,
     };
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::GetRegisterInfo(RegisterInfo& register_info) const {
@@ -545,7 +545,7 @@ Result NfcDevice::GetRegisterInfo(RegisterInfo& register_info) const {
         .creation_date = settings.init_date.GetWriteDate(),
     };
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::GetAdminInfo(AdminInfo& admin_info) const {
@@ -604,7 +604,7 @@ Result NfcDevice::GetAdminInfo(AdminInfo& admin_info) const {
         .app_area_version = app_area_version,
     };
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::DeleteRegisterInfo() {
@@ -689,7 +689,7 @@ Result NfcDevice::RestoreAmiibo() {
 
     // TODO: Load amiibo from backup on system
     LOG_ERROR(Service_NFC, "Not Implemented");
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::Format() {
@@ -704,7 +704,7 @@ Result NfcDevice::Format() {
         return Result2;
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::OpenApplicationArea(u32 access_id) {
@@ -729,7 +729,7 @@ Result NfcDevice::OpenApplicationArea(u32 access_id) {
 
     is_app_area_open = true;
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::GetApplicationAreaId(u32& application_area_id) const {
@@ -751,7 +751,7 @@ Result NfcDevice::GetApplicationAreaId(u32& application_area_id) const {
 
     application_area_id = tag.file.application_area_id;
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::GetApplicationArea(std::vector<u8>& data) const {
@@ -780,7 +780,7 @@ Result NfcDevice::GetApplicationArea(std::vector<u8>& data) const {
 
     memcpy(data.data(), tag.file.application_area.data(), data.size());
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::SetApplicationArea(std::span<const u8> data) {
@@ -828,7 +828,7 @@ Result NfcDevice::SetApplicationArea(std::span<const u8> data) {
 
     is_data_moddified = true;
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result NfcDevice::CreateApplicationArea(u32 access_id, std::span<const u8> data) {
@@ -955,7 +955,7 @@ Result NfcDevice::ApplicationAreaExist(bool& has_application_area) {
 
     has_application_area = tag.file.settings.settings.appdata_initialized.Value() != 0;
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 constexpr u32 NfcDevice::GetApplicationAreaSize() const {
@@ -970,13 +970,13 @@ Result NfcDevice::GetCommunicationStatus(CommunicationState& status) const {
     if (communication_state == CommunicationState::Idle ||
         communication_state == CommunicationState::SearchingForAdapter) {
         status = communication_state;
-        return RESULT_SUCCESS;
+        return ResultSuccess;
     }
 
     if (communication_state == CommunicationState::Initialized ||
         communication_state == CommunicationState::Active) {
         status = CommunicationState::Initialized;
-        return RESULT_SUCCESS;
+        return ResultSuccess;
     }
 
     return ResultInvalidOperation;
@@ -991,7 +991,7 @@ Result NfcDevice::CheckConnectionState() const {
         return ResultWifiOff;
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 void NfcDevice::SetAmiiboName(AmiiboSettings& settings, const AmiiboName& amiibo_name) {

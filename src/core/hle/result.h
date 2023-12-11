@@ -245,7 +245,7 @@ constexpr bool operator!=(const Result& a, const Result& b) {
 // Convenience functions for creating some common kinds of errors:
 
 /// The default success `Result`.
-constexpr Result RESULT_SUCCESS(0);
+constexpr Result ResultSuccess(0);
 
 /// Might be returned instead of a dummy success for unimplemented APIs.
 constexpr Result UnimplementedFunction(ErrorModule module) {
@@ -259,7 +259,7 @@ constexpr Result UnimplementedFunction(ErrorModule module) {
  * @note This should only be used when a particular error code
  *       is not known yet.
  */
-constexpr Result RESULT_UNKNOWN(UINT32_MAX);
+constexpr Result ResultUnknown(std::numeric_limits<u32>::max());
 
 /**
  * This is an optional value type. It holds a `Result` and, if that code is ResultSuccess, it
@@ -318,7 +318,7 @@ public:
     }
 
     [[nodiscard]] constexpr Result Code() const {
-        return expected.has_value() ? RESULT_SUCCESS : expected.error();
+        return expected.has_value() ? ResultSuccess : expected.error();
     }
 
     [[nodiscard]] constexpr bool Succeeded() const {
@@ -430,7 +430,7 @@ private:
     }
 
 /// Evaluates a boolean expression, and succeeds if that expression is true.
-#define R_SUCCEED_IF(expr) R_UNLESS(!(expr), RESULT_SUCCESS)
+#define R_SUCCEED_IF(expr) R_UNLESS(!(expr), ResultSuccess)
 
 /// Evaluates a boolean expression, and asserts if that expression is false.
 #define R_ASSERT(expr) ASSERT(R_SUCCEEDED(expr))

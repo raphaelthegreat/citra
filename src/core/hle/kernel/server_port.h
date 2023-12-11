@@ -39,7 +39,7 @@ public:
 
     /**
      * Accepts a pending incoming connection on this port. If there are no pending sessions, will
-     * return ERR_NO_PENDING_SESSIONS.
+     * return ResultNoPendingSessions.
      */
     Result Accept(std::shared_ptr<ServerSession>& session);
 

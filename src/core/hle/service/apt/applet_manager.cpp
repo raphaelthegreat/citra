@@ -271,7 +271,7 @@ Result AppletManager::SendParameter(const MessageParameter& parameter) {
     }
 
     CancelAndSendParameter(parameter);
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 ResultVal<MessageParameter> AppletManager::GlanceParameter(AppletId app_id) {
@@ -406,7 +406,7 @@ Result AppletManager::Enable(AppletAttributes attributes) {
         delayed_parameter.reset();
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::Finalize(AppletId app_id) {
@@ -430,7 +430,7 @@ Result AppletManager::Finalize(AppletId app_id) {
         active_slot = GetAppletSlotFromPos(AppletPos::System);
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 u32 AppletManager::CountRegisteredApplet() {
@@ -480,7 +480,7 @@ Result AppletManager::SendNotification(Notification notification) {
         if (slot_data->registered) {
             slot_data->notification = notification;
             slot_data->notification_event->Signal();
-            return RESULT_SUCCESS;
+            return ResultSuccess;
         }
     }
 
@@ -519,14 +519,14 @@ Result AppletManager::PrepareToStartLibraryApplet(AppletId applet_id) {
     auto process =
         NS::LaunchTitle(FS::MediaType::NAND, GetTitleIdForApplet(applet_id, cfg->GetRegionValue()));
     if (process) {
-        return RESULT_SUCCESS;
+        return ResultSuccess;
     }
 
     // If we weren't able to load the native applet title, try to fallback to an HLE implementation.
     auto applet = HLE::Applets::Applet::Get(applet_id);
     if (applet) {
         LOG_WARNING(Service_APT, "applet has already been started id={:03X}", applet_id);
-        return RESULT_SUCCESS;
+        return ResultSuccess;
     } else {
         auto parent = GetAppletSlotId(last_library_launcher_slot);
         LOG_DEBUG(Service_APT, "Creating HLE applet {:03X} with parent {:03X}", applet_id, parent);
@@ -547,14 +547,14 @@ Result AppletManager::PreloadLibraryApplet(AppletId applet_id) {
     auto process =
         NS::LaunchTitle(FS::MediaType::NAND, GetTitleIdForApplet(applet_id, cfg->GetRegionValue()));
     if (process) {
-        return RESULT_SUCCESS;
+        return ResultSuccess;
     }
 
     // If we weren't able to load the native applet title, try to fallback to an HLE implementation.
     auto applet = HLE::Applets::Applet::Get(applet_id);
     if (applet) {
         LOG_WARNING(Service_APT, "applet has already been started id={:08X}", applet_id);
-        return RESULT_SUCCESS;
+        return ResultSuccess;
     } else {
         auto parent = GetAppletSlotId(last_library_launcher_slot);
         LOG_DEBUG(Service_APT, "Creating HLE applet {:03X} with parent {:03X}", applet_id, parent);
@@ -565,7 +565,7 @@ Result AppletManager::PreloadLibraryApplet(AppletId applet_id) {
 Result AppletManager::FinishPreloadingLibraryApplet(AppletId applet_id) {
     // TODO(Subv): This function should fail depending on the applet preparation state.
     GetAppletSlot(AppletSlot::LibraryApplet)->loaded = true;
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::StartLibraryApplet(AppletId applet_id, std::shared_ptr<Kernel::Object> object,
@@ -584,7 +584,7 @@ Result AppletManager::StartLibraryApplet(AppletId applet_id, std::shared_ptr<Ker
         return send_res;
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::PrepareToCloseLibraryApplet(bool not_pause, bool exiting, bool jump_home) {
@@ -602,7 +602,7 @@ Result AppletManager::PrepareToCloseLibraryApplet(bool not_pause, bool exiting, 
     else
         library_applet_closing_command = SignalType::WakeupByExit;
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::CloseLibraryApplet(std::shared_ptr<Kernel::Object> object,
@@ -628,7 +628,7 @@ Result AppletManager::CloseLibraryApplet(std::shared_ptr<Kernel::Object> object,
         SendParameter(param);
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::CancelLibraryApplet(bool app_exiting) {
@@ -679,7 +679,7 @@ Result AppletManager::SendDspSleep(AppletId from_applet_id,
         });
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::SendDspWakeUp(AppletId from_applet_id,
@@ -712,7 +712,7 @@ Result AppletManager::SendDspWakeUp(AppletId from_applet_id,
         }
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::PrepareToStartSystemApplet(AppletId applet_id) {
@@ -724,7 +724,7 @@ Result AppletManager::PrepareToStartSystemApplet(AppletId applet_id) {
     }
 
     last_system_launcher_slot = active_slot;
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::StartSystemApplet(AppletId applet_id, std::shared_ptr<Kernel::Object> object,
@@ -766,7 +766,7 @@ Result AppletManager::StartSystemApplet(AppletId applet_id, std::shared_ptr<Kern
         .buffer = buffer,
     });
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::PrepareToCloseSystemApplet() {
@@ -775,7 +775,7 @@ Result AppletManager::PrepareToCloseSystemApplet() {
                 ErrorLevel::Status};
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::CloseSystemApplet(std::shared_ptr<Kernel::Object> object,
@@ -803,7 +803,7 @@ Result AppletManager::CloseSystemApplet(std::shared_ptr<Kernel::Object> object,
     }
 
     // TODO: Terminate the running applet title
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::OrderToCloseSystemApplet() {
@@ -840,7 +840,7 @@ Result AppletManager::OrderToCloseSystemApplet() {
         .signal = SignalType::WakeupByCancel,
     });
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::PrepareToJumpToHomeMenu() {
@@ -857,7 +857,7 @@ Result AppletManager::PrepareToJumpToHomeMenu() {
         EnsureHomeMenuLoaded();
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::JumpToHomeMenu(std::shared_ptr<Kernel::Object> object,
@@ -907,7 +907,7 @@ Result AppletManager::JumpToHomeMenu(std::shared_ptr<Kernel::Object> object,
         }
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::PrepareToLeaveHomeMenu() {
@@ -921,7 +921,7 @@ Result AppletManager::PrepareToLeaveHomeMenu() {
                 ErrorLevel::Status};
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::LeaveHomeMenu(std::shared_ptr<Kernel::Object> object,
@@ -936,7 +936,7 @@ Result AppletManager::LeaveHomeMenu(std::shared_ptr<Kernel::Object> object,
         .buffer = buffer,
     });
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::OrderToCloseApplication() {
@@ -961,7 +961,7 @@ Result AppletManager::OrderToCloseApplication() {
         .signal = SignalType::WakeupByCancel,
     });
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::PrepareToCloseApplication(bool return_to_sys) {
@@ -1012,7 +1012,7 @@ Result AppletManager::PrepareToCloseApplication(bool return_to_sys) {
         // EnsureHomeMenuLoaded();
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::CloseApplication(std::shared_ptr<Kernel::Object> object,
@@ -1041,7 +1041,7 @@ Result AppletManager::CloseApplication(std::shared_ptr<Kernel::Object> object,
     }
 
     // TODO: Terminate the application process.
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 ResultVal<AppletManager::AppletManInfo> AppletManager::GetAppletManInfo(
@@ -1176,7 +1176,7 @@ Result AppletManager::PrepareToDoApplicationJump(u64 title_id, FS::MediaType med
     // Note: The real console uses the Home Menu to perform the application jump, therefore the menu
     // needs to be running. The real APT module starts the Home Menu here if it's not already
     // running, we don't have to do this. See `EnsureHomeMenuLoaded` for launching the Home Menu.
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::DoApplicationJump(const DeliverArg& arg) {
@@ -1208,7 +1208,7 @@ Result AppletManager::DoApplicationJump(const DeliverArg& arg) {
         });
 
         // TODO: APT terminates the application here, usually it will exit itself properly though.
-        return RESULT_SUCCESS;
+        return ResultSuccess;
     } else {
         // Otherwise, work around the missing home menu by launching the title directly.
 
@@ -1223,12 +1223,12 @@ Result AppletManager::DoApplicationJump(const DeliverArg& arg) {
             LOG_CRITICAL(Service_APT, "Failed to launch title during application jump, exiting.");
             system.RequestShutdown();
         }
-        return RESULT_SUCCESS;
+        return ResultSuccess;
         */
 
         NS::RebootToTitle(system, app_jump_parameters.next_media_type,
                           app_jump_parameters.next_title_id);
-        return RESULT_SUCCESS;
+        return ResultSuccess;
     }
 }
 
@@ -1255,7 +1255,7 @@ Result AppletManager::PrepareToStartApplication(u64 title_id, FS::MediaType medi
 
     capture_buffer_info.reset();
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::StartApplication(const std::vector<u8>& parameter,
@@ -1291,7 +1291,7 @@ Result AppletManager::StartApplication(const std::vector<u8>& parameter,
         return WakeupApplication(nullptr, {});
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::WakeupApplication(std::shared_ptr<Kernel::Object> object,
@@ -1307,7 +1307,7 @@ Result AppletManager::WakeupApplication(std::shared_ptr<Kernel::Object> object,
         .buffer = buffer,
     });
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result AppletManager::CancelApplication() {
@@ -1326,7 +1326,7 @@ Result AppletManager::CancelApplication() {
         .signal = SignalType::WakeupByCancel,
     });
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 void AppletManager::SendApplicationParameterAfterRegistration(const MessageParameter& parameter) {

@@ -24,7 +24,7 @@ Result ClientPort::Connect(std::shared_ptr<ClientSession>& client_session) {
     // Note: Threads do not wait for the server endpoint to call
     // AcceptSession before returning from this call.
 
-    R_UNLESS(active_sessions < max_sessions, ERR_MAX_CONNECTIONS_REACHED);
+    R_UNLESS(active_sessions < max_sessions, ResultMaxConnectionsReached);
     active_sessions++;
 
     // Create a new session pair, let the created sessions inherit the parent port's HLE handler.
@@ -40,7 +40,7 @@ Result ClientPort::Connect(std::shared_ptr<ClientSession>& client_session) {
     server_port->WakeupAllWaitingThreads();
 
     client_session = client;
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 void ClientPort::ConnectionClosed() {

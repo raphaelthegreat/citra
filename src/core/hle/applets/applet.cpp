@@ -66,7 +66,7 @@ Result Applet::Create(Service::APT::AppletId id, Service::APT::AppletId parent, 
     // Schedule the update event
     Core::System::GetInstance().CoreTiming().ScheduleEvent(
         usToCycles(applet_update_interval_us), applet_update_event, static_cast<u64>(id));
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 std::shared_ptr<Applet> Applet::Get(Service::APT::AppletId id) {

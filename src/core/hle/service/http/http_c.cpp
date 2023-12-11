@@ -334,7 +334,7 @@ void HTTP_C::Initialize(Kernel::HLERequestContext& ctx) {
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
     // This returns 0xd8a0a046 if no network connection is available.
     // Just assume we are always connected.
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void HTTP_C::InitializeConnectionSession(Kernel::HLERequestContext& ctx) {
@@ -369,7 +369,7 @@ void HTTP_C::InitializeConnectionSession(Kernel::HLERequestContext& ctx) {
     session_data->current_http_context = context_handle;
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void HTTP_C::BeginRequest(Kernel::HLERequestContext& ctx) {
@@ -404,7 +404,7 @@ void HTTP_C::BeginRequest(Kernel::HLERequestContext& ctx) {
     http_context.current_copied_data = 0;
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void HTTP_C::BeginRequestAsync(Kernel::HLERequestContext& ctx) {
@@ -439,7 +439,7 @@ void HTTP_C::BeginRequestAsync(Kernel::HLERequestContext& ctx) {
     http_context.current_copied_data = 0;
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void HTTP_C::ReceiveData(Kernel::HLERequestContext& ctx) {
@@ -462,7 +462,7 @@ void HTTP_C::ReceiveDataImpl(Kernel::HLERequestContext& ctx, bool timeout) {
         Kernel::MappedBuffer* buffer;
         bool is_complete;
         // Output
-        Result async_res = RESULT_SUCCESS;
+        Result async_res = ResultSuccess;
     };
     std::shared_ptr<AsyncData> async_data = std::make_shared<AsyncData>();
     async_data->timeout = timeout;
@@ -502,7 +502,7 @@ void HTTP_C::ReceiveDataImpl(Kernel::HLERequestContext& ctx, bool timeout) {
         [this, async_data](Kernel::HLERequestContext& ctx) {
             IPC::RequestBuilder rb(ctx, static_cast<u16>(ctx.CommandHeader().command_id.Value()), 1,
                                    0);
-            if (async_data->async_res != RESULT_SUCCESS) {
+            if (async_data->async_res != ResultSuccess) {
                 rb.Push(async_data->async_res);
                 return;
             }
@@ -516,7 +516,7 @@ void HTTP_C::ReceiveDataImpl(Kernel::HLERequestContext& ctx, bool timeout) {
                                               http_context.current_copied_data,
                                           0, remaining_data);
                 http_context.current_copied_data += remaining_data;
-                rb.Push(RESULT_SUCCESS);
+                rb.Push(ResultSuccess);
             } else {
                 async_data->buffer->Write(http_context.response.body.data() +
                                               http_context.current_copied_data,
@@ -537,7 +537,7 @@ void HTTP_C::SetProxyDefault(Kernel::HLERequestContext& ctx) {
     LOG_WARNING(Service_HTTP, "(STUBBED) called, handle={}", context_handle);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void HTTP_C::CreateContext(Kernel::HLERequestContext& ctx) {
@@ -602,7 +602,7 @@ void HTTP_C::CreateContext(Kernel::HLERequestContext& ctx) {
     session_data->num_http_contexts++;
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.Push<u32>(context_counter);
     rb.PushMappedBuffer(buffer);
 }
@@ -626,7 +626,7 @@ void HTTP_C::CloseContext(Kernel::HLERequestContext& ctx) {
     if (itr == contexts.end()) {
         // The real HTTP module just silently fails in this case.
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(RESULT_SUCCESS);
+        rb.Push(ResultSuccess);
         LOG_ERROR(Service_HTTP, "called, context {} not found", context_handle);
         return;
     }
@@ -639,7 +639,7 @@ void HTTP_C::CloseContext(Kernel::HLERequestContext& ctx) {
     session_data->num_http_contexts--;
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void HTTP_C::CancelConnection(Kernel::HLERequestContext& ctx) {
@@ -656,7 +656,7 @@ void HTTP_C::CancelConnection(Kernel::HLERequestContext& ctx) {
     [[maybe_unused]] Context& http_context = GetContext(context_handle);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void HTTP_C::AddRequestHeader(Kernel::HLERequestContext& ctx) {
@@ -696,7 +696,7 @@ void HTTP_C::AddRequestHeader(Kernel::HLERequestContext& ctx) {
     http_context.headers.emplace_back(name, value);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushMappedBuffer(value_buffer);
 }
 
@@ -737,7 +737,7 @@ void HTTP_C::AddPostDataAscii(Kernel::HLERequestContext& ctx) {
     http_context.post_data.emplace(name, value);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushMappedBuffer(value_buffer);
 }
 
@@ -770,7 +770,7 @@ void HTTP_C::AddPostDataRaw(Kernel::HLERequestContext& ctx) {
     buffer.Read(http_context.post_data_raw.data(), 0, buffer.GetSize());
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushMappedBuffer(buffer);
 }
 
@@ -836,7 +836,7 @@ void HTTP_C::GetResponseHeader(Kernel::HLERequestContext& ctx) {
 
             IPC::RequestBuilder rb(ctx, static_cast<u16>(ctx.CommandHeader().command_id.Value()), 2,
                                    2);
-            rb.Push(RESULT_SUCCESS);
+            rb.Push(ResultSuccess);
             rb.Push(copied_size);
             rb.PushMappedBuffer(*async_data->value_buffer);
         });
@@ -859,7 +859,7 @@ void HTTP_C::GetResponseStatusCodeImpl(Kernel::HLERequestContext& ctx, bool time
         bool timeout;
         u64 timeout_nanos = 0;
         // Output
-        Result async_res = RESULT_SUCCESS;
+        Result async_res = ResultSuccess;
     };
     std::shared_ptr<AsyncData> async_data = std::make_shared<AsyncData>();
 
@@ -896,7 +896,7 @@ void HTTP_C::GetResponseStatusCodeImpl(Kernel::HLERequestContext& ctx, bool time
             return 0;
         },
         [this, async_data](Kernel::HLERequestContext& ctx) {
-            if (async_data->async_res != RESULT_SUCCESS) {
+            if (async_data->async_res != ResultSuccess) {
                 IPC::RequestBuilder rb(
                     ctx, static_cast<u16>(ctx.CommandHeader().command_id.Value()), 1, 0);
                 rb.Push(async_data->async_res);
@@ -910,7 +910,7 @@ void HTTP_C::GetResponseStatusCodeImpl(Kernel::HLERequestContext& ctx, bool time
 
             IPC::RequestBuilder rb(ctx, static_cast<u16>(ctx.CommandHeader().command_id.Value()), 2,
                                    0);
-            rb.Push(RESULT_SUCCESS);
+            rb.Push(ResultSuccess);
             rb.Push(response_code);
         });
 }
@@ -924,7 +924,7 @@ void HTTP_C::AddTrustedRootCA(Kernel::HLERequestContext& ctx) {
     LOG_WARNING(Service_HTTP, "(STUBBED) called, handle={}", context_handle);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushMappedBuffer(root_ca_data);
 }
 
@@ -937,7 +937,7 @@ void HTTP_C::AddDefaultCert(Kernel::HLERequestContext& ctx) {
                 certificate_id);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void HTTP_C::SetDefaultClientCert(Kernel::HLERequestContext& ctx) {
@@ -963,7 +963,7 @@ void HTTP_C::SetDefaultClientCert(Kernel::HLERequestContext& ctx) {
     http_context.clcert_data = &GetClCertA();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void HTTP_C::SetClientCertContext(Kernel::HLERequestContext& ctx) {
@@ -1007,7 +1007,7 @@ void HTTP_C::SetClientCertContext(Kernel::HLERequestContext& ctx) {
 
     http_context.ssl_config.client_cert_ctx = cert_context_itr->second;
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void HTTP_C::GetSSLError(Kernel::HLERequestContext& ctx) {
@@ -1020,7 +1020,7 @@ void HTTP_C::GetSSLError(Kernel::HLERequestContext& ctx) {
     [[maybe_unused]] Context& http_context = GetContext(context_handle);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     // Since we create the actual http/ssl context only when the request is submitted we can't check
     // for SSL Errors here. Just submit no error.
     rb.Push<u32>(0);
@@ -1034,7 +1034,7 @@ void HTTP_C::SetSSLOpt(Kernel::HLERequestContext& ctx) {
     LOG_WARNING(Service_HTTP, "(STUBBED) called, context_handle={}, opts={}", context_handle, opts);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void HTTP_C::OpenClientCertContext(Kernel::HLERequestContext& ctx) {
@@ -1049,7 +1049,7 @@ void HTTP_C::OpenClientCertContext(Kernel::HLERequestContext& ctx) {
     auto* session_data = GetSessionData(ctx.Session());
     ASSERT(session_data);
 
-    Result result(RESULT_SUCCESS);
+    Result result(ResultSuccess);
 
     if (!session_data->initialized) {
         LOG_ERROR(Service_HTTP, "Command called without Initialize");
@@ -1126,7 +1126,7 @@ void HTTP_C::OpenDefaultClientCertContext(Kernel::HLERequestContext& ctx) {
 
     if (it != client_certs.end()) {
         IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
-        rb.Push(RESULT_SUCCESS);
+        rb.Push(ResultSuccess);
         rb.Push<u32>(it->first);
 
         LOG_DEBUG(Service_HTTP, "called, with an already loaded cert_id={}", cert_id);
@@ -1141,7 +1141,7 @@ void HTTP_C::OpenDefaultClientCertContext(Kernel::HLERequestContext& ctx) {
     ++session_data->num_client_certs;
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.Push<u32>(client_certs_counter);
 }
 
@@ -1158,7 +1158,7 @@ void HTTP_C::CloseClientCertContext(Kernel::HLERequestContext& ctx) {
         LOG_ERROR(Service_HTTP, "Command called with a unkown client cert handle {}", cert_handle);
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
         // This just return success without doing anything
-        rb.Push(RESULT_SUCCESS);
+        rb.Push(ResultSuccess);
         return;
     }
 
@@ -1166,7 +1166,7 @@ void HTTP_C::CloseClientCertContext(Kernel::HLERequestContext& ctx) {
         LOG_ERROR(Service_HTTP, "called from another main session");
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
         // This just return success without doing anything
-        rb.Push(RESULT_SUCCESS);
+        rb.Push(ResultSuccess);
         return;
     }
 
@@ -1174,7 +1174,7 @@ void HTTP_C::CloseClientCertContext(Kernel::HLERequestContext& ctx) {
     session_data->num_client_certs--;
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void HTTP_C::SetKeepAlive(Kernel::HLERequestContext& ctx) {
@@ -1185,7 +1185,7 @@ void HTTP_C::SetKeepAlive(Kernel::HLERequestContext& ctx) {
     LOG_WARNING(Service_HTTP, "(STUBBED) called, handle={}, option={}", context_handle, option);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void HTTP_C::Finalize(Kernel::HLERequestContext& ctx) {
@@ -1194,7 +1194,7 @@ void HTTP_C::Finalize(Kernel::HLERequestContext& ctx) {
     shared_memory = nullptr;
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     LOG_WARNING(Service_HTTP, "(STUBBED) called");
 }
@@ -1230,7 +1230,7 @@ void HTTP_C::GetDownloadSizeState(Kernel::HLERequestContext& ctx) {
               content_length);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(3, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.Push(static_cast<u32>(http_context.current_copied_data));
     rb.Push(content_length);
 }

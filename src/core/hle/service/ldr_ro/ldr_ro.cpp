@@ -118,7 +118,7 @@ void RO::Initialize(Kernel::HLERequestContext& ctx) {
         return;
     }
 
-    Result result = RESULT_SUCCESS;
+    Result result = ResultSuccess;
 
     result = process->Map(crs_address, crs_buffer_ptr, crs_size, Kernel::VMAPermission::Read, true);
     if (result.IsError()) {
@@ -139,7 +139,7 @@ void RO::Initialize(Kernel::HLERequestContext& ctx) {
 
     slot->loaded_crs = crs_address;
 
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void RO::LoadCRR(Kernel::HLERequestContext& ctx) {
@@ -149,7 +149,7 @@ void RO::LoadCRR(Kernel::HLERequestContext& ctx) {
     auto process = rp.PopObject<Kernel::Process>();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     LOG_WARNING(Service_LDR, "(STUBBED) called, crr_buffer_ptr=0x{:08X}, crr_size=0x{:08X}",
                 crr_buffer_ptr, crr_size);
@@ -161,7 +161,7 @@ void RO::UnloadCRR(Kernel::HLERequestContext& ctx) {
     auto process = rp.PopObject<Kernel::Process>();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     LOG_WARNING(Service_LDR, "(STUBBED) called, crr_buffer_ptr=0x{:08X}", crr_buffer_ptr);
 }
@@ -251,7 +251,7 @@ void RO::LoadCRO(Kernel::HLERequestContext& ctx, bool link_on_load_bug_fix) {
         return;
     }
 
-    Result result = RESULT_SUCCESS;
+    Result result = ResultSuccess;
 
     result = process->Map(cro_address, cro_buffer_ptr, cro_size, Kernel::VMAPermission::Read, true);
     if (result.IsError()) {
@@ -330,7 +330,7 @@ void RO::LoadCRO(Kernel::HLERequestContext& ctx, bool link_on_load_bug_fix) {
     LOG_INFO(Service_LDR, "CRO \"{}\" loaded at 0x{:08X}, fixed_end=0x{:08X}", cro.ModuleName(),
              cro_address, cro_address + fix_size);
 
-    rb.Push(RESULT_SUCCESS, fix_size);
+    rb.Push(ResultSuccess, fix_size);
 }
 
 void RO::UnloadCRO(Kernel::HLERequestContext& ctx) {
@@ -502,7 +502,7 @@ void RO::Shutdown(Kernel::HLERequestContext& ctx) {
     CROHelper crs(slot->loaded_crs, *process, system);
     crs.Unrebase(true);
 
-    Result result = RESULT_SUCCESS;
+    Result result = ResultSuccess;
 
     result = process->Unmap(slot->loaded_crs, crs_buffer_ptr, crs.GetFileSize(),
                             Kernel::VMAPermission::ReadWrite, true);

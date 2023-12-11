@@ -136,7 +136,7 @@ Result ServerSession::HandleSyncRequest(std::shared_ptr<Thread> thread) {
     // If this ServerSession does not have an HLE implementation, just wake up the threads waiting
     // on it.
     WakeupAllWaitingThreads();
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 KernelSystem::SessionPair KernelSystem::CreateSessionPair(const std::string& name,

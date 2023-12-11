@@ -88,7 +88,7 @@ Result CROHelper::ApplyRelocation(VAddr target_address, RelocationType relocatio
     default:
         return CROFormatError(0x22);
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ClearRelocation(VAddr target_address, RelocationType relocation_type) {
@@ -111,7 +111,7 @@ Result CROHelper::ClearRelocation(VAddr target_address, RelocationType relocatio
     default:
         return CROFormatError(0x22);
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ApplyRelocationBatch(VAddr batch, u32 symbol_address, bool reset) {
@@ -146,7 +146,7 @@ Result CROHelper::ApplyRelocationBatch(VAddr batch, u32 symbol_address, bool res
     system.Memory().ReadBlock(process, batch, &relocation, sizeof(RelocationEntry));
     relocation.is_batch_resolved = reset ? 0 : 1;
     system.Memory().WriteBlock(process, batch, &relocation, sizeof(RelocationEntry));
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 VAddr CROHelper::FindExportNamedSymbol(const std::string& name) const {
@@ -269,7 +269,7 @@ Result CROHelper::RebaseHeader(u32 cro_size) {
             return error;
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 ResultVal<VAddr> CROHelper::RebaseSegmentTable(u32 cro_size, VAddr data_segment_address,
@@ -323,7 +323,7 @@ Result CROHelper::RebaseExportNamedSymbolTable() {
 
         SetEntry(system.Memory(), i, entry);
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::VerifyExportTreeTable() const {
@@ -336,7 +336,7 @@ Result CROHelper::VerifyExportTreeTable() const {
             return CROFormatError(0x11);
         }
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::RebaseImportModuleTable() {
@@ -382,7 +382,7 @@ Result CROHelper::RebaseImportModuleTable() {
 
         SetEntry(system.Memory(), i, entry);
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::RebaseImportNamedSymbolTable() {
@@ -416,7 +416,7 @@ Result CROHelper::RebaseImportNamedSymbolTable() {
 
         SetEntry(system.Memory(), i, entry);
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::RebaseImportIndexedSymbolTable() {
@@ -440,7 +440,7 @@ Result CROHelper::RebaseImportIndexedSymbolTable() {
 
         SetEntry(system.Memory(), i, entry);
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::RebaseImportAnonymousSymbolTable() {
@@ -464,7 +464,7 @@ Result CROHelper::RebaseImportAnonymousSymbolTable() {
 
         SetEntry(system.Memory(), i, entry);
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 VAddr CROHelper::GetOnUnresolvedAddress() {
@@ -508,7 +508,7 @@ Result CROHelper::ResetExternalRelocations() {
         batch_begin = relocation.is_batch_end != 0;
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ClearExternalRelocations() {
@@ -540,7 +540,7 @@ Result CROHelper::ClearExternalRelocations() {
         batch_begin = relocation.is_batch_end != 0;
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ApplyStaticAnonymousSymbolToCRS(VAddr crs_address) {
@@ -572,7 +572,7 @@ Result CROHelper::ApplyStaticAnonymousSymbolToCRS(VAddr crs_address) {
             return result;
         }
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ApplyInternalRelocations(u32 old_data_segment_address) {
@@ -613,7 +613,7 @@ Result CROHelper::ApplyInternalRelocations(u32 old_data_segment_address) {
             return result;
         }
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ClearInternalRelocations() {
@@ -633,7 +633,7 @@ Result CROHelper::ClearInternalRelocations() {
             return result;
         }
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 void CROHelper::UnrebaseImportAnonymousSymbolTable() {
@@ -786,7 +786,7 @@ Result CROHelper::ApplyImportNamedSymbol(VAddr crs_address) {
             }
         }
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ResetImportNamedSymbol() {
@@ -807,7 +807,7 @@ Result CROHelper::ResetImportNamedSymbol() {
             return result;
         }
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ResetImportIndexedSymbol() {
@@ -828,7 +828,7 @@ Result CROHelper::ResetImportIndexedSymbol() {
             return result;
         }
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ResetImportAnonymousSymbol() {
@@ -849,7 +849,7 @@ Result CROHelper::ResetImportAnonymousSymbol() {
             return result;
         }
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ApplyModuleImport(VAddr crs_address) {
@@ -905,7 +905,7 @@ Result CROHelper::ApplyModuleImport(VAddr crs_address) {
             return result;
         }
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ApplyExportNamedSymbol(CROHelper target) {
@@ -935,7 +935,7 @@ Result CROHelper::ApplyExportNamedSymbol(CROHelper target) {
             }
         }
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ResetExportNamedSymbol(CROHelper target) {
@@ -967,7 +967,7 @@ Result CROHelper::ResetExportNamedSymbol(CROHelper target) {
             }
         }
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ApplyModuleExport(CROHelper target) {
@@ -1013,7 +1013,7 @@ Result CROHelper::ApplyModuleExport(CROHelper target) {
         }
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ResetModuleExport(CROHelper target) {
@@ -1057,7 +1057,7 @@ Result CROHelper::ResetModuleExport(CROHelper target) {
         }
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ApplyExitRelocations(VAddr crs_address) {
@@ -1099,7 +1099,7 @@ Result CROHelper::ApplyExitRelocations(VAddr crs_address) {
             }
         }
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 /**
@@ -1109,14 +1109,14 @@ Result CROHelper::ApplyExitRelocations(VAddr crs_address) {
  * whole string (table) is terminated properly, despite that it is not actually one string.
  * @param address the virtual address of the string (table)
  * @param size the size of the string (table), including the terminating 0
- * @returns Result RESULT_SUCCESS if the size matches, otherwise error code.
+ * @returns Result ResultSuccess if the size matches, otherwise error code.
  */
 static Result VerifyStringTableLength(Memory::MemorySystem& memory, VAddr address, u32 size) {
     if (size != 0) {
         if (memory.Read8(address + size - 1) != 0)
             return CROFormatError(0x0B);
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::Rebase(VAddr crs_address, u32 cro_size, VAddr data_segment_addresss,
@@ -1225,7 +1225,7 @@ Result CROHelper::Rebase(VAddr crs_address, u32 cro_size, VAddr data_segment_add
         }
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 void CROHelper::Unrebase(bool is_crs) {
@@ -1248,11 +1248,11 @@ void CROHelper::Unrebase(bool is_crs) {
 
 Result CROHelper::VerifyHash(u32 cro_size, VAddr crr) const {
     // TODO(wwylele): actually verify the hash
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::Link(VAddr crs_address, bool link_on_load_bug_fix) {
-    Result result = RESULT_SUCCESS;
+    Result result = ResultSuccess;
 
     {
         VAddr data_segment_address = 0;
@@ -1322,7 +1322,7 @@ Result CROHelper::Link(VAddr crs_address, bool link_on_load_bug_fix) {
         return result;
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::Unlink(VAddr crs_address) {
@@ -1367,7 +1367,7 @@ Result CROHelper::Unlink(VAddr crs_address) {
         return result;
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result CROHelper::ClearRelocations() {
@@ -1382,7 +1382,7 @@ Result CROHelper::ClearRelocations() {
         LOG_ERROR(Service_LDR, "Error clearing internal relocations {:08X}", result.raw);
         return result;
     }
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 void CROHelper::InitCRS() {

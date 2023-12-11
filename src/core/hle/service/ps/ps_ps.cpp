@@ -141,7 +141,7 @@ void PS_PS::EncryptDecryptAes(Kernel::HLERequestContext& ctx) {
     }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(5, 4);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushRaw(new_iv);
     rb.PushMappedBuffer(source);
     rb.PushMappedBuffer(destination);
@@ -157,7 +157,7 @@ void PS_PS::GenerateRandomBytes(Kernel::HLERequestContext& ctx) {
     buffer.Write(out_data.data(), 0, size);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushMappedBuffer(buffer);
 }
 

@@ -160,7 +160,7 @@ void PLG_LDR::IsEnabled(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.Push(plgldr_context.is_enabled);
 }
 
@@ -174,7 +174,7 @@ void PLG_LDR::SetEnabled(Kernel::HLERequestContext& ctx) {
         Settings::values.plugin_loader_enabled.SetValue(enabled);
     }
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push((can_change) ? RESULT_SUCCESS : Kernel::ERR_NOT_AUTHORIZED);
+    rb.Push((can_change) ? ResultSuccess : Kernel::ResultNotAuthorized);
 }
 
 void PLG_LDR::SetLoadSettings(Kernel::HLERequestContext& ctx) {
@@ -198,7 +198,7 @@ void PLG_LDR::SetLoadSettings(Kernel::HLERequestContext& ctx) {
         std::min(sizeof(PluginLoaderContext::PluginLoadParameters::config), config.GetSize()));
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void PLG_LDR::DisplayErrorMessage(Kernel::HLERequestContext& ctx) {
@@ -220,14 +220,14 @@ void PLG_LDR::DisplayErrorMessage(Kernel::HLERequestContext& ctx) {
               std::string(title_data.data()), std::string(desc_data.data()));
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void PLG_LDR::GetPLGLDRVersion(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.Push(plgldr_version.raw);
 }
 
@@ -239,7 +239,7 @@ void PLG_LDR::GetArbiter(Kernel::HLERequestContext& ctx) {
     // signal the plgldr service thread when a event is ready. Instead we just send
     // an error and the 3GX plugin will take care of it.
     // (We never send any events anyways)
-    rb.Push(Kernel::ERR_NOT_IMPLEMENTED);
+    rb.Push(Kernel::ResultNotImplemented);
 }
 
 void PLG_LDR::GetPluginPath(Kernel::HLERequestContext& ctx) {
@@ -260,7 +260,7 @@ void PLG_LDR::GetPluginPath(Kernel::HLERequestContext& ctx) {
     path.Write(plugin_path.c_str(), 0, std::min(path.GetSize(), plugin_path.length() + 1));
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushMappedBuffer(path);
 }
 

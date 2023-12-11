@@ -159,7 +159,7 @@ void Module::Interface::GetCountryCodeString(Kernel::HLERequestContext& ctx) {
         return;
     }
 
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     // the real CFG service copies only three bytes (including the null-terminator) here
     rb.Push<u32>(country_codes[country_code_id]);
 }
@@ -193,7 +193,7 @@ void Module::Interface::GetCountryCodeID(Kernel::HLERequestContext& ctx) {
         return;
     }
 
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.Push<u16>(country_code_id);
 }
 
@@ -210,7 +210,7 @@ void Module::Interface::GetRegion(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.Push<u8>(static_cast<u8>(cfg->GetRegionValue()));
 }
 
@@ -220,7 +220,7 @@ void Module::Interface::SecureInfoGetByte101(Kernel::HLERequestContext& ctx) {
     LOG_DEBUG(Service_CFG, "(STUBBED) called");
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     // According to 3dbrew this is normally 0.
     rb.Push<u8>(0);
 }
@@ -232,14 +232,14 @@ void Module::Interface::SetUUIDClockSequence(Kernel::HLERequestContext& ctx) {
     cfg->SaveMCUConfig();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void Module::Interface::GetUUIDClockSequence(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.Push<u16>(static_cast<u16>(cfg->mcu_data.clock_sequence));
 }
 
@@ -274,7 +274,7 @@ void Module::Interface::IsCoppacsSupported(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
 
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     u8 canada_or_usa = 1;
     if (canada_or_usa == cfg->GetRegionValue()) {
@@ -442,21 +442,21 @@ Result Module::GetConfigBlock(u32 block_id, u32 size, AccessFlag accesss_flag, v
     CASCADE_RESULT(pointer, GetConfigBlockPointer(block_id, size, accesss_flag));
     std::memcpy(output, pointer, size);
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result Module::SetConfigBlock(u32 block_id, u32 size, AccessFlag accesss_flag, const void* input) {
     void* pointer = nullptr;
     CASCADE_RESULT(pointer, GetConfigBlockPointer(block_id, size, accesss_flag));
     std::memcpy(pointer, input, size);
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result Module::CreateConfigBlock(u32 block_id, u16 size, AccessFlag access_flags,
                                  const void* data) {
     SaveFileConfig* config = reinterpret_cast<SaveFileConfig*>(cfg_config_file_buffer.data());
     if (config->total_entries >= CONFIG_FILE_MAX_BLOCK_ENTRIES)
-        return Result(-1); // TODO(Subv): Find the right error code
+        return ResultUnknown; // TODO(Subv): Find the right error code
 
     // Insert the block header with offset 0 for now
     config->block_entries[config->total_entries] = {block_id, 0, size, access_flags};
@@ -482,7 +482,7 @@ Result Module::CreateConfigBlock(u32 block_id, u16 size, AccessFlag access_flags
     }
 
     ++config->total_entries;
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result Module::DeleteConfigNANDSaveFile() {
@@ -503,13 +503,13 @@ Result Module::UpdateConfigNANDSavegame() {
     auto config = std::move(config_result).Unwrap();
     config->Write(0, CONFIG_SAVEFILE_SIZE, 1, cfg_config_file_buffer.data());
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result Module::FormatConfig() {
     Result res = DeleteConfigNANDSaveFile();
     // The delete command fails if the file doesn't exist, so we have to check that too
-    if (!res.IsSuccess() && res != FileSys::ERROR_FILE_NOT_FOUND) {
+    if (!res.IsSuccess() && res != FileSys::ResultFileNotFound) {
         return res;
     }
     // Delete the old data
@@ -539,7 +539,7 @@ Result Module::FormatConfig() {
         return res;
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result Module::LoadConfigNANDSaveFile() {
@@ -551,7 +551,7 @@ Result Module::LoadConfigNANDSaveFile() {
     auto archive_result = systemsavedata_factory.Open(archive_path, 0);
 
     // If the archive didn't exist, create the files inside
-    if (archive_result.Code() == FileSys::ERROR_NOT_FOUND) {
+    if (archive_result.Code() == FileSys::ResultNotFound) {
         // Format the archive to create the directories
         systemsavedata_factory.Format(archive_path, FileSys::ArchiveFormatInfo(), 0);
 
@@ -573,7 +573,7 @@ Result Module::LoadConfigNANDSaveFile() {
     if (config_result.Succeeded()) {
         auto config = std::move(config_result).Unwrap();
         config->Read(0, CONFIG_SAVEFILE_SIZE, cfg_config_file_buffer.data());
-        return RESULT_SUCCESS;
+        return ResultSuccess;
     }
 
     return FormatConfig();
@@ -794,7 +794,7 @@ Result Module::SetConsoleUniqueId(u32 random_number, u64 console_id) {
     if (!res.IsSuccess())
         return res;
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 u64 Module::GetConsoleUniqueId() {

@@ -114,21 +114,21 @@ Result SharedMemory::Map(Process& target_process, VAddr address, MemoryPermissio
 
     // Automatically allocated memory blocks can only be mapped with other_permissions = DontCare
     if (base_address == 0 && other_permissions != MemoryPermission::DontCare) {
-        return ERR_INVALID_COMBINATION;
+        return ResultInvalidCombination;
     }
 
     // Error out if the requested permissions don't match what the creator process allows.
     if (static_cast<u32>(permissions) & ~static_cast<u32>(own_other_permissions)) {
         LOG_ERROR(Kernel, "cannot map id={}, address=0x{:08X} name={}, permissions don't match",
                   GetObjectId(), address, name);
-        return ERR_INVALID_COMBINATION;
+        return ResultInvalidCombination;
     }
 
     // Heap-backed memory blocks can not be mapped with other_permissions = DontCare
     if (base_address != 0 && other_permissions == MemoryPermission::DontCare) {
         LOG_ERROR(Kernel, "cannot map id={}, address=0x{08X} name={}, permissions don't match",
                   GetObjectId(), address, name);
-        return ERR_INVALID_COMBINATION;
+        return ResultInvalidCombination;
     }
 
     // Error out if the provided permissions are not compatible with what the creator process needs.
@@ -136,7 +136,7 @@ Result SharedMemory::Map(Process& target_process, VAddr address, MemoryPermissio
         static_cast<u32>(this->permissions) & ~static_cast<u32>(other_permissions)) {
         LOG_ERROR(Kernel, "cannot map id={}, address=0x{:08X} name={}, permissions don't match",
                   GetObjectId(), address, name);
-        return ERR_WRONG_PERMISSION;
+        return ResultWrongPermission;
     }
 
     // TODO(Subv): Check for the Shared Device Mem flag in the creator process.
@@ -152,7 +152,7 @@ Result SharedMemory::Map(Process& target_process, VAddr address, MemoryPermissio
         if (address < Memory::HEAP_VADDR || address + size >= Memory::SHARED_MEMORY_VADDR_END) {
             LOG_ERROR(Kernel, "cannot map id={}, address=0x{:08X} name={}, invalid address",
                       GetObjectId(), address, name);
-            return ERR_INVALID_ADDRESS;
+            return ResultInvalidAddress;
         }
     }
 
@@ -173,7 +173,7 @@ Result SharedMemory::Map(Process& target_process, VAddr address, MemoryPermissio
                 Kernel,
                 "cannot map id={}, address=0x{:08X} name={}, mapping to already allocated memory",
                 GetObjectId(), address, name);
-            return ERR_INVALID_ADDRESS_STATE;
+            return ResultInvalidAddressState;
         }
     }
 
@@ -187,7 +187,7 @@ Result SharedMemory::Map(Process& target_process, VAddr address, MemoryPermissio
         interval_target += interval.second;
     }
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result SharedMemory::Unmap(Process& target_process, VAddr address) {

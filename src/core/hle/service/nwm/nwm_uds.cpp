@@ -576,7 +576,7 @@ void NWM_UDS::Shutdown(Kernel::HLERequestContext& ctx) {
     recv_buffer_memory.reset();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     LOG_DEBUG(Service_NWM, "called");
 }
 
@@ -636,7 +636,7 @@ void NWM_UDS::RecvBeaconBroadcastData(Kernel::HLERequestContext& ctx) {
     out_buffer.Write(&data_reply_header, 0, sizeof(BeaconDataReplyHeader));
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushMappedBuffer(out_buffer);
 
     LOG_DEBUG(Service_NWM,
@@ -707,7 +707,7 @@ void NWM_UDS::GetConnectionStatus(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
     IPC::RequestBuilder rb = rp.MakeBuilder(13, 0);
 
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     {
         std::scoped_lock lock(connection_status_mutex);
         rb.PushRaw(connection_status);
@@ -747,7 +747,7 @@ void NWM_UDS::GetNodeInformation(Kernel::HLERequestContext& ctx) {
         }
 
         IPC::RequestBuilder rb = rp.MakeBuilder(11, 0);
-        rb.Push(RESULT_SUCCESS);
+        rb.Push(ResultSuccess);
         rb.PushRaw<NodeInfo>(*itr);
     }
     LOG_DEBUG(Service_NWM, "called");
@@ -800,7 +800,7 @@ void NWM_UDS::Bind(Kernel::HLERequestContext& ctx) {
     channel_data[data_channel] = {bind_node_id, data_channel, network_node_id, event};
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushCopyObjects(event);
 }
 
@@ -829,7 +829,7 @@ void NWM_UDS::Unbind(Kernel::HLERequestContext& ctx) {
     }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(5, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.Push(bind_node_id);
     // TODO(B3N30): Find out what the other return values are
     rb.Push<u32>(0);
@@ -901,7 +901,7 @@ Result NWM_UDS::BeginHostingNetwork(std::span<const u8> network_info_buffer,
     system.CoreTiming().ScheduleEvent(msToCycles(DefaultBeaconInterval * MillisecondsPerTU),
                                       beacon_broadcast_event, 0);
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 void NWM_UDS::BeginHostingNetwork(Kernel::HLERequestContext& ctx) {
@@ -965,7 +965,7 @@ void NWM_UDS::EjectClient(Kernel::HLERequestContext& ctx) {
     }
 
     // This function always returns success if the status is valid.
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     using Network::WifiPacket;
     Network::MacAddress dest_address = Network::BroadcastMac;
@@ -996,7 +996,7 @@ void NWM_UDS::UpdateNetworkAttribute(Kernel::HLERequestContext& ctx) {
     rp.Skip(2, false);
     LOG_WARNING(Service_NWM, "stubbed");
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void NWM_UDS::DestroyNetwork(Kernel::HLERequestContext& ctx) {
@@ -1032,7 +1032,7 @@ void NWM_UDS::DestroyNetwork(Kernel::HLERequestContext& ctx) {
     }
     channel_data.clear();
 
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     LOG_DEBUG(Service_NWM, "called");
 }
@@ -1078,7 +1078,7 @@ void NWM_UDS::DisconnectNetwork(Kernel::HLERequestContext& ctx) {
     }
     channel_data.clear();
 
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     LOG_DEBUG(Service_NWM, "called");
 }
 
@@ -1157,7 +1157,7 @@ void NWM_UDS::SendTo(Kernel::HLERequestContext& ctx) {
 
     SendPacket(packet);
 
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void NWM_UDS::PullPacket(Kernel::HLERequestContext& ctx) {
@@ -1195,7 +1195,7 @@ void NWM_UDS::PullPacket(Kernel::HLERequestContext& ctx) {
     if (channel->second.received_packets.empty()) {
         std::vector<u8> output_buffer(buff_size);
         IPC::RequestBuilder rb = rp.MakeBuilder(3, 2);
-        rb.Push(RESULT_SUCCESS);
+        rb.Push(ResultSuccess);
         rb.Push<u32>(0);
         rb.Push<u16>(0);
         rb.PushStaticBuffer(std::move(output_buffer), 0);
@@ -1221,7 +1221,7 @@ void NWM_UDS::PullPacket(Kernel::HLERequestContext& ctx) {
     std::memcpy(output_buffer.data(),
                 next_packet.data() + sizeof(LLCHeader) + sizeof(SecureDataHeader), data_size);
 
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.Push<u32>(data_size);
     rb.Push<u16>(secure_data.src_node_id);
     rb.PushStaticBuffer(std::move(output_buffer), 0);
@@ -1238,7 +1238,7 @@ void NWM_UDS::GetChannel(Kernel::HLERequestContext& ctx) {
 
     u8 channel = is_connected ? network_channel : 0;
 
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.Push(channel);
 
     LOG_DEBUG(Service_NWM, "called");
@@ -1252,7 +1252,7 @@ public:
                 Kernel::ThreadWakeupReason reason) {
         // TODO(B3N30): Add error handling for host full and timeout
         IPC::RequestBuilder rb(ctx, command_id, 1, 0);
-        rb.Push(RESULT_SUCCESS);
+        rb.Push(ResultSuccess);
         LOG_DEBUG(Service_NWM, "connection sequence finished");
     }
 
@@ -1339,7 +1339,7 @@ void NWM_UDS::SetApplicationData(Kernel::HLERequestContext& ctx) {
     network_info.application_data_size = static_cast<u8>(size);
     std::memcpy(network_info.application_data.data(), application_data.data(), size);
 
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 }
 
 void NWM_UDS::GetApplicationData(Kernel::HLERequestContext& ctx) {
@@ -1348,7 +1348,7 @@ void NWM_UDS::GetApplicationData(Kernel::HLERequestContext& ctx) {
     u8 appdata_size = network_info.application_data_size;
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     if (input_size < appdata_size) {
         rb.Push(0);
@@ -1420,7 +1420,7 @@ void NWM_UDS::DecryptBeaconData(Kernel::HLERequestContext& ctx) {
     }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     std::vector<u8> output_buffer(sizeof(NodeInfo) * UDSMaxNodes);
     std::memcpy(output_buffer.data(), nodes.data(), sizeof(NodeInfo) * nodes.size());

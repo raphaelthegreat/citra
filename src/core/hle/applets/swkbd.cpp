@@ -44,7 +44,7 @@ Result SoftwareKeyboard::ReceiveParameterImpl(Service::APT::MessageParameter con
             .object = framebuffer_memory,
         });
 
-        return RESULT_SUCCESS;
+        return ResultSuccess;
     }
 
     case Service::APT::SignalType::Message: {
@@ -58,7 +58,7 @@ Result SoftwareKeyboard::ReceiveParameterImpl(Service::APT::MessageParameter con
         case SoftwareKeyboardCallbackResult::OK:
             // Finish execution
             Finalize();
-            return RESULT_SUCCESS;
+            return ResultSuccess;
 
         case SoftwareKeyboardCallbackResult::Close:
             // Let the frontend display error and quit
@@ -66,14 +66,14 @@ Result SoftwareKeyboard::ReceiveParameterImpl(Service::APT::MessageParameter con
             config.return_code = SoftwareKeyboardResult::BannedInput;
             config.text_offset = config.text_length = 0;
             Finalize();
-            return RESULT_SUCCESS;
+            return ResultSuccess;
 
         case SoftwareKeyboardCallbackResult::Continue:
             // Let the frontend display error and get input again
             // The input will be sent for validation again on next Update().
             frontend_applet->ShowError(Common::UTF16BufferToUTF8(config.callback_msg));
             frontend_applet->Execute(ToFrontendConfig(config));
-            return RESULT_SUCCESS;
+            return ResultSuccess;
 
         default:
             UNREACHABLE();
@@ -84,7 +84,7 @@ Result SoftwareKeyboard::ReceiveParameterImpl(Service::APT::MessageParameter con
         LOG_ERROR(Service_APT, "unsupported signal {}", parameter.signal);
         UNIMPLEMENTED();
         // TODO(Subv): Find the right error code
-        return Result(-1);
+        return ResultUnknown;
     }
     }
 }
@@ -104,7 +104,7 @@ Result SoftwareKeyboard::Start(Service::APT::MessageParameter const& parameter) 
 
     frontend_applet->Execute(ToFrontendConfig(config));
 
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 void SoftwareKeyboard::Update() {
@@ -171,7 +171,7 @@ Result SoftwareKeyboard::Finalize() {
     std::memcpy(buffer.data(), &config, buffer.size());
     CloseApplet(nullptr, buffer);
     text_memory = nullptr;
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Frontend::KeyboardConfig SoftwareKeyboard::ToFrontendConfig(

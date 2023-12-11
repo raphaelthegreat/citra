@@ -32,7 +32,7 @@ Result HandleTable::Create(Handle* out_handle, std::shared_ptr<Object> obj) {
     DEBUG_ASSERT(obj != nullptr);
 
     u16 slot = next_free_slot;
-    R_UNLESS(slot < generations.size(), ERR_OUT_OF_HANDLES);
+    R_UNLESS(slot < generations.size(), ResultOutOfHandles);
     next_free_slot = generations[slot];
 
     u16 generation = next_generation++;
@@ -47,24 +47,24 @@ Result HandleTable::Create(Handle* out_handle, std::shared_ptr<Object> obj) {
     objects[slot] = std::move(obj);
 
     *out_handle = generation | (slot << 15);
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 Result HandleTable::Duplicate(Handle* out, Handle handle) {
     std::shared_ptr<Object> object = GetGeneric(handle);
-    R_UNLESS(object, ERR_INVALID_HANDLE);
+    R_UNLESS(object, ResultInvalidHandle);
     return Create(out, std::move(object));
 }
 
 Result HandleTable::Close(Handle handle) {
-    R_UNLESS(IsValid(handle), ERR_INVALID_HANDLE);
+    R_UNLESS(IsValid(handle), ResultInvalidHandle);
 
     const u16 slot = GetSlot(handle);
     objects[slot] = nullptr;
 
     generations[slot] = next_free_slot;
     next_free_slot = slot;
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
 bool HandleTable::IsValid(Handle handle) const {

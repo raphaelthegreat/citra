@@ -61,13 +61,13 @@ public:
     std::optional<InterfaceInfo> GetDefaultInterfaceInfo();
 
 private:
-    static constexpr Result ERR_WRONG_PROCESS =
+    static constexpr Result ResultWrongProcess =
         Result(4, ErrorModule::SOC, ErrorSummary::InvalidState, ErrorLevel::Status);
-    static constexpr Result ERR_NOT_INITIALIZED =
+    static constexpr Result ResultNotInitialized =
         Result(6, ErrorModule::SOC, ErrorSummary::InvalidArgument, ErrorLevel::Permanent);
-    static constexpr Result ERR_INVALID_SOCKET_DESCRIPTOR =
+    static constexpr Result ResultInvalidSocketDescriptor =
         Result(7, ErrorModule::SOC, ErrorSummary::InvalidArgument, ErrorLevel::Permanent);
-    static constexpr Result ERR_ALREADY_INITIALIZED =
+    static constexpr Result ResultAlreadyInitialized =
         Result(11, ErrorModule::SOC, ErrorSummary::InvalidState, ErrorLevel::Status);
 
     static constexpr u32 SOC_ERR_INAVLID_ENUM_VALUE = 0xFFFF8025;
