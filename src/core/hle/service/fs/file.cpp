@@ -104,7 +104,7 @@ void File::Read(Kernel::HLERequestContext& ctx) {
         bool cache_ready;
 
         // Output
-        ResultCode ret{0};
+        Result ret{0};
         Kernel::MappedBuffer* buffer;
         std::unique_ptr<u8*> data;
         size_t read_size;

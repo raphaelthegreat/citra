@@ -34,7 +34,7 @@ void Module::Interface::Initialize(Kernel::HLERequestContext& ctx) {
         return;
     }
 
-    ResultCode result = RESULT_SUCCESS;
+    Result result = RESULT_SUCCESS;
     switch (communication_mode) {
     case CommunicationMode::Ntag:
     case CommunicationMode::Amiibo:
@@ -68,7 +68,7 @@ void Module::Interface::Finalize(Kernel::HLERequestContext& ctx) {
         return;
     }
 
-    ResultCode result = RESULT_SUCCESS;
+    Result result = RESULT_SUCCESS;
     switch (communication_mode) {
     case CommunicationMode::Ntag:
     case CommunicationMode::Amiibo:
@@ -129,7 +129,7 @@ void Module::Interface::StartDetection(Kernel::HLERequestContext& ctx) {
 
     LOG_INFO(Service_NFC, "called, in_val={:04x}", in_val);
 
-    ResultCode result = RESULT_SUCCESS;
+    Result result = RESULT_SUCCESS;
     switch (nfc->nfc_mode) {
     case CommunicationMode::Ntag:
     case CommunicationMode::Amiibo:
@@ -150,7 +150,7 @@ void Module::Interface::StopDetection(Kernel::HLERequestContext& ctx) {
 
     LOG_INFO(Service_NFC, "called");
 
-    ResultCode result = RESULT_SUCCESS;
+    Result result = RESULT_SUCCESS;
     switch (nfc->nfc_mode) {
     case CommunicationMode::Ntag:
     case CommunicationMode::Amiibo:
@@ -175,7 +175,7 @@ void Module::Interface::Mount(Kernel::HLERequestContext& ctx) {
 
     nfc->device->RescheduleTagRemoveEvent();
 
-    ResultCode result = RESULT_SUCCESS;
+    Result result = RESULT_SUCCESS;
     switch (nfc->nfc_mode) {
     case CommunicationMode::Ntag:
         result = nfc->device->Mount();
@@ -197,7 +197,7 @@ void Module::Interface::Unmount(Kernel::HLERequestContext& ctx) {
 
     LOG_INFO(Service_NFC, "called");
 
-    ResultCode result = RESULT_SUCCESS;
+    Result result = RESULT_SUCCESS;
     switch (nfc->nfc_mode) {
     case CommunicationMode::Ntag:
     case CommunicationMode::Amiibo:
@@ -217,7 +217,7 @@ void Module::Interface::Flush(Kernel::HLERequestContext& ctx) {
 
     LOG_INFO(Service_NFC, "called");
 
-    ResultCode result = RESULT_SUCCESS;
+    Result result = RESULT_SUCCESS;
     switch (nfc->nfc_mode) {
     case CommunicationMode::Ntag:
         LOG_ERROR(Service_NFC, "CommunicationMode  {} not implemented", nfc->nfc_mode);
@@ -514,7 +514,7 @@ void Module::Interface::MountRom(Kernel::HLERequestContext& ctx) {
 
     LOG_INFO(Service_NFC, "called");
 
-    ResultCode result = RESULT_SUCCESS;
+    Result result = RESULT_SUCCESS;
     switch (nfc->nfc_mode) {
     case CommunicationMode::Ntag:
         result = nfc->device->PartiallyMount();

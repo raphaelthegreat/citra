@@ -37,18 +37,17 @@ enum {
 };
 }
 
-constexpr ResultCode RESULT_FIRST_INITIALIZATION(ErrCodes::FirstInitialization, ErrorModule::GX,
-                                                 ErrorSummary::Success, ErrorLevel::Success);
-constexpr ResultCode ERR_REGS_OUTOFRANGE_OR_MISALIGNED(ErrCodes::OutofRangeOrMisalignedAddress,
-                                                       ErrorModule::GX,
-                                                       ErrorSummary::InvalidArgument,
-                                                       ErrorLevel::Usage); // 0xE0E02A01
-constexpr ResultCode ERR_REGS_MISALIGNED(ErrorDescription::MisalignedSize, ErrorModule::GX,
-                                         ErrorSummary::InvalidArgument,
-                                         ErrorLevel::Usage); // 0xE0E02BF2
-constexpr ResultCode ERR_REGS_INVALID_SIZE(ErrorDescription::InvalidSize, ErrorModule::GX,
-                                           ErrorSummary::InvalidArgument,
-                                           ErrorLevel::Usage); // 0xE0E02BEC
+constexpr Result RESULT_FIRST_INITIALIZATION(ErrCodes::FirstInitialization, ErrorModule::GX,
+                                             ErrorSummary::Success, ErrorLevel::Success);
+constexpr Result ERR_REGS_OUTOFRANGE_OR_MISALIGNED(ErrCodes::OutofRangeOrMisalignedAddress,
+                                                   ErrorModule::GX, ErrorSummary::InvalidArgument,
+                                                   ErrorLevel::Usage); // 0xE0E02A01
+constexpr Result ERR_REGS_MISALIGNED(ErrorDescription::MisalignedSize, ErrorModule::GX,
+                                     ErrorSummary::InvalidArgument,
+                                     ErrorLevel::Usage); // 0xE0E02BF2
+constexpr Result ERR_REGS_INVALID_SIZE(ErrorDescription::InvalidSize, ErrorModule::GX,
+                                       ErrorSummary::InvalidArgument,
+                                       ErrorLevel::Usage); // 0xE0E02BEC
 
 u32 GSP_GPU::GetUnusedThreadId() const {
     for (u32 id = 0; id < MaxGSPThreads; ++id) {
@@ -96,7 +95,7 @@ void GSP_GPU::ClientDisconnected(std::shared_ptr<Kernel::ServerSession> server_s
  * @param data A vector containing the source data
  * @return RESULT_SUCCESS if the parameters are valid, error code otherwise
  */
-static ResultCode WriteHWRegs(u32 base_address, u32 size_in_bytes, std::span<const u8> data,
+static Result WriteHWRegs(u32 base_address, u32 size_in_bytes, std::span<const u8> data,
                               VideoCore::GPU& gpu) {
     // This magic number is verified to be done by the gsp module
     const u32 max_size_in_bytes = 0x80;
@@ -142,7 +141,7 @@ static ResultCode WriteHWRegs(u32 base_address, u32 size_in_bytes, std::span<con
  * @param masks   A vector containing the masks
  * @return RESULT_SUCCESS if the parameters are valid, error code otherwise
  */
-static ResultCode WriteHWRegsWithMask(u32 base_address, u32 size_in_bytes, std::span<const u8> data,
+static Result WriteHWRegsWithMask(u32 base_address, u32 size_in_bytes, std::span<const u8> data,
                                       std::span<const u8> masks, VideoCore::GPU& gpu) {
     // This magic number is verified to be done by the gsp module
     const u32 max_size_in_bytes = 0x80;

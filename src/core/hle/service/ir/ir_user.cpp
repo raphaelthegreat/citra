@@ -402,8 +402,8 @@ void IR_USER::SendIrNop(Kernel::HLERequestContext& ctx) {
         rb.Push(RESULT_SUCCESS);
     } else {
         LOG_ERROR(Service_IR, "not connected");
-        rb.Push(ResultCode(static_cast<ErrorDescription>(13), ErrorModule::IR,
-                           ErrorSummary::InvalidState, ErrorLevel::Status));
+        rb.Push(Result(static_cast<ErrorDescription>(13), ErrorModule::IR,
+                       ErrorSummary::InvalidState, ErrorLevel::Status));
     }
 
     LOG_TRACE(Service_IR, "called, data={}", fmt::format("{:02x}", fmt::join(buffer, " ")));
@@ -419,8 +419,8 @@ void IR_USER::ReleaseReceivedData(Kernel::HLERequestContext& ctx) {
         rb.Push(RESULT_SUCCESS);
     } else {
         LOG_ERROR(Service_IR, "failed to release {} packets", count);
-        rb.Push(ResultCode(ErrorDescription::NoData, ErrorModule::IR, ErrorSummary::NotFound,
-                           ErrorLevel::Status));
+        rb.Push(Result(ErrorDescription::NoData, ErrorModule::IR, ErrorSummary::NotFound,
+                       ErrorLevel::Status));
     }
 
     LOG_TRACE(Service_IR, "called, count={}", count);

@@ -77,10 +77,10 @@ constexpr std::array<int, 13> LATENCY_BY_FRAME_RATE{{
     33,  // Rate_30_To_10
 }};
 
-const ResultCode ERROR_INVALID_ENUM_VALUE(ErrorDescription::InvalidEnumValue, ErrorModule::CAM,
-                                          ErrorSummary::InvalidArgument, ErrorLevel::Usage);
-const ResultCode ERROR_OUT_OF_RANGE(ErrorDescription::OutOfRange, ErrorModule::CAM,
-                                    ErrorSummary::InvalidArgument, ErrorLevel::Usage);
+const Result ERROR_INVALID_ENUM_VALUE(ErrorDescription::InvalidEnumValue, ErrorModule::CAM,
+                                      ErrorSummary::InvalidArgument, ErrorLevel::Usage);
+const Result ERROR_OUT_OF_RANGE(ErrorDescription::OutOfRange, ErrorModule::CAM,
+                                ErrorSummary::InvalidArgument, ErrorLevel::Usage);
 
 void Module::PortConfig::Clear() {
     completion_event->Clear();
@@ -476,7 +476,7 @@ void Module::Interface::GetMaxLines(Kernel::HLERequestContext& ctx) {
         if (lines > height) {
             lines = height;
         }
-        ResultCode result = RESULT_SUCCESS;
+        Result result = RESULT_SUCCESS;
         while (height % lines != 0 || (lines * width * 2 % MIN_TRANSFER_UNIT != 0)) {
             --lines;
             if (lines == 0) {
@@ -980,7 +980,7 @@ void Module::Interface::SetPackageParameterWithoutContext(Kernel::HLERequestCont
 }
 
 template <typename PackageParameterType>
-ResultCode Module::SetPackageParameter(const PackageParameterType& package) {
+Result Module::SetPackageParameter(const PackageParameterType& package) {
     const CameraSet camera_select(package.camera_select);
     const ContextSet context_select(package.context_select);
 
@@ -1018,7 +1018,7 @@ void Module::Interface::SetPackageParameterWithContext(Kernel::HLERequestContext
     rp.PopRaw(package);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    ResultCode result = cam->SetPackageParameter(package);
+    Result result = cam->SetPackageParameter(package);
     rb.Push(result);
 
     LOG_DEBUG(Service_CAM, "called");
@@ -1031,7 +1031,7 @@ void Module::Interface::SetPackageParameterWithContextDetail(Kernel::HLERequestC
     rp.PopRaw(package);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    ResultCode result = cam->SetPackageParameter(package);
+    Result result = cam->SetPackageParameter(package);
     rb.Push(result);
 
     LOG_DEBUG(Service_CAM, "called");

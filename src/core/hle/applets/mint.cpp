@@ -9,12 +9,12 @@
 
 namespace HLE::Applets {
 
-ResultCode Mint::ReceiveParameterImpl(const Service::APT::MessageParameter& parameter) {
+Result Mint::ReceiveParameterImpl(const Service::APT::MessageParameter& parameter) {
     if (parameter.signal != Service::APT::SignalType::Request) {
         LOG_ERROR(Service_APT, "unsupported signal {}", parameter.signal);
         UNIMPLEMENTED();
         // TODO(Subv): Find the right error code
-        return ResultCode(-1);
+        return Result(-1);
     }
 
     // The Request message contains a buffer with the size of the framebuffer shared
@@ -43,7 +43,7 @@ ResultCode Mint::ReceiveParameterImpl(const Service::APT::MessageParameter& para
     return RESULT_SUCCESS;
 }
 
-ResultCode Mint::Start(const Service::APT::MessageParameter& parameter) {
+Result Mint::Start(const Service::APT::MessageParameter& parameter) {
     startup_param = parameter.buffer;
 
     // TODO(Subv): Set the expected fields in the response buffer before resending it to the
@@ -55,7 +55,7 @@ ResultCode Mint::Start(const Service::APT::MessageParameter& parameter) {
     return RESULT_SUCCESS;
 }
 
-ResultCode Mint::Finalize() {
+Result Mint::Finalize() {
     std::vector<u8> buffer(startup_param.size());
     std::fill(buffer.begin(), buffer.end(), 0);
     CloseApplet(nullptr, buffer);

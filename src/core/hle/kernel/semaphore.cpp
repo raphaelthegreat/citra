@@ -48,7 +48,7 @@ void Semaphore::Acquire(Thread* thread) {
     --available_count;
 }
 
-ResultCode Semaphore::Release(s32* count, s32 release_count) {
+Result Semaphore::Release(s32* count, s32 release_count) {
     R_UNLESS(max_count >= release_count + available_count, ERR_OUT_OF_RANGE_KERNEL);
 
     *count = available_count;

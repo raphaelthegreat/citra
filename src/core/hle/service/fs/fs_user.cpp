@@ -699,8 +699,8 @@ void FS_USER::GetProductInfo(Kernel::HLERequestContext& ctx) {
 
     const auto product_info = GetProductInfo(process_id);
     if (!product_info.has_value()) {
-        rb.Push(ResultCode(FileSys::ErrCodes::ArchiveNotMounted, ErrorModule::FS,
-                           ErrorSummary::NotFound, ErrorLevel::Status));
+        rb.Push(Result(FileSys::ErrCodes::ArchiveNotMounted, ErrorModule::FS,
+                       ErrorSummary::NotFound, ErrorLevel::Status));
         return;
     }
 
@@ -966,7 +966,7 @@ ResultVal<u16> FS_USER::GetSpecialContentIndexFromGameCard(u64 title_id, Special
     if (type > SpecialContentType::DLPChild) {
         // Maybe type 4 is New 3DS update/partition 6 but this needs more research
         // TODO(B3N30): Find correct result code
-        return ResultCode(-1);
+        return Result(-1);
     }
 
     switch (type) {
@@ -985,7 +985,7 @@ ResultVal<u16> FS_USER::GetSpecialContentIndexFromTMD(MediaType media_type, u64 
                                                       SpecialContentType type) {
     if (type > SpecialContentType::DLPChild) {
         // TODO(B3N30): Find correct result code
-        return ResultCode(-1);
+        return Result(-1);
     }
 
     std::string tmd_path = AM::GetTitleMetadataPath(media_type, title_id);
@@ -993,7 +993,7 @@ ResultVal<u16> FS_USER::GetSpecialContentIndexFromTMD(MediaType media_type, u64 
     FileSys::TitleMetadata tmd;
     if (tmd.Load(tmd_path) != Loader::ResultStatus::Success || type == SpecialContentType::Update) {
         // TODO(B3N30): Find correct result code
-        return ResultCode(-1);
+        return Result(-1);
     }
 
     // TODO(B3N30): Does real 3DS check if content exists in TMD?
@@ -1007,7 +1007,7 @@ ResultVal<u16> FS_USER::GetSpecialContentIndexFromTMD(MediaType media_type, u64 
         ASSERT(false);
     }
 
-    return ResultCode(-1);
+    return Result(-1);
 }
 
 FS_USER::FS_USER(Core::System& system)

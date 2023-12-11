@@ -108,8 +108,8 @@ void AddressArbiter::WakeUp(ThreadWakeupReason reason, std::shared_ptr<Thread> t
                           waiting_threads.end());
 };
 
-ResultCode AddressArbiter::ArbitrateAddress(std::shared_ptr<Thread> thread, ArbitrationType type,
-                                            VAddr address, s32 value, u64 nanoseconds) {
+Result AddressArbiter::ArbitrateAddress(std::shared_ptr<Thread> thread, ArbitrationType type,
+                                        VAddr address, s32 value, u64 nanoseconds) {
     switch (type) {
 
     // Signal thread(s) waiting for arbitrate address...

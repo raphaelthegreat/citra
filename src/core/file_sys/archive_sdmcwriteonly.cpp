@@ -81,9 +81,9 @@ ResultVal<std::unique_ptr<ArchiveBackend>> ArchiveFactory_SDMCWriteOnly::Open(co
     return std::make_unique<SDMCWriteOnlyArchive>(sdmc_directory, std::move(delay_generator));
 }
 
-ResultCode ArchiveFactory_SDMCWriteOnly::Format(const Path& path,
-                                                const FileSys::ArchiveFormatInfo& format_info,
-                                                u64 program_id) {
+Result ArchiveFactory_SDMCWriteOnly::Format(const Path& path,
+                                            const FileSys::ArchiveFormatInfo& format_info,
+                                            u64 program_id) {
     // TODO(wwylele): hwtest this
     LOG_ERROR(Service_FS, "Attempted to format a SDMC write-only archive.");
     return RESULT_UNKNOWN;

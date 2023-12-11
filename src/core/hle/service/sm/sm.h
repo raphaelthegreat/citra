@@ -31,19 +31,19 @@ namespace Service::SM {
 
 class SRV;
 
-constexpr ResultCode ERR_SERVICE_NOT_REGISTERED(1, ErrorModule::SRV, ErrorSummary::WouldBlock,
-                                                ErrorLevel::Temporary); // 0xD0406401
-constexpr ResultCode ERR_MAX_CONNECTIONS_REACHED(2, ErrorModule::SRV, ErrorSummary::WouldBlock,
-                                                 ErrorLevel::Temporary); // 0xD0406402
-constexpr ResultCode ERR_INVALID_NAME_SIZE(5, ErrorModule::SRV, ErrorSummary::WrongArgument,
-                                           ErrorLevel::Permanent); // 0xD9006405
-constexpr ResultCode ERR_ACCESS_DENIED(6, ErrorModule::SRV, ErrorSummary::InvalidArgument,
-                                       ErrorLevel::Permanent); // 0xD8E06406
-constexpr ResultCode ERR_NAME_CONTAINS_NUL(7, ErrorModule::SRV, ErrorSummary::WrongArgument,
-                                           ErrorLevel::Permanent); // 0xD9006407
-constexpr ResultCode ERR_ALREADY_REGISTERED(ErrorDescription::AlreadyExists, ErrorModule::OS,
-                                            ErrorSummary::WrongArgument,
-                                            ErrorLevel::Permanent); // 0xD9001BFC
+constexpr Result ERR_SERVICE_NOT_REGISTERED(1, ErrorModule::SRV, ErrorSummary::WouldBlock,
+                                            ErrorLevel::Temporary); // 0xD0406401
+constexpr Result ERR_MAX_CONNECTIONS_REACHED(2, ErrorModule::SRV, ErrorSummary::WouldBlock,
+                                             ErrorLevel::Temporary); // 0xD0406402
+constexpr Result ERR_INVALID_NAME_SIZE(5, ErrorModule::SRV, ErrorSummary::WrongArgument,
+                                       ErrorLevel::Permanent); // 0xD9006405
+constexpr Result ERR_ACCESS_DENIED(6, ErrorModule::SRV, ErrorSummary::InvalidArgument,
+                                   ErrorLevel::Permanent); // 0xD8E06406
+constexpr Result ERR_NAME_CONTAINS_NUL(7, ErrorModule::SRV, ErrorSummary::WrongArgument,
+                                       ErrorLevel::Permanent); // 0xD9006407
+constexpr Result ERR_ALREADY_REGISTERED(ErrorDescription::AlreadyExists, ErrorModule::OS,
+                                        ErrorSummary::WrongArgument,
+                                        ErrorLevel::Permanent); // 0xD9001BFC
 
 class ServiceManager {
 public:
@@ -51,12 +51,11 @@ public:
 
     explicit ServiceManager(Core::System& system);
 
-    ResultCode RegisterService(std::shared_ptr<Kernel::ServerPort>& out_port, std::string name,
-                               u32 max_sessions);
-    ResultCode GetServicePort(std::shared_ptr<Kernel::ClientPort>& out_port,
-                              const std::string& name);
-    ResultCode ConnectToService(std::shared_ptr<Kernel::ClientSession>& out_session,
-                                const std::string& name);
+    Result RegisterService(std::shared_ptr<Kernel::ServerPort>& out_port, std::string name,
+                           u32 max_sessions);
+    Result GetServicePort(std::shared_ptr<Kernel::ClientPort>& out_port, const std::string& name);
+    Result ConnectToService(std::shared_ptr<Kernel::ClientSession>& out_session,
+                            const std::string& name);
     // For IPC Recorder
     std::string GetServiceNameByPortId(u32 port) const;
 

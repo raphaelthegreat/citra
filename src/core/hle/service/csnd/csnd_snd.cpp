@@ -240,8 +240,8 @@ void CSND_SND::ExecuteCommands(Kernel::HLERequestContext& ctx) {
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
     if (!shared_memory) {
-        rb.Push(ResultCode(ErrorDescription::InvalidResultValue, ErrorModule::CSND,
-                           ErrorSummary::InvalidState, ErrorLevel::Status));
+        rb.Push(Result(ErrorDescription::InvalidResultValue, ErrorModule::CSND,
+                       ErrorSummary::InvalidState, ErrorLevel::Status));
         LOG_ERROR(Service_CSND, "called, shared memory not allocated");
         return;
     }
@@ -428,8 +428,8 @@ void CSND_SND::AcquireCapUnit(Kernel::HLERequestContext& ctx) {
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
     if (capture_units[0] && capture_units[1]) {
         LOG_WARNING(Service_CSND, "No more capture units available");
-        rb.Push(ResultCode(ErrorDescription::InvalidResultValue, ErrorModule::CSND,
-                           ErrorSummary::OutOfResource, ErrorLevel::Status));
+        rb.Push(Result(ErrorDescription::InvalidResultValue, ErrorModule::CSND,
+                       ErrorSummary::OutOfResource, ErrorLevel::Status));
         rb.Skip(1, false);
         return;
     }

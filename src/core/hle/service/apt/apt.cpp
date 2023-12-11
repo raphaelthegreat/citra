@@ -564,7 +564,7 @@ void Module::APTInterface::PrepareToDoApplicationJump(Kernel::HLERequestContext&
     LOG_INFO(Service_APT, "called title_id={:016X}, media_type={:#01X}, flags={:#08X}", title_id,
              media_type, flags);
 
-    ResultCode result = apt->applet_manager->PrepareToDoApplicationJump(
+    Result result = apt->applet_manager->PrepareToDoApplicationJump(
         title_id, static_cast<FS::MediaType>(media_type), flags);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
@@ -767,8 +767,8 @@ void Module::APTInterface::PrepareToStartNewestHomeMenu(Kernel::HLERequestContex
 
     // This command must return an error when called, otherwise the Home Menu will try to reboot the
     // system.
-    rb.Push(ResultCode(ErrorDescription::AlreadyExists, ErrorModule::Applet,
-                       ErrorSummary::InvalidState, ErrorLevel::Status));
+    rb.Push(Result(ErrorDescription::AlreadyExists, ErrorModule::Applet, ErrorSummary::InvalidState,
+                   ErrorLevel::Status));
 }
 
 void Module::APTInterface::PreloadLibraryApplet(Kernel::HLERequestContext& ctx) {
@@ -1341,8 +1341,8 @@ void Module::APTInterface::Unwrap(Kernel::HLERequestContext& ctx) {
         rb.Push(RESULT_SUCCESS);
     } else {
         LOG_ERROR(Service_APT, "Failed to decrypt data");
-        rb.Push(ResultCode(static_cast<ErrorDescription>(1), ErrorModule::PS,
-                           ErrorSummary::WrongArgument, ErrorLevel::Status));
+        rb.Push(Result(static_cast<ErrorDescription>(1), ErrorModule::PS,
+                       ErrorSummary::WrongArgument, ErrorLevel::Status));
     }
 
     // Unmap buffer

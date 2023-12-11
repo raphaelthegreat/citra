@@ -106,8 +106,8 @@ std::shared_ptr<SharedMemory> KernelSystem::CreateSharedMemoryForApplet(
     return shared_memory;
 }
 
-ResultCode SharedMemory::Map(Process& target_process, VAddr address, MemoryPermission permissions,
-                             MemoryPermission other_permissions) {
+Result SharedMemory::Map(Process& target_process, VAddr address, MemoryPermission permissions,
+                         MemoryPermission other_permissions) {
 
     MemoryPermission own_other_permissions =
         &target_process == owner_process.lock().get() ? this->permissions : this->other_permissions;
@@ -141,7 +141,7 @@ ResultCode SharedMemory::Map(Process& target_process, VAddr address, MemoryPermi
 
     // TODO(Subv): Check for the Shared Device Mem flag in the creator process.
     /*if (was_created_with_shared_device_mem && address != 0) {
-        return ResultCode(ErrorDescription::InvalidCombination, ErrorModule::OS,
+        return Result(ErrorDescription::InvalidCombination, ErrorModule::OS,
     ErrorSummary::InvalidArgument, ErrorLevel::Usage);
     }*/
 
@@ -190,7 +190,7 @@ ResultCode SharedMemory::Map(Process& target_process, VAddr address, MemoryPermi
     return RESULT_SUCCESS;
 }
 
-ResultCode SharedMemory::Unmap(Process& target_process, VAddr address) {
+Result SharedMemory::Unmap(Process& target_process, VAddr address) {
     // TODO(Subv): Verify what happens if the application tries to unmap an address that is not
     // mapped to a SharedMemory.
     return target_process.vm_manager.UnmapRange(address, size);

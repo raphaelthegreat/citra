@@ -155,7 +155,7 @@ static void LogGenericInfo(const ErrInfo::ErrInfoCommon& errinfo_common) {
                  errinfo_common.app_title_id_low);
     LOG_CRITICAL(Service_ERR, "ADR: 0x{:08X}", errinfo_common.pc_address);
 
-    ResultCode result_code{errinfo_common.result_code};
+    Result result_code{errinfo_common.result_code};
     LOG_CRITICAL(Service_ERR, "RSL: 0x{:08X}", result_code.raw);
     LOG_CRITICAL(Service_ERR, "  Level: {}", static_cast<u32>(result_code.level.Value()));
     LOG_CRITICAL(Service_ERR, "  Summary: {}", static_cast<u32>(result_code.summary.Value()));

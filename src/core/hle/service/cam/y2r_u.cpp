@@ -37,10 +37,10 @@ constexpr std::array<CoefficientSet, 4> standard_coefficients{{
     {{0x12A, 0x1CA, 0x88, 0x36, 0x21C, -0x1F04, 0x99C, -0x2421}},  // ITU_Rec709_Scaling
 }};
 
-ResultCode ConversionConfiguration::SetInputLineWidth(u16 width) {
+Result ConversionConfiguration::SetInputLineWidth(u16 width) {
     if (width == 0 || width > 1024 || width % 8 != 0) {
-        return ResultCode(ErrorDescription::OutOfRange, ErrorModule::CAM,
-                          ErrorSummary::InvalidArgument, ErrorLevel::Usage); // 0xE0E053FD
+        return Result(ErrorDescription::OutOfRange, ErrorModule::CAM, ErrorSummary::InvalidArgument,
+                      ErrorLevel::Usage); // 0xE0E053FD
     }
 
     // Note: The hardware uses the register value 0 to represent a width of 1024, so for a width of
@@ -50,10 +50,10 @@ ResultCode ConversionConfiguration::SetInputLineWidth(u16 width) {
     return RESULT_SUCCESS;
 }
 
-ResultCode ConversionConfiguration::SetInputLines(u16 lines) {
+Result ConversionConfiguration::SetInputLines(u16 lines) {
     if (lines == 0 || lines > 1024) {
-        return ResultCode(ErrorDescription::OutOfRange, ErrorModule::CAM,
-                          ErrorSummary::InvalidArgument, ErrorLevel::Usage); // 0xE0E053FD
+        return Result(ErrorDescription::OutOfRange, ErrorModule::CAM, ErrorSummary::InvalidArgument,
+                      ErrorLevel::Usage); // 0xE0E053FD
     }
 
     // Note: In what appears to be a bug, the `camera` module does not set the hardware register at
@@ -65,12 +65,11 @@ ResultCode ConversionConfiguration::SetInputLines(u16 lines) {
     return RESULT_SUCCESS;
 }
 
-ResultCode ConversionConfiguration::SetStandardCoefficient(
-    StandardCoefficient standard_coefficient) {
+Result ConversionConfiguration::SetStandardCoefficient(StandardCoefficient standard_coefficient) {
     const auto index = static_cast<std::size_t>(standard_coefficient);
     if (index >= standard_coefficients.size()) {
-        return ResultCode(ErrorDescription::InvalidEnumValue, ErrorModule::CAM,
-                          ErrorSummary::InvalidArgument, ErrorLevel::Usage); // 0xE0E053ED
+        return Result(ErrorDescription::InvalidEnumValue, ErrorModule::CAM,
+                      ErrorSummary::InvalidArgument, ErrorLevel::Usage); // 0xE0E053ED
     }
 
     std::memcpy(coefficients.data(), standard_coefficients[index].data(), sizeof(coefficients));
@@ -466,8 +465,8 @@ void Y2R_U::GetStandardCoefficient(Kernel::HLERequestContext& ctx) {
         LOG_DEBUG(Service_Y2R, "called standard_coefficient={} ", index);
     } else {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(ResultCode(ErrorDescription::InvalidEnumValue, ErrorModule::CAM,
-                           ErrorSummary::InvalidArgument, ErrorLevel::Usage));
+        rb.Push(Result(ErrorDescription::InvalidEnumValue, ErrorModule::CAM,
+                       ErrorSummary::InvalidArgument, ErrorLevel::Usage));
 
         LOG_ERROR(Service_Y2R, "called standard_coefficient={}  The argument is invalid!", index);
     }
@@ -559,7 +558,7 @@ void Y2R_U::SetPackageParameter(Kernel::HLERequestContext& ctx) {
     conversion.rotation = params.rotation;
     conversion.block_alignment = params.block_alignment;
 
-    ResultCode result = conversion.SetInputLineWidth(params.input_line_width);
+    Result result = conversion.SetInputLineWidth(params.input_line_width);
 
     if (result.IsError())
         goto cleanup;

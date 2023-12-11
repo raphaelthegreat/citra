@@ -62,9 +62,9 @@ ResultVal<std::unique_ptr<ArchiveBackend>> ArchiveFactory_SystemSaveData::Open(c
     return std::make_unique<SaveDataArchive>(fullpath);
 }
 
-ResultCode ArchiveFactory_SystemSaveData::Format(const Path& path,
-                                                 const FileSys::ArchiveFormatInfo& format_info,
-                                                 u64 program_id) {
+Result ArchiveFactory_SystemSaveData::Format(const Path& path,
+                                             const FileSys::ArchiveFormatInfo& format_info,
+                                             u64 program_id) {
     std::string fullpath = GetSystemSaveDataPath(base_path, path);
     FileUtil::DeleteDirRecursively(fullpath);
     FileUtil::CreateFullPath(fullpath);

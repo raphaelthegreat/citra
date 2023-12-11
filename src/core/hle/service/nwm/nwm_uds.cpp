@@ -728,8 +728,8 @@ void NWM_UDS::GetNodeInformation(Kernel::HLERequestContext& ctx) {
 
     if (!initialized) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(ResultCode(ErrorDescription::NotInitialized, ErrorModule::UDS,
-                           ErrorSummary::StatusChanged, ErrorLevel::Status));
+        rb.Push(Result(ErrorDescription::NotInitialized, ErrorModule::UDS,
+                       ErrorSummary::StatusChanged, ErrorLevel::Status));
         return;
     }
 
@@ -741,8 +741,8 @@ void NWM_UDS::GetNodeInformation(Kernel::HLERequestContext& ctx) {
                                 });
         if (itr == node_info.end()) {
             IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-            rb.Push(ResultCode(ErrorDescription::NotFound, ErrorModule::UDS,
-                               ErrorSummary::WrongArgument, ErrorLevel::Status));
+            rb.Push(Result(ErrorDescription::NotFound, ErrorModule::UDS,
+                           ErrorSummary::WrongArgument, ErrorLevel::Status));
             return;
         }
 
@@ -765,8 +765,8 @@ void NWM_UDS::Bind(Kernel::HLERequestContext& ctx) {
 
     if (data_channel == 0 || bind_node_id == 0) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(ResultCode(ErrorDescription::NotAuthorized, ErrorModule::UDS,
-                           ErrorSummary::WrongArgument, ErrorLevel::Usage));
+        rb.Push(Result(ErrorDescription::NotAuthorized, ErrorModule::UDS,
+                       ErrorSummary::WrongArgument, ErrorLevel::Usage));
         LOG_WARNING(Service_NWM, "data_channel = {}, bind_node_id = {}", data_channel,
                     bind_node_id);
         return;
@@ -775,8 +775,8 @@ void NWM_UDS::Bind(Kernel::HLERequestContext& ctx) {
     constexpr std::size_t MaxBindNodes = 16;
     if (channel_data.size() >= MaxBindNodes) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(ResultCode(ErrorDescription::OutOfMemory, ErrorModule::UDS,
-                           ErrorSummary::OutOfResource, ErrorLevel::Status));
+        rb.Push(Result(ErrorDescription::OutOfMemory, ErrorModule::UDS, ErrorSummary::OutOfResource,
+                       ErrorLevel::Status));
         LOG_WARNING(Service_NWM, "max bind nodes");
         return;
     }
@@ -784,8 +784,8 @@ void NWM_UDS::Bind(Kernel::HLERequestContext& ctx) {
     constexpr u32 MinRecvBufferSize = 0x5F4;
     if (recv_buffer_size < MinRecvBufferSize) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(ResultCode(ErrorDescription::TooLarge, ErrorModule::UDS,
-                           ErrorSummary::WrongArgument, ErrorLevel::Usage));
+        rb.Push(Result(ErrorDescription::TooLarge, ErrorModule::UDS, ErrorSummary::WrongArgument,
+                       ErrorLevel::Usage));
         LOG_WARNING(Service_NWM, "MinRecvBufferSize");
         return;
     }
@@ -810,8 +810,8 @@ void NWM_UDS::Unbind(Kernel::HLERequestContext& ctx) {
     u32 bind_node_id = rp.Pop<u32>();
     if (bind_node_id == 0) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(ResultCode(ErrorDescription::NotAuthorized, ErrorModule::UDS,
-                           ErrorSummary::WrongArgument, ErrorLevel::Usage));
+        rb.Push(Result(ErrorDescription::NotAuthorized, ErrorModule::UDS,
+                       ErrorSummary::WrongArgument, ErrorLevel::Usage));
         return;
     }
 
@@ -837,8 +837,8 @@ void NWM_UDS::Unbind(Kernel::HLERequestContext& ctx) {
     rb.Push<u32>(0);
 }
 
-ResultCode NWM_UDS::BeginHostingNetwork(std::span<const u8> network_info_buffer,
-                                        std::vector<u8> passphrase) {
+Result NWM_UDS::BeginHostingNetwork(std::span<const u8> network_info_buffer,
+                                    std::vector<u8> passphrase) {
     // TODO(Subv): Store the passphrase and verify it when attempting a connection.
 
     {
@@ -950,16 +950,16 @@ void NWM_UDS::EjectClient(Kernel::HLERequestContext& ctx) {
 
     // The host can not be kicked.
     if (network_node_id == 1) {
-        rb.Push(ResultCode(ErrorDescription::NotAuthorized, ErrorModule::UDS,
-                           ErrorSummary::WrongArgument, ErrorLevel::Usage));
+        rb.Push(Result(ErrorDescription::NotAuthorized, ErrorModule::UDS,
+                       ErrorSummary::WrongArgument, ErrorLevel::Usage));
         return;
     }
 
     std::scoped_lock lock(connection_status_mutex);
     if (connection_status.status != NetworkStatus::ConnectedAsHost) {
         // Only the host can kick people.
-        rb.Push(ResultCode(ErrorDescription::NotAuthorized, ErrorModule::UDS,
-                           ErrorSummary::InvalidState, ErrorLevel::Usage));
+        rb.Push(Result(ErrorDescription::NotAuthorized, ErrorModule::UDS,
+                       ErrorSummary::InvalidState, ErrorLevel::Usage));
         LOG_WARNING(Service_NWM, "called with status {}", connection_status.status);
         return;
     }
@@ -1009,8 +1009,8 @@ void NWM_UDS::DestroyNetwork(Kernel::HLERequestContext& ctx) {
     std::scoped_lock lock(connection_status_mutex);
     if (connection_status.status != NetworkStatus::ConnectedAsHost) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(ResultCode(ErrCodes::WrongStatus, ErrorModule::UDS, ErrorSummary::InvalidState,
-                           ErrorLevel::Status));
+        rb.Push(Result(ErrCodes::WrongStatus, ErrorModule::UDS, ErrorSummary::InvalidState,
+                       ErrorLevel::Status));
         LOG_WARNING(Service_NWM, "called with status {}",
                     static_cast<u32>(connection_status.status));
         return;
@@ -1053,8 +1053,8 @@ void NWM_UDS::DisconnectNetwork(Kernel::HLERequestContext& ctx) {
             connection_status.network_node_id = tmp_node_id;
             node_map.clear();
             LOG_DEBUG(Service_NWM, "called as a host");
-            rb.Push(ResultCode(ErrCodes::WrongStatus, ErrorModule::UDS, ErrorSummary::InvalidState,
-                               ErrorLevel::Status));
+            rb.Push(Result(ErrCodes::WrongStatus, ErrorModule::UDS, ErrorSummary::InvalidState,
+                           ErrorLevel::Status));
             return;
         }
         u16_le tmp_node_id = connection_status.network_node_id;
@@ -1101,23 +1101,23 @@ void NWM_UDS::SendTo(Kernel::HLERequestContext& ctx) {
     std::scoped_lock lock(connection_status_mutex);
     if (connection_status.status != NetworkStatus::ConnectedAsClient &&
         connection_status.status != NetworkStatus::ConnectedAsHost) {
-        rb.Push(ResultCode(ErrorDescription::NotAuthorized, ErrorModule::UDS,
-                           ErrorSummary::InvalidState, ErrorLevel::Status));
+        rb.Push(Result(ErrorDescription::NotAuthorized, ErrorModule::UDS,
+                       ErrorSummary::InvalidState, ErrorLevel::Status));
         return;
     }
 
     // There should never be a dest_node_id of 0
     if (dest_node_id == 0) {
-        rb.Push(ResultCode(ErrorDescription::NotFound, ErrorModule::UDS,
-                           ErrorSummary::WrongArgument, ErrorLevel::Status));
+        rb.Push(Result(ErrorDescription::NotFound, ErrorModule::UDS, ErrorSummary::WrongArgument,
+                       ErrorLevel::Status));
         LOG_ERROR(Service_NWM, "dest_node_id is 0");
         return;
     }
 
     if (dest_node_id == connection_status.network_node_id) {
         LOG_ERROR(Service_NWM, "tried to send packet to itself");
-        rb.Push(ResultCode(ErrorDescription::NotFound, ErrorModule::UDS,
-                           ErrorSummary::WrongArgument, ErrorLevel::Status));
+        rb.Push(Result(ErrorDescription::NotFound, ErrorModule::UDS, ErrorSummary::WrongArgument,
+                       ErrorLevel::Status));
         return;
     }
 
@@ -1127,15 +1127,15 @@ void NWM_UDS::SendTo(Kernel::HLERequestContext& ctx) {
 
     auto dest_address = GetNodeMacAddress(dest_node_id, flags);
     if (!dest_address) {
-        rb.Push(ResultCode(ErrorDescription::NotFound, ErrorModule::UDS,
-                           ErrorSummary::WrongArgument, ErrorLevel::Status));
+        rb.Push(Result(ErrorDescription::NotFound, ErrorModule::UDS, ErrorSummary::WrongArgument,
+                       ErrorLevel::Status));
         return;
     }
 
     constexpr std::size_t MaxSize = 0x5C6;
     if (data_size > MaxSize) {
-        rb.Push(ResultCode(ErrorDescription::TooLarge, ErrorModule::UDS,
-                           ErrorSummary::WrongArgument, ErrorLevel::Usage));
+        rb.Push(Result(ErrorDescription::TooLarge, ErrorModule::UDS, ErrorSummary::WrongArgument,
+                       ErrorLevel::Usage));
         return;
     }
 
@@ -1175,8 +1175,8 @@ void NWM_UDS::PullPacket(Kernel::HLERequestContext& ctx) {
         connection_status.status != NetworkStatus::ConnectedAsClient &&
         connection_status.status != NetworkStatus::ConnectedAsSpectator) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(ResultCode(ErrorDescription::NotAuthorized, ErrorModule::UDS,
-                           ErrorSummary::InvalidState, ErrorLevel::Status));
+        rb.Push(Result(ErrorDescription::NotAuthorized, ErrorModule::UDS,
+                       ErrorSummary::InvalidState, ErrorLevel::Status));
         return;
     }
 
@@ -1187,8 +1187,8 @@ void NWM_UDS::PullPacket(Kernel::HLERequestContext& ctx) {
 
     if (channel == channel_data.end()) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(ResultCode(ErrorDescription::NotAuthorized, ErrorModule::UDS,
-                           ErrorSummary::WrongArgument, ErrorLevel::Usage));
+        rb.Push(Result(ErrorDescription::NotAuthorized, ErrorModule::UDS,
+                       ErrorSummary::WrongArgument, ErrorLevel::Usage));
         return;
     }
 
@@ -1209,8 +1209,8 @@ void NWM_UDS::PullPacket(Kernel::HLERequestContext& ctx) {
 
     if (data_size > max_out_buff_size) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(ResultCode(ErrorDescription::TooLarge, ErrorModule::UDS,
-                           ErrorSummary::WrongArgument, ErrorLevel::Usage));
+        rb.Push(Result(ErrorDescription::TooLarge, ErrorModule::UDS, ErrorSummary::WrongArgument,
+                       ErrorLevel::Usage));
         return;
     }
 
@@ -1331,8 +1331,8 @@ void NWM_UDS::SetApplicationData(Kernel::HLERequestContext& ctx) {
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
 
     if (size > ApplicationDataSize) {
-        rb.Push(ResultCode(ErrorDescription::TooLarge, ErrorModule::UDS,
-                           ErrorSummary::WrongArgument, ErrorLevel::Usage));
+        rb.Push(Result(ErrorDescription::TooLarge, ErrorModule::UDS, ErrorSummary::WrongArgument,
+                       ErrorLevel::Usage));
         return;
     }
 

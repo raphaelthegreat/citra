@@ -46,7 +46,7 @@ public:
      * waiting on it to awake.
      * @returns ClientSession The client endpoint of the created Session pair, or error code.
      */
-    ResultCode Connect(std::shared_ptr<ClientSession>& client_session);
+    Result Connect(std::shared_ptr<ClientSession>& client_session);
 
     /**
      * Signifies that a previously active connection has been closed,

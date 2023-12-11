@@ -93,7 +93,7 @@ ResultVal<std::unique_ptr<FileBackend>> SaveDataArchive::OpenFile(const Path& pa
     return std::make_unique<DiskFile>(std::move(file), mode, std::move(delay_generator));
 }
 
-ResultCode SaveDataArchive::DeleteFile(const Path& path) const {
+Result SaveDataArchive::DeleteFile(const Path& path) const {
     const PathParser path_parser(path);
 
     if (!path_parser.IsValid()) {
@@ -127,7 +127,7 @@ ResultCode SaveDataArchive::DeleteFile(const Path& path) const {
     return ERROR_FILE_NOT_FOUND;
 }
 
-ResultCode SaveDataArchive::RenameFile(const Path& src_path, const Path& dest_path) const {
+Result SaveDataArchive::RenameFile(const Path& src_path, const Path& dest_path) const {
     const PathParser path_parser_src(src_path);
 
     // TODO: Verify these return codes with HW
@@ -152,13 +152,12 @@ ResultCode SaveDataArchive::RenameFile(const Path& src_path, const Path& dest_pa
 
     // TODO(yuriks): This code probably isn't right, it'll return a Status even if the file didn't
     // exist or similar. Verify.
-    return ResultCode(ErrorDescription::NoData, ErrorModule::FS, // TODO: verify description
-                      ErrorSummary::NothingHappened, ErrorLevel::Status);
+    return Result(ErrorDescription::NoData, ErrorModule::FS, // TODO: verify description
+                  ErrorSummary::NothingHappened, ErrorLevel::Status);
 }
 
 template <typename T>
-static ResultCode DeleteDirectoryHelper(const Path& path, const std::string& mount_point,
-                                        T deleter) {
+static Result DeleteDirectoryHelper(const Path& path, const std::string& mount_point, T deleter) {
     const PathParser path_parser(path);
 
     if (!path_parser.IsValid()) {
@@ -195,16 +194,16 @@ static ResultCode DeleteDirectoryHelper(const Path& path, const std::string& mou
     return ERROR_DIRECTORY_NOT_EMPTY;
 }
 
-ResultCode SaveDataArchive::DeleteDirectory(const Path& path) const {
+Result SaveDataArchive::DeleteDirectory(const Path& path) const {
     return DeleteDirectoryHelper(path, mount_point, FileUtil::DeleteDir);
 }
 
-ResultCode SaveDataArchive::DeleteDirectoryRecursively(const Path& path) const {
+Result SaveDataArchive::DeleteDirectoryRecursively(const Path& path) const {
     return DeleteDirectoryHelper(
         path, mount_point, [](const std::string& p) { return FileUtil::DeleteDirRecursively(p); });
 }
 
-ResultCode SaveDataArchive::CreateFile(const FileSys::Path& path, u64 size) const {
+Result SaveDataArchive::CreateFile(const FileSys::Path& path, u64 size) const {
     const PathParser path_parser(path);
 
     if (!path_parser.IsValid()) {
@@ -245,11 +244,11 @@ ResultCode SaveDataArchive::CreateFile(const FileSys::Path& path, u64 size) cons
     }
 
     LOG_ERROR(Service_FS, "Too large file");
-    return ResultCode(ErrorDescription::TooLarge, ErrorModule::FS, ErrorSummary::OutOfResource,
-                      ErrorLevel::Info);
+    return Result(ErrorDescription::TooLarge, ErrorModule::FS, ErrorSummary::OutOfResource,
+                  ErrorLevel::Info);
 }
 
-ResultCode SaveDataArchive::CreateDirectory(const Path& path) const {
+Result SaveDataArchive::CreateDirectory(const Path& path) const {
     const PathParser path_parser(path);
 
     if (!path_parser.IsValid()) {
@@ -282,11 +281,11 @@ ResultCode SaveDataArchive::CreateDirectory(const Path& path) const {
     }
 
     LOG_CRITICAL(Service_FS, "(unreachable) Unknown error creating {}", mount_point);
-    return ResultCode(ErrorDescription::NoData, ErrorModule::FS, ErrorSummary::Canceled,
-                      ErrorLevel::Status);
+    return Result(ErrorDescription::NoData, ErrorModule::FS, ErrorSummary::Canceled,
+                  ErrorLevel::Status);
 }
 
-ResultCode SaveDataArchive::RenameDirectory(const Path& src_path, const Path& dest_path) const {
+Result SaveDataArchive::RenameDirectory(const Path& src_path, const Path& dest_path) const {
     const PathParser path_parser_src(src_path);
 
     // TODO: Verify these return codes with HW
@@ -311,8 +310,8 @@ ResultCode SaveDataArchive::RenameDirectory(const Path& src_path, const Path& de
 
     // TODO(yuriks): This code probably isn't right, it'll return a Status even if the file didn't
     // exist or similar. Verify.
-    return ResultCode(ErrorDescription::NoData, ErrorModule::FS, // TODO: verify description
-                      ErrorSummary::NothingHappened, ErrorLevel::Status);
+    return Result(ErrorDescription::NoData, ErrorModule::FS, // TODO: verify description
+                  ErrorSummary::NothingHappened, ErrorLevel::Status);
 }
 
 ResultVal<std::unique_ptr<DirectoryBackend>> SaveDataArchive::OpenDirectory(

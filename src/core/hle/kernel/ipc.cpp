@@ -18,12 +18,11 @@
 
 namespace Kernel {
 
-ResultCode TranslateCommandBuffer(Kernel::KernelSystem& kernel, Memory::MemorySystem& memory,
-                                  std::shared_ptr<Thread> src_thread,
-                                  std::shared_ptr<Thread> dst_thread, VAddr src_address,
-                                  VAddr dst_address,
-                                  std::vector<MappedBufferContext>& mapped_buffer_context,
-                                  bool reply) {
+Result TranslateCommandBuffer(Kernel::KernelSystem& kernel, Memory::MemorySystem& memory,
+                              std::shared_ptr<Thread> src_thread,
+                              std::shared_ptr<Thread> dst_thread, VAddr src_address,
+                              VAddr dst_address,
+                              std::vector<MappedBufferContext>& mapped_buffer_context, bool reply) {
     auto src_process = src_thread->owner_process.lock();
     auto dst_process = dst_thread->owner_process.lock();
     ASSERT(src_process && dst_process);
@@ -60,8 +59,8 @@ ResultCode TranslateCommandBuffer(Kernel::KernelSystem& kernel, Memory::MemorySy
             // Note: The real kernel does not check that the number of handles fits into the command
             // buffer before writing them, only after finishing.
             if (i + num_handles > command_size) {
-                return ResultCode(ErrCodes::CommandTooLarge, ErrorModule::OS,
-                                  ErrorSummary::InvalidState, ErrorLevel::Status);
+                return Result(ErrCodes::CommandTooLarge, ErrorModule::OS,
+                              ErrorSummary::InvalidState, ErrorLevel::Status);
             }
 
             for (u32 j = 0; j < num_handles; ++j) {
@@ -180,7 +179,7 @@ ResultCode TranslateCommandBuffer(Kernel::KernelSystem& kernel, Memory::MemorySy
                        next_vma.meminfo_state == MemoryState::Reserved);
 
                 // Unmap the buffer and guard pages from the source process
-                ResultCode result =
+                Result result =
                     src_process->vm_manager.UnmapRange(page_start - Memory::CITRA_PAGE_SIZE,
                                                        (num_pages + 2) * Memory::CITRA_PAGE_SIZE);
                 ASSERT(result == RESULT_SUCCESS);

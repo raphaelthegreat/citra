@@ -44,7 +44,7 @@ ClientSession::~ClientSession() {
     }
 }
 
-ResultCode ClientSession::SendSyncRequest(std::shared_ptr<Thread> thread) {
+Result ClientSession::SendSyncRequest(std::shared_ptr<Thread> thread) {
     // Keep ServerSession alive until we're done working with it.
     std::shared_ptr<ServerSession> server = SharedFrom(parent->server);
     R_UNLESS(server, ERR_SESSION_CLOSED_BY_REMOTE);

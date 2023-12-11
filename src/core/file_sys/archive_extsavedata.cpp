@@ -155,7 +155,7 @@ public:
                                                  std::move(delay_generator));
     }
 
-    ResultCode CreateFile(const Path& path, u64 size) const override {
+    Result CreateFile(const Path& path, u64 size) const override {
         if (size == 0) {
             LOG_ERROR(Service_FS, "Zero-size file is not supported");
             return ERROR_UNSUPPORTED_OPEN_FLAGS;
@@ -259,9 +259,9 @@ ResultVal<std::unique_ptr<ArchiveBackend>> ArchiveFactory_ExtSaveData::Open(cons
     return std::make_unique<ExtSaveDataArchive>(fullpath, std::move(delay_generator));
 }
 
-ResultCode ArchiveFactory_ExtSaveData::Format(const Path& path,
-                                              const FileSys::ArchiveFormatInfo& format_info,
-                                              u64 program_id) {
+Result ArchiveFactory_ExtSaveData::Format(const Path& path,
+                                          const FileSys::ArchiveFormatInfo& format_info,
+                                          u64 program_id) {
     auto corrected_path = GetCorrectedPath(path);
 
     // These folders are always created with the ExtSaveData

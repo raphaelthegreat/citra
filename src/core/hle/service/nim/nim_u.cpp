@@ -312,8 +312,8 @@ void NIM_U::UnregisterTask(Kernel::HLERequestContext& ctx) {
     const u32 process_id = rp.PopPID();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(ResultCode(ErrorDescription::NotFound, ErrorModule::NIM, ErrorSummary::NotFound,
-                       ErrorLevel::Status));
+    rb.Push(Result(ErrorDescription::NotFound, ErrorModule::NIM, ErrorSummary::NotFound,
+                   ErrorLevel::Status));
 
     LOG_WARNING(Service_NIM, "(STUBBED) called title_id={:016X}, process_id={:08X}", title_id,
                 process_id);
@@ -339,8 +339,8 @@ void NIM_U::FindTaskInfo(Kernel::HLERequestContext& ctx) {
     std::vector<u8> buffer(0x120, 0);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(ResultCode(ErrorDescription::NotFound, ErrorModule::NIM, ErrorSummary::NotFound,
-                       ErrorLevel::Status));
+    rb.Push(Result(ErrorDescription::NotFound, ErrorModule::NIM, ErrorSummary::NotFound,
+                   ErrorLevel::Status));
     rb.PushStaticBuffer(std::move(buffer), 0);
 
     LOG_WARNING(Service_NIM, "(STUBBED) called title_id={:016X}", title_id);

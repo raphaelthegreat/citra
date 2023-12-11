@@ -45,25 +45,25 @@ enum {
 };
 }
 
-const ResultCode ERROR_STATE_ERROR = // 0xD8A0A066
-    ResultCode(ErrCodes::SessionStateError, ErrorModule::HTTP, ErrorSummary::InvalidState,
-               ErrorLevel::Permanent);
-const ResultCode ERROR_NOT_IMPLEMENTED = // 0xD960A3F4
-    ResultCode(ErrCodes::NotImplemented, ErrorModule::HTTP, ErrorSummary::Internal,
-               ErrorLevel::Permanent);
-const ResultCode ERROR_TOO_MANY_CLIENT_CERTS = // 0xD8A0A0CB
-    ResultCode(ErrCodes::TooManyClientCerts, ErrorModule::HTTP, ErrorSummary::InvalidState,
-               ErrorLevel::Permanent);
-const ResultCode ERROR_HEADER_NOT_FOUND = ResultCode(
-    ErrCodes::HeaderNotFound, ErrorModule::HTTP, ErrorSummary::InvalidState, ErrorLevel::Permanent);
-const ResultCode ERROR_BUFFER_SMALL = ResultCode(ErrCodes::BufferTooSmall, ErrorModule::HTTP,
-                                                 ErrorSummary::WouldBlock, ErrorLevel::Permanent);
-const ResultCode ERROR_WRONG_CERT_ID = // 0xD8E0B839
-    ResultCode(57, ErrorModule::SSL, ErrorSummary::InvalidArgument, ErrorLevel::Permanent);
-const ResultCode ERROR_WRONG_CERT_HANDLE = // 0xD8A0A0C9
-    ResultCode(201, ErrorModule::HTTP, ErrorSummary::InvalidState, ErrorLevel::Permanent);
-const ResultCode ERROR_CERT_ALREADY_SET = // 0xD8A0A03D
-    ResultCode(61, ErrorModule::HTTP, ErrorSummary::InvalidState, ErrorLevel::Permanent);
+const Result ERROR_STATE_ERROR = // 0xD8A0A066
+    Result(ErrCodes::SessionStateError, ErrorModule::HTTP, ErrorSummary::InvalidState,
+           ErrorLevel::Permanent);
+const Result ERROR_NOT_IMPLEMENTED = // 0xD960A3F4
+    Result(ErrCodes::NotImplemented, ErrorModule::HTTP, ErrorSummary::Internal,
+           ErrorLevel::Permanent);
+const Result ERROR_TOO_MANY_CLIENT_CERTS = // 0xD8A0A0CB
+    Result(ErrCodes::TooManyClientCerts, ErrorModule::HTTP, ErrorSummary::InvalidState,
+           ErrorLevel::Permanent);
+const Result ERROR_HEADER_NOT_FOUND = Result(ErrCodes::HeaderNotFound, ErrorModule::HTTP,
+                                             ErrorSummary::InvalidState, ErrorLevel::Permanent);
+const Result ERROR_BUFFER_SMALL = Result(ErrCodes::BufferTooSmall, ErrorModule::HTTP,
+                                         ErrorSummary::WouldBlock, ErrorLevel::Permanent);
+const Result ERROR_WRONG_CERT_ID = // 0xD8E0B839
+    Result(57, ErrorModule::SSL, ErrorSummary::InvalidArgument, ErrorLevel::Permanent);
+const Result ERROR_WRONG_CERT_HANDLE = // 0xD8A0A0C9
+    Result(201, ErrorModule::HTTP, ErrorSummary::InvalidState, ErrorLevel::Permanent);
+const Result ERROR_CERT_ALREADY_SET = // 0xD8A0A03D
+    Result(61, ErrorModule::HTTP, ErrorSummary::InvalidState, ErrorLevel::Permanent);
 
 // Splits URL into its components. Example: https://citra-emu.org:443/index.html
 // is_https: true; host: citra-emu.org; port: 443; path: /index.html
@@ -358,8 +358,8 @@ void HTTP_C::InitializeConnectionSession(Kernel::HLERequestContext& ctx) {
     auto itr = contexts.find(context_handle);
     if (itr == contexts.end()) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(ResultCode(ErrCodes::ContextNotFound, ErrorModule::HTTP, ErrorSummary::InvalidState,
-                           ErrorLevel::Permanent));
+        rb.Push(Result(ErrCodes::ContextNotFound, ErrorModule::HTTP, ErrorSummary::InvalidState,
+                       ErrorLevel::Permanent));
         return;
     }
 
@@ -462,7 +462,7 @@ void HTTP_C::ReceiveDataImpl(Kernel::HLERequestContext& ctx, bool timeout) {
         Kernel::MappedBuffer* buffer;
         bool is_complete;
         // Output
-        ResultCode async_res = RESULT_SUCCESS;
+        Result async_res = RESULT_SUCCESS;
     };
     std::shared_ptr<AsyncData> async_data = std::make_shared<AsyncData>();
     async_data->timeout = timeout;
@@ -490,8 +490,8 @@ void HTTP_C::ReceiveDataImpl(Kernel::HLERequestContext& ctx, bool timeout) {
                     std::chrono::nanoseconds(async_data->timeout_nanos));
                 if (wait_res == std::future_status::timeout) {
                     async_data->async_res =
-                        ResultCode(105, ErrorModule::HTTP, ErrorSummary::NothingHappened,
-                                   ErrorLevel::Permanent);
+                        Result(105, ErrorModule::HTTP, ErrorSummary::NothingHappened,
+                               ErrorLevel::Permanent);
                 }
             } else {
                 http_context.request_future.wait();
@@ -562,8 +562,8 @@ void HTTP_C::CreateContext(Kernel::HLERequestContext& ctx) {
         LOG_ERROR(Service_HTTP, "Command called with a bound context");
 
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-        rb.Push(ResultCode(ErrorDescription::NotImplemented, ErrorModule::HTTP,
-                           ErrorSummary::Internal, ErrorLevel::Permanent));
+        rb.Push(Result(ErrorDescription::NotImplemented, ErrorModule::HTTP, ErrorSummary::Internal,
+                       ErrorLevel::Permanent));
         rb.PushMappedBuffer(buffer);
         return;
     }
@@ -574,8 +574,8 @@ void HTTP_C::CreateContext(Kernel::HLERequestContext& ctx) {
         LOG_ERROR(Service_HTTP, "Tried to open too many HTTP contexts");
 
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-        rb.Push(ResultCode(ErrCodes::TooManyContexts, ErrorModule::HTTP, ErrorSummary::InvalidState,
-                           ErrorLevel::Permanent));
+        rb.Push(Result(ErrCodes::TooManyContexts, ErrorModule::HTTP, ErrorSummary::InvalidState,
+                       ErrorLevel::Permanent));
         rb.PushMappedBuffer(buffer);
         return;
     }
@@ -584,8 +584,8 @@ void HTTP_C::CreateContext(Kernel::HLERequestContext& ctx) {
         LOG_ERROR(Service_HTTP, "invalid request method={}", method);
 
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-        rb.Push(ResultCode(ErrCodes::InvalidRequestMethod, ErrorModule::HTTP,
-                           ErrorSummary::InvalidState, ErrorLevel::Permanent));
+        rb.Push(Result(ErrCodes::InvalidRequestMethod, ErrorModule::HTTP,
+                       ErrorSummary::InvalidState, ErrorLevel::Permanent));
         rb.PushMappedBuffer(buffer);
         return;
     }
@@ -687,8 +687,8 @@ void HTTP_C::AddRequestHeader(Kernel::HLERequestContext& ctx) {
         LOG_ERROR(Service_HTTP,
                   "Tried to add a request header on a context that has already been started.");
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-        rb.Push(ResultCode(ErrCodes::InvalidRequestState, ErrorModule::HTTP,
-                           ErrorSummary::InvalidState, ErrorLevel::Permanent));
+        rb.Push(Result(ErrCodes::InvalidRequestState, ErrorModule::HTTP, ErrorSummary::InvalidState,
+                       ErrorLevel::Permanent));
         rb.PushMappedBuffer(value_buffer);
         return;
     }
@@ -728,8 +728,8 @@ void HTTP_C::AddPostDataAscii(Kernel::HLERequestContext& ctx) {
         LOG_ERROR(Service_HTTP,
                   "Tried to add post data on a context that has already been started.");
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-        rb.Push(ResultCode(ErrCodes::InvalidRequestState, ErrorModule::HTTP,
-                           ErrorSummary::InvalidState, ErrorLevel::Permanent));
+        rb.Push(Result(ErrCodes::InvalidRequestState, ErrorModule::HTTP, ErrorSummary::InvalidState,
+                       ErrorLevel::Permanent));
         rb.PushMappedBuffer(value_buffer);
         return;
     }
@@ -760,8 +760,8 @@ void HTTP_C::AddPostDataRaw(Kernel::HLERequestContext& ctx) {
         LOG_ERROR(Service_HTTP,
                   "Tried to add post data on a context that has already been started.");
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-        rb.Push(ResultCode(ErrCodes::InvalidRequestState, ErrorModule::HTTP,
-                           ErrorSummary::InvalidState, ErrorLevel::Permanent));
+        rb.Push(Result(ErrCodes::InvalidRequestState, ErrorModule::HTTP, ErrorSummary::InvalidState,
+                       ErrorLevel::Permanent));
         rb.PushMappedBuffer(buffer);
         return;
     }
@@ -859,7 +859,7 @@ void HTTP_C::GetResponseStatusCodeImpl(Kernel::HLERequestContext& ctx, bool time
         bool timeout;
         u64 timeout_nanos = 0;
         // Output
-        ResultCode async_res = RESULT_SUCCESS;
+        Result async_res = RESULT_SUCCESS;
     };
     std::shared_ptr<AsyncData> async_data = std::make_shared<AsyncData>();
 
@@ -887,8 +887,8 @@ void HTTP_C::GetResponseStatusCodeImpl(Kernel::HLERequestContext& ctx, bool time
                 if (wait_res == std::future_status::timeout) {
                     LOG_DEBUG(Service_HTTP, "Status code: {}", "timeout");
                     async_data->async_res =
-                        ResultCode(105, ErrorModule::HTTP, ErrorSummary::NothingHappened,
-                                   ErrorLevel::Permanent);
+                        Result(105, ErrorModule::HTTP, ErrorSummary::NothingHappened,
+                               ErrorLevel::Permanent);
                 }
             } else {
                 http_context.request_future.wait();
@@ -1000,8 +1000,8 @@ void HTTP_C::SetClientCertContext(Kernel::HLERequestContext& ctx) {
         LOG_ERROR(Service_HTTP,
                   "Tried to set a client cert on a context that has already been started.");
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(ResultCode(ErrCodes::InvalidRequestState, ErrorModule::HTTP,
-                           ErrorSummary::InvalidState, ErrorLevel::Permanent));
+        rb.Push(Result(ErrCodes::InvalidRequestState, ErrorModule::HTTP, ErrorSummary::InvalidState,
+                       ErrorLevel::Permanent));
         return;
     }
 
@@ -1049,7 +1049,7 @@ void HTTP_C::OpenClientCertContext(Kernel::HLERequestContext& ctx) {
     auto* session_data = GetSessionData(ctx.Session());
     ASSERT(session_data);
 
-    ResultCode result(RESULT_SUCCESS);
+    Result result(RESULT_SUCCESS);
 
     if (!session_data->initialized) {
         LOG_ERROR(Service_HTTP, "Command called without Initialize");
@@ -1114,7 +1114,7 @@ void HTTP_C::OpenDefaultClientCertContext(Kernel::HLERequestContext& ctx) {
     if (!ClCertA.init) {
         LOG_ERROR(Service_HTTP, "called but ClCertA is missing");
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(static_cast<ResultCode>(-1));
+        rb.Push(static_cast<Result>(-1));
         return;
     }
 
@@ -1262,8 +1262,8 @@ bool HTTP_C::PerformStateChecks(Kernel::HLERequestContext& ctx, IPC::RequestPars
         LOG_ERROR(Service_HTTP, "Tried to make a request without a bound context");
 
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(ResultCode(ErrorDescription::NotImplemented, ErrorModule::HTTP,
-                           ErrorSummary::Internal, ErrorLevel::Permanent));
+        rb.Push(Result(ErrorDescription::NotImplemented, ErrorModule::HTTP, ErrorSummary::Internal,
+                       ErrorLevel::Permanent));
         return false;
     }
 

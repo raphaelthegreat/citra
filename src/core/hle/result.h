@@ -192,7 +192,7 @@ enum class ErrorLevel : u32 {
 };
 
 /// Encapsulates a CTR-OS error code, allowing it to be separated into its constituent fields.
-union ResultCode {
+union Result {
     u32 raw;
 
     BitField<0, 10, u32> description;
@@ -205,18 +205,18 @@ union ResultCode {
     // error
     BitField<31, 1, u32> is_error;
 
-    constexpr explicit ResultCode(u32 raw) : raw(raw) {}
+    constexpr explicit Result(u32 raw) : raw(raw) {}
 
-    constexpr ResultCode(ErrorDescription description, ErrorModule module, ErrorSummary summary,
-                         ErrorLevel level)
-        : ResultCode(static_cast<u32>(description), module, summary, level) {}
+    constexpr Result(ErrorDescription description, ErrorModule module, ErrorSummary summary,
+                     ErrorLevel level)
+        : Result(static_cast<u32>(description), module, summary, level) {}
 
-    constexpr ResultCode(u32 description_, ErrorModule module_, ErrorSummary summary_,
-                         ErrorLevel level_)
+    constexpr Result(u32 description_, ErrorModule module_, ErrorSummary summary_,
+                     ErrorLevel level_)
         : raw(description.FormatValue(description_) | module.FormatValue(module_) |
               summary.FormatValue(summary_) | level.FormatValue(level_)) {}
 
-    constexpr ResultCode& operator=(const ResultCode& o) = default;
+    constexpr Result& operator=(const Result& o) = default;
 
     constexpr bool IsSuccess() const {
         return is_error.ExtractValue(raw) == 0;
@@ -234,23 +234,23 @@ private:
     friend class boost::serialization::access;
 };
 
-constexpr bool operator==(const ResultCode& a, const ResultCode& b) {
+constexpr bool operator==(const Result& a, const Result& b) {
     return a.raw == b.raw;
 }
 
-constexpr bool operator!=(const ResultCode& a, const ResultCode& b) {
+constexpr bool operator!=(const Result& a, const Result& b) {
     return a.raw != b.raw;
 }
 
 // Convenience functions for creating some common kinds of errors:
 
-/// The default success `ResultCode`.
-constexpr ResultCode RESULT_SUCCESS(0);
+/// The default success `Result`.
+constexpr Result RESULT_SUCCESS(0);
 
 /// Might be returned instead of a dummy success for unimplemented APIs.
-constexpr ResultCode UnimplementedFunction(ErrorModule module) {
-    return ResultCode(ErrorDescription::NotImplemented, module, ErrorSummary::NotSupported,
-                      ErrorLevel::Permanent);
+constexpr Result UnimplementedFunction(ErrorModule module) {
+    return Result(ErrorDescription::NotImplemented, module, ErrorSummary::NotSupported,
+                  ErrorLevel::Permanent);
 }
 
 /**
@@ -259,10 +259,10 @@ constexpr ResultCode UnimplementedFunction(ErrorModule module) {
  * @note This should only be used when a particular error code
  *       is not known yet.
  */
-constexpr ResultCode RESULT_UNKNOWN(UINT32_MAX);
+constexpr Result RESULT_UNKNOWN(UINT32_MAX);
 
 /**
- * This is an optional value type. It holds a `ResultCode` and, if that code is ResultSuccess, it
+ * This is an optional value type. It holds a `Result` and, if that code is ResultSuccess, it
  * also holds a result of type `T`. If the code is an error code (not ResultSuccess), then trying
  * to access the inner value with operator* is undefined behavior and will assert with Unwrap().
  * Users of this class must be cognizant to check the status of the ResultVal with operator bool(),
@@ -273,7 +273,7 @@ constexpr ResultCode RESULT_UNKNOWN(UINT32_MAX);
  * ResultVal<int> Frobnicate(float strength) {
  *     if (strength < 0.f || strength > 1.0f) {
  *         // Can't frobnicate too weakly or too strongly
- *         return ResultCode(ErrorDescription::OutOfRange, ErrorModule::Common,
+ *         return Result(ErrorDescription::OutOfRange, ErrorModule::Common,
  *             ErrorSummary::InvalidArgument, ErrorLevel::Permanent);
  *     } else {
  *         // Frobnicated! Give caller a cookie
@@ -297,7 +297,7 @@ class ResultVal {
 public:
     constexpr ResultVal() : expected{} {}
 
-    constexpr ResultVal(ResultCode code) : expected{Common::Unexpected(code)} {}
+    constexpr ResultVal(Result code) : expected{Common::Unexpected(code)} {}
 
     template <typename U>
     constexpr ResultVal(U&& val) : expected{std::forward<U>(val)} {}
@@ -317,7 +317,7 @@ public:
         return expected.has_value();
     }
 
-    [[nodiscard]] constexpr ResultCode Code() const {
+    [[nodiscard]] constexpr Result Code() const {
         return expected.has_value() ? RESULT_SUCCESS : expected.error();
     }
 
@@ -385,7 +385,7 @@ public:
 
 private:
     // TODO: Replace this with std::expected once it is standardized in the STL.
-    Common::Expected<T, ResultCode> expected;
+    Common::Expected<T, Result> expected;
 };
 
 /**
@@ -401,7 +401,7 @@ private:
     target = std::move(*CONCAT2(check_result_L, __LINE__))
 
 /**
- * Analogous to CASCADE_RESULT, but for a bare ResultCode. The code will be propagated if
+ * Analogous to CASCADE_RESULT, but for a bare Result. The code will be propagated if
  * non-success, or discarded otherwise.
  */
 #define CASCADE_CODE(source)                                                                       \
@@ -409,8 +409,8 @@ private:
     if (CONCAT2(check_result_L, __LINE__).IsError())                                               \
         return CONCAT2(check_result_L, __LINE__);
 
-#define R_SUCCEEDED(res) (static_cast<ResultCode>(res).IsSuccess())
-#define R_FAILED(res) (static_cast<ResultCode>(res).IsError())
+#define R_SUCCEEDED(res) (static_cast<Result>(res).IsSuccess())
+#define R_FAILED(res) (static_cast<Result>(res).IsError())
 
 /// Evaluates a boolean expression, and returns a result unless that expression is true.
 #define R_UNLESS(expr, res)                                                                        \

@@ -53,8 +53,8 @@ ResultVal<std::unique_ptr<ArchiveBackend>> ArchiveSource_SDSaveData::Open(u64 pr
     return std::make_unique<SaveDataArchive>(std::move(concrete_mount_point));
 }
 
-ResultCode ArchiveSource_SDSaveData::Format(u64 program_id,
-                                            const FileSys::ArchiveFormatInfo& format_info) {
+Result ArchiveSource_SDSaveData::Format(u64 program_id,
+                                        const FileSys::ArchiveFormatInfo& format_info) {
     std::string concrete_mount_point = GetSaveDataPath(mount_point, program_id);
     FileUtil::DeleteDirRecursively(concrete_mount_point);
     FileUtil::CreateFullPath(concrete_mount_point);

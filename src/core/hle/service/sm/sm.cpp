@@ -12,7 +12,7 @@
 
 namespace Service::SM {
 
-static ResultCode ValidateServiceName(const std::string& name) {
+static Result ValidateServiceName(const std::string& name) {
     R_UNLESS(name.size() > 0 && name.size() <= 8, ERR_INVALID_NAME_SIZE);
     R_UNLESS(name.find('\0') == std::string::npos, ERR_NAME_CONTAINS_NUL);
     return RESULT_SUCCESS;
@@ -28,8 +28,8 @@ void ServiceManager::InstallInterfaces(Core::System& system) {
     system.ServiceManager().srv_interface = srv;
 }
 
-ResultCode ServiceManager::RegisterService(std::shared_ptr<Kernel::ServerPort>& server_port,
-                                           std::string name, u32 max_sessions) {
+Result ServiceManager::RegisterService(std::shared_ptr<Kernel::ServerPort>& server_port,
+                                       std::string name, u32 max_sessions) {
     R_TRY(ValidateServiceName(name));
     R_UNLESS(registered_services.find(name) == registered_services.end(), ERR_ALREADY_REGISTERED);
 
@@ -41,8 +41,8 @@ ResultCode ServiceManager::RegisterService(std::shared_ptr<Kernel::ServerPort>& 
     return RESULT_SUCCESS;
 }
 
-ResultCode ServiceManager::GetServicePort(std::shared_ptr<Kernel::ClientPort>& out_port,
-                                          const std::string& name) {
+Result ServiceManager::GetServicePort(std::shared_ptr<Kernel::ClientPort>& out_port,
+                                      const std::string& name) {
     R_TRY(ValidateServiceName(name));
 
     auto it = registered_services.find(name);
@@ -52,8 +52,8 @@ ResultCode ServiceManager::GetServicePort(std::shared_ptr<Kernel::ClientPort>& o
     return RESULT_SUCCESS;
 }
 
-ResultCode ServiceManager::ConnectToService(std::shared_ptr<Kernel::ClientSession>& session,
-                                            const std::string& name) {
+Result ServiceManager::ConnectToService(std::shared_ptr<Kernel::ClientSession>& session,
+                                        const std::string& name) {
     std::shared_ptr<Kernel::ClientPort> client_port;
     R_TRY(GetServicePort(client_port, name));
     return client_port->Connect(session);

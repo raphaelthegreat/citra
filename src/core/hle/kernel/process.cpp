@@ -249,8 +249,8 @@ VAddr Process::GetLinearHeapLimit() const {
     return GetLinearHeapBase() + memory_region->size;
 }
 
-ResultCode Process::HeapAllocate(VAddr* out_addr, VAddr target, u32 size, VMAPermission perms,
-                                 MemoryState memory_state, bool skip_range_check) {
+Result Process::HeapAllocate(VAddr* out_addr, VAddr target, u32 size, VMAPermission perms,
+                             MemoryState memory_state, bool skip_range_check) {
     LOG_DEBUG(Kernel, "Allocate heap target={:08X}, size={:08X}", target, size);
     if (target < Memory::HEAP_VADDR || target + size > Memory::HEAP_VADDR_END ||
         target + size < target) {
@@ -297,7 +297,7 @@ ResultCode Process::HeapAllocate(VAddr* out_addr, VAddr target, u32 size, VMAPer
     return RESULT_SUCCESS;
 }
 
-ResultCode Process::HeapFree(VAddr target, u32 size) {
+Result Process::HeapFree(VAddr target, u32 size) {
     LOG_DEBUG(Kernel, "Free heap target={:08X}, size={:08X}", target, size);
     if (target < Memory::HEAP_VADDR || target + size > Memory::HEAP_VADDR_END ||
         target + size < target) {
@@ -315,7 +315,7 @@ ResultCode Process::HeapFree(VAddr target, u32 size) {
         holding_memory -= MemoryRegionInfo::Interval(backing_offset, backing_offset + block_size);
     }
 
-    ResultCode result = vm_manager.UnmapRange(target, size);
+    Result result = vm_manager.UnmapRange(target, size);
     ASSERT(result.IsSuccess());
 
     memory_used -= size;
@@ -324,7 +324,7 @@ ResultCode Process::HeapFree(VAddr target, u32 size) {
     return RESULT_SUCCESS;
 }
 
-ResultCode Process::LinearAllocate(VAddr* out_addr, VAddr target, u32 size, VMAPermission perms) {
+Result Process::LinearAllocate(VAddr* out_addr, VAddr target, u32 size, VMAPermission perms) {
     LOG_DEBUG(Kernel, "Allocate linear heap target={:08X}, size={:08X}", target, size);
     u32 physical_offset;
     if (target == 0) {
@@ -372,7 +372,7 @@ ResultCode Process::LinearAllocate(VAddr* out_addr, VAddr target, u32 size, VMAP
     return RESULT_SUCCESS;
 }
 
-ResultCode Process::LinearFree(VAddr target, u32 size) {
+Result Process::LinearFree(VAddr target, u32 size) {
     LOG_DEBUG(Kernel, "Free linear heap target={:08X}, size={:08X}", target, size);
     if (target < GetLinearHeapBase() || target + size > GetLinearHeapLimit() ||
         target + size < target) {
@@ -463,8 +463,7 @@ ResultVal<VAddr> Process::AllocateThreadLocalStorage() {
     return tls_address;
 }
 
-ResultCode Process::Map(VAddr target, VAddr source, u32 size, VMAPermission perms,
-                        bool privileged) {
+Result Process::Map(VAddr target, VAddr source, u32 size, VMAPermission perms, bool privileged) {
     LOG_DEBUG(Kernel, "Map memory target={:08X}, source={:08X}, size={:08X}, perms={:08X}", target,
               source, size, perms);
     if (!privileged && (source < Memory::HEAP_VADDR || source + size > Memory::HEAP_VADDR_END ||
@@ -518,8 +517,7 @@ ResultCode Process::Map(VAddr target, VAddr source, u32 size, VMAPermission perm
 
     return RESULT_SUCCESS;
 }
-ResultCode Process::Unmap(VAddr target, VAddr source, u32 size, VMAPermission perms,
-                          bool privileged) {
+Result Process::Unmap(VAddr target, VAddr source, u32 size, VMAPermission perms, bool privileged) {
     LOG_DEBUG(Kernel, "Unmap memory target={:08X}, source={:08X}, size={:08X}, perms={:08X}",
               target, source, size, perms);
     if (!privileged && (source < Memory::HEAP_VADDR || source + size > Memory::HEAP_VADDR_END ||

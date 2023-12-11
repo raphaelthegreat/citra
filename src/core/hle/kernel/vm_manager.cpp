@@ -83,8 +83,8 @@ ResultVal<VAddr> VMManager::MapBackingMemoryToBase(VAddr base, u32 region_size, 
     // Do not try to allocate the block if there are no available addresses within the desired
     // region.
     if (vma_handle == vma_map.end() || target + size > base + region_size) {
-        return ResultCode(ErrorDescription::OutOfMemory, ErrorModule::Kernel,
-                          ErrorSummary::OutOfResource, ErrorLevel::Permanent);
+        return Result(ErrorDescription::OutOfMemory, ErrorModule::Kernel,
+                      ErrorSummary::OutOfResource, ErrorLevel::Permanent);
     }
 
     auto result = MapBackingMemory(target, memory, size, state);
@@ -114,9 +114,9 @@ ResultVal<VMManager::VMAHandle> VMManager::MapBackingMemory(VAddr target, Memory
     return MergeAdjacent(vma_handle);
 }
 
-ResultCode VMManager::ChangeMemoryState(VAddr target, u32 size, MemoryState expected_state,
-                                        VMAPermission expected_perms, MemoryState new_state,
-                                        VMAPermission new_perms) {
+Result VMManager::ChangeMemoryState(VAddr target, u32 size, MemoryState expected_state,
+                                    VMAPermission expected_perms, MemoryState new_state,
+                                    VMAPermission new_perms) {
     if (is_locked) {
         return RESULT_SUCCESS;
     }
@@ -168,7 +168,7 @@ VMManager::VMAIter VMManager::Unmap(VMAIter vma_handle) {
     return MergeAdjacent(vma_handle);
 }
 
-ResultCode VMManager::UnmapRange(VAddr target, u32 size) {
+Result VMManager::UnmapRange(VAddr target, u32 size) {
     ASSERT(!is_locked);
 
     CASCADE_RESULT(VMAIter vma, CarveVMARange(target, size));
@@ -197,7 +197,7 @@ VMManager::VMAHandle VMManager::Reprotect(VMAHandle vma_handle, VMAPermission ne
     return MergeAdjacent(iter);
 }
 
-ResultCode VMManager::ReprotectRange(VAddr target, u32 size, VMAPermission new_perms) {
+Result VMManager::ReprotectRange(VAddr target, u32 size, VMAPermission new_perms) {
     ASSERT(!is_locked);
 
     CASCADE_RESULT(VMAIter vma, CarveVMARange(target, size));

@@ -166,7 +166,7 @@ void NfcDevice::Finalize() {
     is_initalized = false;
 }
 
-ResultCode NfcDevice::StartCommunication() {
+Result NfcDevice::StartCommunication() {
     const auto connection_result = CheckConnectionState();
     if (connection_result.IsError()) {
         return connection_result;
@@ -184,7 +184,7 @@ ResultCode NfcDevice::StartCommunication() {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::StopCommunication() {
+Result NfcDevice::StopCommunication() {
     const auto connection_result = CheckConnectionState();
     if (connection_result.IsError()) {
         return connection_result;
@@ -204,7 +204,7 @@ ResultCode NfcDevice::StopCommunication() {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::StartDetection(TagProtocol allowed_protocol) {
+Result NfcDevice::StartDetection(TagProtocol allowed_protocol) {
     const auto connection_result = CheckConnectionState();
     if (connection_result.IsError()) {
         return connection_result;
@@ -230,7 +230,7 @@ ResultCode NfcDevice::StartDetection(TagProtocol allowed_protocol) {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::StopDetection() {
+Result NfcDevice::StopDetection() {
     const auto connection_result = CheckConnectionState();
     if (connection_result.IsError()) {
         return connection_result;
@@ -257,7 +257,7 @@ ResultCode NfcDevice::StopDetection() {
     return ResultInvalidOperation;
 }
 
-ResultCode NfcDevice::Flush() {
+Result NfcDevice::Flush() {
     if (device_state != DeviceState::TagMounted) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
         const auto connection_result = CheckConnectionState();
@@ -327,7 +327,7 @@ ResultCode NfcDevice::Flush() {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::Mount() {
+Result NfcDevice::Mount() {
     if (device_state != DeviceState::TagFound) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
         const auto connection_result = CheckConnectionState();
@@ -357,7 +357,7 @@ ResultCode NfcDevice::Mount() {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::MountAmiibo() {
+Result NfcDevice::MountAmiibo() {
     TagInfo tag_info{};
     const auto result = GetTagInfo(tag_info);
 
@@ -372,7 +372,7 @@ ResultCode NfcDevice::MountAmiibo() {
     return Mount();
 }
 
-ResultCode NfcDevice::PartiallyMount() {
+Result NfcDevice::PartiallyMount() {
     if (device_state != DeviceState::TagFound) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
         const auto connection_result = CheckConnectionState();
@@ -402,7 +402,7 @@ ResultCode NfcDevice::PartiallyMount() {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::PartiallyMountAmiibo() {
+Result NfcDevice::PartiallyMountAmiibo() {
     TagInfo tag_info{};
     const auto result = GetTagInfo(tag_info);
 
@@ -416,7 +416,7 @@ ResultCode NfcDevice::PartiallyMountAmiibo() {
 
     return PartiallyMount();
 }
-ResultCode NfcDevice::ResetTagScanState() {
+Result NfcDevice::ResetTagScanState() {
     if (device_state != DeviceState::TagMounted &&
         device_state != DeviceState::TagPartiallyMounted) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
@@ -433,7 +433,7 @@ ResultCode NfcDevice::ResetTagScanState() {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::GetTagInfo2(TagInfo2& tag_info) const {
+Result NfcDevice::GetTagInfo2(TagInfo2& tag_info) const {
     tag_info = {
         .uuid_length = static_cast<u16>(encrypted_tag.file.uuid.uid.size()),
         .tag_type = PackedTagType::Type2,
@@ -446,7 +446,7 @@ ResultCode NfcDevice::GetTagInfo2(TagInfo2& tag_info) const {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::GetTagInfo(TagInfo& tag_info) const {
+Result NfcDevice::GetTagInfo(TagInfo& tag_info) const {
     if (device_state != DeviceState::TagFound && device_state != DeviceState::TagMounted &&
         device_state != DeviceState::TagPartiallyMounted) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
@@ -468,7 +468,7 @@ ResultCode NfcDevice::GetTagInfo(TagInfo& tag_info) const {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::GetCommonInfo(CommonInfo& common_info) const {
+Result NfcDevice::GetCommonInfo(CommonInfo& common_info) const {
     if (device_state != DeviceState::TagMounted) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
         const auto connection_result = CheckConnectionState();
@@ -497,7 +497,7 @@ ResultCode NfcDevice::GetCommonInfo(CommonInfo& common_info) const {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::GetModelInfo(ModelInfo& model_info) const {
+Result NfcDevice::GetModelInfo(ModelInfo& model_info) const {
     if (device_state != DeviceState::TagMounted &&
         device_state != DeviceState::TagPartiallyMounted) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
@@ -520,7 +520,7 @@ ResultCode NfcDevice::GetModelInfo(ModelInfo& model_info) const {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::GetRegisterInfo(RegisterInfo& register_info) const {
+Result NfcDevice::GetRegisterInfo(RegisterInfo& register_info) const {
     if (device_state != DeviceState::TagMounted) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
         const auto connection_result = CheckConnectionState();
@@ -548,7 +548,7 @@ ResultCode NfcDevice::GetRegisterInfo(RegisterInfo& register_info) const {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::GetAdminInfo(AdminInfo& admin_info) const {
+Result NfcDevice::GetAdminInfo(AdminInfo& admin_info) const {
     if (device_state != DeviceState::TagMounted) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
         const auto connection_result = CheckConnectionState();
@@ -607,7 +607,7 @@ ResultCode NfcDevice::GetAdminInfo(AdminInfo& admin_info) const {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::DeleteRegisterInfo() {
+Result NfcDevice::DeleteRegisterInfo() {
     // This is a hack to get around a HW issue
     if (device_state == DeviceState::TagFound) {
         Mount();
@@ -645,7 +645,7 @@ ResultCode NfcDevice::DeleteRegisterInfo() {
     return Flush();
 }
 
-ResultCode NfcDevice::SetRegisterInfoPrivate(const RegisterInfoPrivate& register_info) {
+Result NfcDevice::SetRegisterInfoPrivate(const RegisterInfoPrivate& register_info) {
     if (device_state != DeviceState::TagMounted) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
         const auto connection_result = CheckConnectionState();
@@ -677,7 +677,7 @@ ResultCode NfcDevice::SetRegisterInfoPrivate(const RegisterInfoPrivate& register
     return Flush();
 }
 
-ResultCode NfcDevice::RestoreAmiibo() {
+Result NfcDevice::RestoreAmiibo() {
     if (device_state != DeviceState::TagMounted) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
         const auto connection_result = CheckConnectionState();
@@ -692,22 +692,22 @@ ResultCode NfcDevice::RestoreAmiibo() {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::Format() {
-    auto ResultCode = DeleteApplicationArea();
-    auto ResultCode2 = DeleteRegisterInfo();
+Result NfcDevice::Format() {
+    auto Result = DeleteApplicationArea();
+    auto Result2 = DeleteRegisterInfo();
 
-    if (ResultCode.IsError()) {
-        return ResultCode;
+    if (Result.IsError()) {
+        return Result;
     }
 
-    if (ResultCode2.IsError()) {
-        return ResultCode2;
+    if (Result2.IsError()) {
+        return Result2;
     }
 
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::OpenApplicationArea(u32 access_id) {
+Result NfcDevice::OpenApplicationArea(u32 access_id) {
     if (device_state != DeviceState::TagMounted) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
         const auto connection_result = CheckConnectionState();
@@ -732,7 +732,7 @@ ResultCode NfcDevice::OpenApplicationArea(u32 access_id) {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::GetApplicationAreaId(u32& application_area_id) const {
+Result NfcDevice::GetApplicationAreaId(u32& application_area_id) const {
     application_area_id = {};
 
     if (device_state != DeviceState::TagMounted) {
@@ -754,7 +754,7 @@ ResultCode NfcDevice::GetApplicationAreaId(u32& application_area_id) const {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::GetApplicationArea(std::vector<u8>& data) const {
+Result NfcDevice::GetApplicationArea(std::vector<u8>& data) const {
     if (device_state != DeviceState::TagMounted) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
         const auto connection_result = CheckConnectionState();
@@ -783,7 +783,7 @@ ResultCode NfcDevice::GetApplicationArea(std::vector<u8>& data) const {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::SetApplicationArea(std::span<const u8> data) {
+Result NfcDevice::SetApplicationArea(std::span<const u8> data) {
     if (device_state != DeviceState::TagMounted) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
         const auto connection_result = CheckConnectionState();
@@ -831,7 +831,7 @@ ResultCode NfcDevice::SetApplicationArea(std::span<const u8> data) {
     return RESULT_SUCCESS;
 }
 
-ResultCode NfcDevice::CreateApplicationArea(u32 access_id, std::span<const u8> data) {
+Result NfcDevice::CreateApplicationArea(u32 access_id, std::span<const u8> data) {
     if (device_state != DeviceState::TagMounted) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
         const auto connection_result = CheckConnectionState();
@@ -849,7 +849,7 @@ ResultCode NfcDevice::CreateApplicationArea(u32 access_id, std::span<const u8> d
     return RecreateApplicationArea(access_id, data);
 }
 
-ResultCode NfcDevice::RecreateApplicationArea(u32 access_id, std::span<const u8> data) {
+Result NfcDevice::RecreateApplicationArea(u32 access_id, std::span<const u8> data) {
     if (device_state != DeviceState::TagMounted) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
         const auto connection_result = CheckConnectionState();
@@ -900,7 +900,7 @@ ResultCode NfcDevice::RecreateApplicationArea(u32 access_id, std::span<const u8>
     return Flush();
 }
 
-ResultCode NfcDevice::DeleteApplicationArea() {
+Result NfcDevice::DeleteApplicationArea() {
     // This is a hack to get around a HW issue
     if (device_state == DeviceState::TagFound) {
         Mount();
@@ -943,7 +943,7 @@ ResultCode NfcDevice::DeleteApplicationArea() {
     return Flush();
 }
 
-ResultCode NfcDevice::ApplicationAreaExist(bool& has_application_area) {
+Result NfcDevice::ApplicationAreaExist(bool& has_application_area) {
     if (device_state != DeviceState::TagMounted) {
         LOG_ERROR(Service_NFC, "Wrong device state {}", device_state);
         const auto connection_result = CheckConnectionState();
@@ -966,7 +966,7 @@ DeviceState NfcDevice::GetCurrentState() const {
     return device_state;
 }
 
-ResultCode NfcDevice::GetCommunicationStatus(CommunicationState& status) const {
+Result NfcDevice::GetCommunicationStatus(CommunicationState& status) const {
     if (communication_state == CommunicationState::Idle ||
         communication_state == CommunicationState::SearchingForAdapter) {
         status = communication_state;
@@ -982,7 +982,7 @@ ResultCode NfcDevice::GetCommunicationStatus(CommunicationState& status) const {
     return ResultInvalidOperation;
 }
 
-ResultCode NfcDevice::CheckConnectionState() const {
+Result NfcDevice::CheckConnectionState() const {
     if (connection_state == ConnectionState::Lost) {
         return ResultSleep;
     }

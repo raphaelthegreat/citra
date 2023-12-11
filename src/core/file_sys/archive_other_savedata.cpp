@@ -78,8 +78,9 @@ ResultVal<std::unique_ptr<ArchiveBackend>> ArchiveFactory_OtherSaveDataPermitted
     return sd_savedata_source->Open(program_id);
 }
 
-ResultCode ArchiveFactory_OtherSaveDataPermitted::Format(
-    const Path& path, const FileSys::ArchiveFormatInfo& format_info, u64 program_id) {
+Result ArchiveFactory_OtherSaveDataPermitted::Format(const Path& path,
+                                                     const FileSys::ArchiveFormatInfo& format_info,
+                                                     u64 program_id) {
     LOG_ERROR(Service_FS, "Attempted to format a OtherSaveDataPermitted archive.");
     return ERROR_INVALID_PATH;
 }
@@ -116,8 +117,9 @@ ResultVal<std::unique_ptr<ArchiveBackend>> ArchiveFactory_OtherSaveDataGeneral::
     return sd_savedata_source->Open(program_id);
 }
 
-ResultCode ArchiveFactory_OtherSaveDataGeneral::Format(
-    const Path& path, const FileSys::ArchiveFormatInfo& format_info, u64 /*client_program_id*/) {
+Result ArchiveFactory_OtherSaveDataGeneral::Format(const Path& path,
+                                                   const FileSys::ArchiveFormatInfo& format_info,
+                                                   u64 /*client_program_id*/) {
     MediaType media_type;
     u64 program_id;
     CASCADE_RESULT(std::tie(media_type, program_id), ParsePathGeneral(path));

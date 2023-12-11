@@ -20,7 +20,7 @@ namespace Kernel {
 ClientPort::ClientPort(KernelSystem& kernel) : Object(kernel), kernel(kernel) {}
 ClientPort::~ClientPort() = default;
 
-ResultCode ClientPort::Connect(std::shared_ptr<ClientSession>& client_session) {
+Result ClientPort::Connect(std::shared_ptr<ClientSession>& client_session) {
     // Note: Threads do not wait for the server endpoint to call
     // AcceptSession before returning from this call.
 

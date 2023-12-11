@@ -28,7 +28,7 @@ HandleTable::HandleTable(KernelSystem& kernel) : kernel(kernel) {
 
 HandleTable::~HandleTable() = default;
 
-ResultCode HandleTable::Create(Handle* out_handle, std::shared_ptr<Object> obj) {
+Result HandleTable::Create(Handle* out_handle, std::shared_ptr<Object> obj) {
     DEBUG_ASSERT(obj != nullptr);
 
     u16 slot = next_free_slot;
@@ -50,13 +50,13 @@ ResultCode HandleTable::Create(Handle* out_handle, std::shared_ptr<Object> obj) 
     return RESULT_SUCCESS;
 }
 
-ResultCode HandleTable::Duplicate(Handle* out, Handle handle) {
+Result HandleTable::Duplicate(Handle* out, Handle handle) {
     std::shared_ptr<Object> object = GetGeneric(handle);
     R_UNLESS(object, ERR_INVALID_HANDLE);
     return Create(out, std::move(object));
 }
 
-ResultCode HandleTable::Close(Handle handle) {
+Result HandleTable::Close(Handle handle) {
     R_UNLESS(IsValid(handle), ERR_INVALID_HANDLE);
 
     const u16 slot = GetSlot(handle);

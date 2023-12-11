@@ -250,8 +250,8 @@ void DSP_DSP::RegisterInterruptEvents(Kernel::HLERequestContext& ctx) {
                      "Ran out of space to register interrupts (Attempted to register "
                      "interrupt={}, channel={}, event={})",
                      interrupt, channel, event->GetName());
-            rb.Push(ResultCode(ErrorDescription::InvalidResultValue, ErrorModule::DSP,
-                               ErrorSummary::OutOfResource, ErrorLevel::Status));
+            rb.Push(Result(ErrorDescription::InvalidResultValue, ErrorModule::DSP,
+                           ErrorSummary::OutOfResource, ErrorLevel::Status));
             return;
         } else {
             GetInterruptEvent(type, pipe) = event;

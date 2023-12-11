@@ -38,7 +38,7 @@ void BossTaskProperties::serialize(Archive& ar, const unsigned int) {
 }
 SERIALIZE_IMPL(BossTaskProperties)
 
-ResultCode OnlineService::InitializeSession(u64 init_program_id) {
+Result OnlineService::InitializeSession(u64 init_program_id) {
     // The BOSS service uses three databases:
     // BOSS_A: Archive? A list of program ids and some properties that are keyed on program
     // BOSS_SS: Saved Strings? Includes the url and the other string properties, and also some other
@@ -150,7 +150,7 @@ void OnlineService::RegisterTask(const u32 size, Kernel::MappedBuffer& buffer) {
     current_props = BossTaskProperties();
 }
 
-ResultCode OnlineService::UnregisterTask(const u32 size, Kernel::MappedBuffer& buffer) {
+Result OnlineService::UnregisterTask(const u32 size, Kernel::MappedBuffer& buffer) {
     if (size > TASK_ID_SIZE) {
         LOG_WARNING(Service_BOSS, "TaskId cannot be longer than 8");
         // TODO: Proper error code.
@@ -334,7 +334,7 @@ std::optional<NsDataEntry> OnlineService::GetNsDataEntryFromId(const u32 ns_data
     return *entry_iter;
 }
 
-ResultCode OnlineService::GetNsDataHeaderInfo(const u32 ns_data_id, const NsDataHeaderInfoType type,
+Result OnlineService::GetNsDataHeaderInfo(const u32 ns_data_id, const NsDataHeaderInfoType type,
                                               const u32 size, Kernel::MappedBuffer& buffer) {
     const auto entry = GetNsDataEntryFromId(ns_data_id);
     if (!entry.has_value()) {
@@ -452,7 +452,7 @@ struct overload : Ts... {
 template <class... Ts>
 overload(Ts...) -> overload<Ts...>;
 
-ResultCode OnlineService::SendProperty(const u16 id, const u32 size, Kernel::MappedBuffer& buffer) {
+Result OnlineService::SendProperty(const u16 id, const u32 size, Kernel::MappedBuffer& buffer) {
     const auto property_id = static_cast<PropertyID>(id);
     if (!current_props.properties.contains(property_id)) {
         LOG_ERROR(Service_BOSS, "Unknown property with ID {:#06x} and size {}", property_id, size);
@@ -492,8 +492,7 @@ ResultCode OnlineService::SendProperty(const u16 id, const u32 size, Kernel::Map
     return RESULT_SUCCESS;
 }
 
-ResultCode OnlineService::ReceiveProperty(const u16 id, const u32 size,
-                                          Kernel::MappedBuffer& buffer) {
+Result OnlineService::ReceiveProperty(const u16 id, const u32 size, Kernel::MappedBuffer& buffer) {
     const auto property_id = static_cast<PropertyID>(id);
     if (!current_props.properties.contains(property_id)) {
         LOG_ERROR(Service_BOSS, "Unknown property with ID {:#06x} and size {}", property_id, size);
