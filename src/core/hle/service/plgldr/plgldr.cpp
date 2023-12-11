@@ -130,21 +130,22 @@ void PLG_LDR::OnProcessExit(Kernel::Process& process, Kernel::KernelSystem& kern
 }
 
 ResultVal<Kernel::Handle> PLG_LDR::GetMemoryChangedHandle(Kernel::KernelSystem& kernel) {
-    if (plgldr_context.memory_changed_handle)
+    if (plgldr_context.memory_changed_handle) {
         return plgldr_context.memory_changed_handle;
+    }
 
     std::shared_ptr<Kernel::Event> evt = kernel.CreateEvent(
         Kernel::ResetType::OneShot,
         fmt::format("event-{:08x}", Core::System::GetInstance().GetRunningCore().GetReg(14)));
-    CASCADE_RESULT(plgldr_context.memory_changed_handle,
-                   kernel.GetCurrentProcess()->handle_table.Create(std::move(evt)));
-
+    R_TRY(kernel.GetCurrentProcess()->handle_table.Create(
+        std::addressof(plgldr_context.memory_changed_handle), std::move(evt)));
     return plgldr_context.memory_changed_handle;
 }
 
 void PLG_LDR::OnMemoryChanged(Kernel::Process& process, Kernel::KernelSystem& kernel) {
-    if (!plgldr_context.plugin_loaded || !plgldr_context.memory_changed_handle)
+    if (!plgldr_context.plugin_loaded || !plgldr_context.memory_changed_handle) {
         return;
+    }
 
     std::shared_ptr<Kernel::Event> evt =
         kernel.GetCurrentProcess()->handle_table.Get<Kernel::Event>(

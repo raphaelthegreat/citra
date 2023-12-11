@@ -239,7 +239,7 @@ ResultCode HLERequestContext::WriteToOutgoingCommandBuffer(u32_le* dst_cmdbuf,
                 Handle handle = 0;
                 if (object != nullptr) {
                     // TODO(yuriks): Figure out the proper error handling for if this fails
-                    handle = dst_process.handle_table.Create(object).Unwrap();
+                    R_ASSERT(dst_process.handle_table.Create(std::addressof(handle), object));
                 }
                 dst_cmdbuf[i++] = handle;
             }

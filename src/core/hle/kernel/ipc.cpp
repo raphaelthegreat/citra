@@ -88,8 +88,8 @@ ResultCode TranslateCommandBuffer(Kernel::KernelSystem& kernel, Memory::MemorySy
                     continue;
                 }
 
-                auto result = dst_process->handle_table.Create(std::move(object));
-                cmd_buf[i++] = result.ValueOr(0);
+                R_ASSERT(dst_process->handle_table.Create(std::addressof(cmd_buf[i++]),
+                                                          std::move(object)));
             }
             break;
         }

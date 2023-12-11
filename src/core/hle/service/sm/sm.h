@@ -51,10 +51,12 @@ public:
 
     explicit ServiceManager(Core::System& system);
 
-    ResultVal<std::shared_ptr<Kernel::ServerPort>> RegisterService(std::string name,
-                                                                   unsigned int max_sessions);
-    ResultVal<std::shared_ptr<Kernel::ClientPort>> GetServicePort(const std::string& name);
-    ResultVal<std::shared_ptr<Kernel::ClientSession>> ConnectToService(const std::string& name);
+    ResultCode RegisterService(std::shared_ptr<Kernel::ServerPort>& out_port, std::string name,
+                               u32 max_sessions);
+    ResultCode GetServicePort(std::shared_ptr<Kernel::ClientPort>& out_port,
+                              const std::string& name);
+    ResultCode ConnectToService(std::shared_ptr<Kernel::ClientSession>& out_session,
+                                const std::string& name);
     // For IPC Recorder
     std::string GetServiceNameByPortId(u32 port) const;
 

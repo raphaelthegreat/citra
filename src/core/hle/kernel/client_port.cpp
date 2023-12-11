@@ -20,32 +20,31 @@ namespace Kernel {
 ClientPort::ClientPort(KernelSystem& kernel) : Object(kernel), kernel(kernel) {}
 ClientPort::~ClientPort() = default;
 
-ResultVal<std::shared_ptr<ClientSession>> ClientPort::Connect() {
+ResultCode ClientPort::Connect(std::shared_ptr<ClientSession>& client_session) {
     // Note: Threads do not wait for the server endpoint to call
     // AcceptSession before returning from this call.
 
-    if (active_sessions >= max_sessions) {
-        return ERR_MAX_CONNECTIONS_REACHED;
-    }
+    R_UNLESS(active_sessions < max_sessions, ERR_MAX_CONNECTIONS_REACHED);
     active_sessions++;
 
     // Create a new session pair, let the created sessions inherit the parent port's HLE handler.
     auto [server, client] = kernel.CreateSessionPair(server_port->GetName(), SharedFrom(this));
 
-    if (server_port->hle_handler)
+    if (server_port->hle_handler) {
         server_port->hle_handler->ClientConnected(server);
-    else
+    } else {
         server_port->pending_sessions.push_back(server);
+    }
 
     // Wake the threads waiting on the ServerPort
     server_port->WakeupAllWaitingThreads();
 
-    return client;
+    client_session = client;
+    return RESULT_SUCCESS;
 }
 
 void ClientPort::ConnectionClosed() {
     ASSERT(active_sessions > 0);
-
     --active_sessions;
 }
 

@@ -178,7 +178,6 @@ ResultCode AddressArbiter::ArbitrateAddress(std::shared_ptr<Thread> thread, Arbi
     // the thread to sleep
     if (type == ArbitrationType::WaitIfLessThanWithTimeout ||
         type == ArbitrationType::DecrementAndWaitIfLessThanWithTimeout) {
-
         return RESULT_TIMEOUT;
     }
     return RESULT_SUCCESS;

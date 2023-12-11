@@ -231,12 +231,12 @@ public:
     VAddr GetLinearHeapBase() const;
     VAddr GetLinearHeapLimit() const;
 
-    ResultVal<VAddr> HeapAllocate(VAddr target, u32 size, VMAPermission perms,
-                                  MemoryState memory_state = MemoryState::Private,
-                                  bool skip_range_check = false);
+    ResultCode HeapAllocate(VAddr* out_addr, VAddr target, u32 size, VMAPermission perms,
+                            MemoryState memory_state = MemoryState::Private,
+                            bool skip_range_check = false);
     ResultCode HeapFree(VAddr target, u32 size);
 
-    ResultVal<VAddr> LinearAllocate(VAddr target, u32 size, VMAPermission perms);
+    ResultCode LinearAllocate(VAddr* out_addr, VAddr target, u32 size, VMAPermission perms);
     ResultCode LinearFree(VAddr target, u32 size);
 
     ResultVal<VAddr> AllocateThreadLocalStorage();

@@ -192,9 +192,12 @@ void Process::Run(s32 main_thread_priority, u32 stack_size) {
         return;
     }
 
+    VAddr out_addr{};
+
     auto MapSegment = [&](CodeSet::Segment& segment, VMAPermission permissions,
                           MemoryState memory_state) {
-        HeapAllocate(segment.addr, segment.size, permissions, memory_state, true);
+        HeapAllocate(std::addressof(out_addr), segment.addr, segment.size, permissions,
+                     memory_state, true);
         kernel.memory.WriteBlock(*this, segment.addr, codeset->memory.data() + segment.offset,
                                  segment.size);
     };
@@ -205,8 +208,8 @@ void Process::Run(s32 main_thread_priority, u32 stack_size) {
     MapSegment(codeset->DataSegment(), VMAPermission::ReadWrite, MemoryState::Private);
 
     // Allocate and map stack
-    HeapAllocate(Memory::HEAP_VADDR_END - stack_size, stack_size, VMAPermission::ReadWrite,
-                 MemoryState::Locked, true);
+    HeapAllocate(std::addressof(out_addr), Memory::HEAP_VADDR_END - stack_size, stack_size,
+                 VMAPermission::ReadWrite, MemoryState::Locked, true);
 
     // Map special address mappings
     kernel.MapSharedPages(vm_manager);
@@ -246,8 +249,8 @@ VAddr Process::GetLinearHeapLimit() const {
     return GetLinearHeapBase() + memory_region->size;
 }
 
-ResultVal<VAddr> Process::HeapAllocate(VAddr target, u32 size, VMAPermission perms,
-                                       MemoryState memory_state, bool skip_range_check) {
+ResultCode Process::HeapAllocate(VAddr* out_addr, VAddr target, u32 size, VMAPermission perms,
+                                 MemoryState memory_state, bool skip_range_check) {
     LOG_DEBUG(Kernel, "Allocate heap target={:08X}, size={:08X}", target, size);
     if (target < Memory::HEAP_VADDR || target + size > Memory::HEAP_VADDR_END ||
         target + size < target) {
@@ -290,7 +293,8 @@ ResultVal<VAddr> Process::HeapAllocate(VAddr target, u32 size, VMAPermission per
     memory_used += size;
     resource_limit->Reserve(ResourceLimitType::Commit, size);
 
-    return target;
+    *out_addr = target;
+    return RESULT_SUCCESS;
 }
 
 ResultCode Process::HeapFree(VAddr target, u32 size) {
@@ -301,9 +305,7 @@ ResultCode Process::HeapFree(VAddr target, u32 size) {
         return ERR_INVALID_ADDRESS;
     }
 
-    if (size == 0) {
-        return RESULT_SUCCESS;
-    }
+    R_SUCCEED_IF(size == 0);
 
     // Free heaps block by block
     CASCADE_RESULT(auto backing_blocks, vm_manager.GetBackingBlocksForRange(target, size));
@@ -322,7 +324,7 @@ ResultCode Process::HeapFree(VAddr target, u32 size) {
     return RESULT_SUCCESS;
 }
 
-ResultVal<VAddr> Process::LinearAllocate(VAddr target, u32 size, VMAPermission perms) {
+ResultCode Process::LinearAllocate(VAddr* out_addr, VAddr target, u32 size, VMAPermission perms) {
     LOG_DEBUG(Kernel, "Allocate linear heap target={:08X}, size={:08X}", target, size);
     u32 physical_offset;
     if (target == 0) {
@@ -366,7 +368,8 @@ ResultVal<VAddr> Process::LinearAllocate(VAddr target, u32 size, VMAPermission p
     resource_limit->Reserve(ResourceLimitType::Commit, size);
 
     LOG_DEBUG(Kernel, "Allocated at target={:08X}", target);
-    return target;
+    *out_addr = target;
+    return RESULT_SUCCESS;
 }
 
 ResultCode Process::LinearFree(VAddr target, u32 size) {
@@ -377,15 +380,8 @@ ResultCode Process::LinearFree(VAddr target, u32 size) {
         return ERR_INVALID_ADDRESS;
     }
 
-    if (size == 0) {
-        return RESULT_SUCCESS;
-    }
-
-    ResultCode result = vm_manager.UnmapRange(target, size);
-    if (result.IsError()) {
-        LOG_ERROR(Kernel, "Trying to free already freed memory");
-        return result;
-    }
+    R_SUCCEED_IF(size == 0);
+    R_TRY(vm_manager.UnmapRange(target, size));
 
     u32 physical_offset = target - GetLinearHeapAreaAddress(); // relative to FCRAM
     memory_region->Free(physical_offset, size);

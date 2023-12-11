@@ -53,7 +53,7 @@ public:
      * @return The created Handle or one of the following errors:
      *           - `ERR_OUT_OF_HANDLES`: the maximum number of handles has been exceeded.
      */
-    ResultVal<Handle> Create(std::shared_ptr<Object> obj);
+    ResultCode Create(Handle* out_handle, std::shared_ptr<Object> obj);
 
     /**
      * Returns a new handle that points to the same object as the passed in handle.
@@ -61,7 +61,7 @@ public:
      *           - `ERR_INVALID_HANDLE`: an invalid handle was passed in.
      *           - Any errors returned by `Create()`.
      */
-    ResultVal<Handle> Duplicate(Handle handle);
+    ResultCode Duplicate(Handle* out, Handle handle);
 
     /**
      * Closes a handle, removing it from the table and decreasing the object's ref-count.

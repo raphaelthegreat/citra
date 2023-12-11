@@ -94,22 +94,23 @@ public:
     void WakeUp(std::shared_ptr<Kernel::Thread> thread, Kernel::HLERequestContext& ctx,
                 Kernel::ThreadWakeupReason reason) {
         LOG_ERROR(Service_SRV, "called service={} wakeup", name);
-        auto client_port = system.ServiceManager().GetServicePort(name);
+        std::shared_ptr<Kernel::ClientPort> client_port;
+        R_ASSERT(system.ServiceManager().GetServicePort(client_port, name));
 
-        auto session = client_port.Unwrap()->Connect();
-        if (session.Succeeded()) {
-            LOG_DEBUG(Service_SRV, "called service={} -> session={}", name,
-                      (*session)->GetObjectId());
+        std::shared_ptr<Kernel::ClientSession> session;
+        auto result = client_port->Connect(session);
+        if (result.IsSuccess()) {
+            LOG_DEBUG(Service_SRV, "called service={} -> session={}", name, session->GetObjectId());
             IPC::RequestBuilder rb(ctx, 0x5, 1, 2);
-            rb.Push(session.Code());
-            rb.PushMoveObjects(std::move(session).Unwrap());
-        } else if (session.Code() == Kernel::ERR_MAX_CONNECTIONS_REACHED) {
+            rb.Push(result);
+            rb.PushMoveObjects(std::move(session));
+        } else if (result == Kernel::ERR_MAX_CONNECTIONS_REACHED) {
             LOG_ERROR(Service_SRV, "called service={} -> ERR_MAX_CONNECTIONS_REACHED", name);
             UNREACHABLE();
         } else {
-            LOG_ERROR(Service_SRV, "called service={} -> error 0x{:08X}", name, session.Code().raw);
+            LOG_ERROR(Service_SRV, "called service={} -> error 0x{:08X}", name, result.raw);
             IPC::RequestBuilder rb(ctx, 0x5, 1, 0);
-            rb.Push(session.Code());
+            rb.Push(result);
         }
     }
 
@@ -158,9 +159,10 @@ void SRV::GetServiceHandle(Kernel::HLERequestContext& ctx) {
 
     auto get_handle = std::make_shared<ThreadCallback>(system, name);
 
-    auto client_port = system.ServiceManager().GetServicePort(name);
-    if (client_port.Failed()) {
-        if (wait_until_available && client_port.Code() == ERR_SERVICE_NOT_REGISTERED) {
+    std::shared_ptr<Kernel::ClientPort> client_port;
+    auto result = system.ServiceManager().GetServicePort(client_port, name);
+    if (result.IsError()) {
+        if (wait_until_available && result == ERR_SERVICE_NOT_REGISTERED) {
             LOG_INFO(Service_SRV, "called service={} delayed", name);
             std::shared_ptr<Kernel::Event> get_service_handle_event =
                 ctx.SleepClientThread("GetServiceHandle", std::chrono::nanoseconds(-1), get_handle);
@@ -168,27 +170,27 @@ void SRV::GetServiceHandle(Kernel::HLERequestContext& ctx) {
             return;
         } else {
             IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-            rb.Push(client_port.Code());
-            LOG_ERROR(Service_SRV, "called service={} -> error 0x{:08X}", name,
-                      client_port.Code().raw);
+            rb.Push(result);
+            LOG_ERROR(Service_SRV, "called service={} -> error 0x{:08X}", name, result.raw);
             return;
         }
     }
 
-    auto session = client_port.Unwrap()->Connect();
-    if (session.Succeeded()) {
-        LOG_DEBUG(Service_SRV, "called service={} -> session={}", name, (*session)->GetObjectId());
+    std::shared_ptr<Kernel::ClientSession> session;
+    result = client_port->Connect(session);
+    if (result.IsSuccess()) {
+        LOG_DEBUG(Service_SRV, "called service={} -> session={}", name, session->GetObjectId());
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-        rb.Push(session.Code());
-        rb.PushMoveObjects(std::move(session).Unwrap());
-    } else if (session.Code() == Kernel::ERR_MAX_CONNECTIONS_REACHED && wait_until_available) {
+        rb.Push(result);
+        rb.PushMoveObjects(std::move(session));
+    } else if (result == Kernel::ERR_MAX_CONNECTIONS_REACHED && wait_until_available) {
         LOG_WARNING(Service_SRV, "called service={} -> ERR_MAX_CONNECTIONS_REACHED", name);
         // TODO(Subv): Put the caller guest thread to sleep until this port becomes available again.
         UNIMPLEMENTED_MSG("Unimplemented wait until port {} is available.", name);
     } else {
-        LOG_ERROR(Service_SRV, "called service={} -> error 0x{:08X}", name, session.Code().raw);
+        LOG_ERROR(Service_SRV, "called service={} -> error 0x{:08X}", name, result.raw);
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(session.Code());
+        rb.Push(result);
     }
 }
 
@@ -266,12 +268,13 @@ void SRV::RegisterService(Kernel::HLERequestContext& ctx) {
 
     std::string name(name_buf.data(), std::min(name_len, name_buf.size()));
 
-    auto port = system.ServiceManager().RegisterService(name, max_sessions);
+    std::shared_ptr<Kernel::ServerPort> port;
+    auto result = system.ServiceManager().RegisterService(port, name, max_sessions);
 
-    if (port.Failed()) {
+    if (result.IsError()) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(port.Code());
-        LOG_ERROR(Service_SRV, "called service={} -> error 0x{:08X}", name, port.Code().raw);
+        rb.Push(result);
+        LOG_ERROR(Service_SRV, "called service={} -> error 0x{:08X}", name, result.raw);
         return;
     }
 
@@ -283,7 +286,7 @@ void SRV::RegisterService(Kernel::HLERequestContext& ctx) {
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
-    rb.PushMoveObjects(port.Unwrap());
+    rb.PushMoveObjects(std::move(port));
 }
 
 SRV::SRV(Core::System& system) : ServiceFramework("srv:", 64), system(system) {

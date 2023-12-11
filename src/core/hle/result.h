@@ -408,3 +408,29 @@ private:
     auto CONCAT2(check_result_L, __LINE__) = source;                                               \
     if (CONCAT2(check_result_L, __LINE__).IsError())                                               \
         return CONCAT2(check_result_L, __LINE__);
+
+#define R_SUCCEEDED(res) (static_cast<ResultCode>(res).IsSuccess())
+#define R_FAILED(res) (static_cast<ResultCode>(res).IsError())
+
+/// Evaluates a boolean expression, and returns a result unless that expression is true.
+#define R_UNLESS(expr, res)                                                                        \
+    {                                                                                              \
+        if (!(expr)) {                                                                             \
+            return (res);                                                                          \
+        }                                                                                          \
+    }
+
+/// Evaluates an expression that returns a result, and returns the result if it would fail.
+#define R_TRY(res_expr)                                                                            \
+    {                                                                                              \
+        const auto _tmp_r_try_rc = (res_expr);                                                     \
+        if (R_FAILED(_tmp_r_try_rc)) {                                                             \
+            return (_tmp_r_try_rc);                                                                \
+        }                                                                                          \
+    }
+
+/// Evaluates a boolean expression, and succeeds if that expression is true.
+#define R_SUCCEED_IF(expr) R_UNLESS(!(expr), RESULT_SUCCESS)
+
+/// Evaluates a boolean expression, and asserts if that expression is false.
+#define R_ASSERT(expr) ASSERT(R_SUCCEEDED(expr))

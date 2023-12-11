@@ -59,7 +59,8 @@ TEST_CASE("HLERequestContext::PopulateFromIncomingCommandBuffer", "[core][kernel
 
     SECTION("translates move handles") {
         auto a = MakeObject(kernel);
-        Handle a_handle = process->handle_table.Create(a).Unwrap();
+        Handle a_handle;
+        process->handle_table.Create(std::addressof(a_handle), a);
         const u32_le input[]{
             IPC::MakeHeader(0, 0, 2),
             IPC::MoveHandleDesc(1),
@@ -75,7 +76,8 @@ TEST_CASE("HLERequestContext::PopulateFromIncomingCommandBuffer", "[core][kernel
 
     SECTION("translates copy handles") {
         auto a = MakeObject(kernel);
-        Handle a_handle = process->handle_table.Create(a).Unwrap();
+        Handle a_handle;
+        process->handle_table.Create(std::addressof(a_handle), a);
         const u32_le input[]{
             IPC::MakeHeader(0, 0, 2),
             IPC::CopyHandleDesc(1),
@@ -93,13 +95,17 @@ TEST_CASE("HLERequestContext::PopulateFromIncomingCommandBuffer", "[core][kernel
         auto a = MakeObject(kernel);
         auto b = MakeObject(kernel);
         auto c = MakeObject(kernel);
+        Handle a_handle, b_handle, c_handle;
+        process->handle_table.Create(std::addressof(a_handle), a);
+        process->handle_table.Create(std::addressof(b_handle), b);
+        process->handle_table.Create(std::addressof(c_handle), c);
         const u32_le input[]{
             IPC::MakeHeader(0, 0, 5),
             IPC::MoveHandleDesc(2),
-            process->handle_table.Create(a).Unwrap(),
-            process->handle_table.Create(b).Unwrap(),
+            a_handle,
+            b_handle,
             IPC::MoveHandleDesc(1),
-            process->handle_table.Create(c).Unwrap(),
+            c_handle,
         };
 
         context.PopulateFromIncomingCommandBuffer(input, process);
@@ -209,12 +215,14 @@ TEST_CASE("HLERequestContext::PopulateFromIncomingCommandBuffer", "[core][kernel
         REQUIRE(result.Code() == RESULT_SUCCESS);
 
         auto a = MakeObject(kernel);
+        Handle a_handle;
+        process->handle_table.Create(std::addressof(a_handle), a);
         const u32_le input[]{
             IPC::MakeHeader(0, 2, 8),
             0x12345678,
             0xABCDEF00,
             IPC::MoveHandleDesc(1),
-            process->handle_table.Create(a).Unwrap(),
+            a_handle,
             IPC::CallingPidDesc(),
             0,
             IPC::StaticBufferDesc(buffer_static.GetSize(), 0),
