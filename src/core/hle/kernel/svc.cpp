@@ -590,7 +590,7 @@ Result SVC::ConnectToPort(Handle* out_handle, VAddr port_name_address) {
 
     auto client_port = it->second;
     std::shared_ptr<ClientSession> client_session;
-    R_TRY(client_port->Connect(client_session));
+    R_TRY(client_port->Connect(std::addressof(client_session)));
 
     // Return the client session
     return kernel.GetCurrentProcess()->handle_table.Create(out_handle, client_session);
@@ -1659,7 +1659,7 @@ Result SVC::CreateSessionToPort(Handle* out_client_session, Handle client_port_h
     R_UNLESS(client_port, ResultInvalidHandle);
 
     std::shared_ptr<ClientSession> session;
-    R_TRY(client_port->Connect(session));
+    R_TRY(client_port->Connect(std::addressof(session)));
 
     return current_process->handle_table.Create(out_client_session, std::move(session));
 }
@@ -1681,7 +1681,7 @@ Result SVC::AcceptSession(Handle* out_server_session, Handle server_port_handle)
     R_UNLESS(server_port, ResultInvalidHandle);
 
     std::shared_ptr<ServerSession> session;
-    R_TRY(server_port->Accept(session));
+    R_TRY(server_port->Accept(std::addressof(session)));
 
     return current_process->handle_table.Create(out_server_session, std::move(session));
 }

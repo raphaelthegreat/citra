@@ -95,10 +95,10 @@ public:
                 Kernel::ThreadWakeupReason reason) {
         LOG_ERROR(Service_SRV, "called service={} wakeup", name);
         std::shared_ptr<Kernel::ClientPort> client_port;
-        R_ASSERT(system.ServiceManager().GetServicePort(client_port, name));
+        R_ASSERT(system.ServiceManager().GetServicePort(std::addressof(client_port), name));
 
         std::shared_ptr<Kernel::ClientSession> session;
-        auto result = client_port->Connect(session);
+        auto result = client_port->Connect(std::addressof(session));
         if (result.IsSuccess()) {
             LOG_DEBUG(Service_SRV, "called service={} -> session={}", name, session->GetObjectId());
             IPC::RequestBuilder rb(ctx, 0x5, 1, 2);
@@ -160,7 +160,7 @@ void SRV::GetServiceHandle(Kernel::HLERequestContext& ctx) {
     auto get_handle = std::make_shared<ThreadCallback>(system, name);
 
     std::shared_ptr<Kernel::ClientPort> client_port;
-    auto result = system.ServiceManager().GetServicePort(client_port, name);
+    auto result = system.ServiceManager().GetServicePort(std::addressof(client_port), name);
     if (result.IsError()) {
         if (wait_until_available && result == ResultServiceNotRegistered) {
             LOG_INFO(Service_SRV, "called service={} delayed", name);
@@ -177,7 +177,7 @@ void SRV::GetServiceHandle(Kernel::HLERequestContext& ctx) {
     }
 
     std::shared_ptr<Kernel::ClientSession> session;
-    result = client_port->Connect(session);
+    result = client_port->Connect(std::addressof(session));
     if (result.IsSuccess()) {
         LOG_DEBUG(Service_SRV, "called service={} -> session={}", name, session->GetObjectId());
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
@@ -269,7 +269,7 @@ void SRV::RegisterService(Kernel::HLERequestContext& ctx) {
     std::string name(name_buf.data(), std::min(name_len, name_buf.size()));
 
     std::shared_ptr<Kernel::ServerPort> port;
-    auto result = system.ServiceManager().RegisterService(port, name, max_sessions);
+    auto result = system.ServiceManager().RegisterService(std::addressof(port), name, max_sessions);
 
     if (result.IsError()) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);

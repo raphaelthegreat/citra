@@ -24,10 +24,10 @@ namespace Kernel {
 ServerPort::ServerPort(KernelSystem& kernel) : WaitObject(kernel) {}
 ServerPort::~ServerPort() {}
 
-Result ServerPort::Accept(std::shared_ptr<ServerSession>& session) {
+Result ServerPort::Accept(std::shared_ptr<ServerSession>* out_server_session) {
     R_UNLESS(!pending_sessions.empty(), ResultNoPendingSessions);
 
-    session = std::move(pending_sessions.back());
+    *out_server_session = std::move(pending_sessions.back());
     pending_sessions.pop_back();
     return ResultSuccess;
 }

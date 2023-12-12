@@ -28,35 +28,35 @@ void ServiceManager::InstallInterfaces(Core::System& system) {
     system.ServiceManager().srv_interface = srv;
 }
 
-Result ServiceManager::RegisterService(std::shared_ptr<Kernel::ServerPort>& server_port,
+Result ServiceManager::RegisterService(std::shared_ptr<Kernel::ServerPort>* out_server_port,
                                        std::string name, u32 max_sessions) {
     R_TRY(ValidateServiceName(name));
     R_UNLESS(registered_services.find(name) == registered_services.end(), ResultAlreadyRegistered);
 
-    std::shared_ptr<Kernel::ClientPort> client_port;
-    std::tie(server_port, client_port) = system.Kernel().CreatePortPair(max_sessions, name);
+    const auto [server_port, client_port] = system.Kernel().CreatePortPair(max_sessions, name);
     registered_services_inverse.emplace(client_port->GetObjectId(), name);
     registered_services.emplace(std::move(name), std::move(client_port));
 
+    *out_server_port = server_port;
     return ResultSuccess;
 }
 
-Result ServiceManager::GetServicePort(std::shared_ptr<Kernel::ClientPort>& out_port,
+Result ServiceManager::GetServicePort(std::shared_ptr<Kernel::ClientPort>* out_client_port,
                                       const std::string& name) {
     R_TRY(ValidateServiceName(name));
 
     auto it = registered_services.find(name);
     R_UNLESS(it != registered_services.end(), ResultServiceNotRegistered);
 
-    out_port = it->second;
+    *out_client_port = it->second;
     return ResultSuccess;
 }
 
-Result ServiceManager::ConnectToService(std::shared_ptr<Kernel::ClientSession>& session,
+Result ServiceManager::ConnectToService(std::shared_ptr<Kernel::ClientSession>* out_client_session,
                                         const std::string& name) {
     std::shared_ptr<Kernel::ClientPort> client_port;
-    R_TRY(GetServicePort(client_port, name));
-    return client_port->Connect(session);
+    R_TRY(GetServicePort(std::addressof(client_port), name));
+    return client_port->Connect(out_client_session);
 }
 
 std::string ServiceManager::GetServiceNameByPortId(u32 port) const {

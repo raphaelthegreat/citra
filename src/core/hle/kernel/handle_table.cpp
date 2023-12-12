@@ -50,10 +50,10 @@ Result HandleTable::Create(Handle* out_handle, std::shared_ptr<Object> obj) {
     return ResultSuccess;
 }
 
-Result HandleTable::Duplicate(Handle* out, Handle handle) {
+Result HandleTable::Duplicate(Handle* out_handle, Handle handle) {
     std::shared_ptr<Object> object = GetGeneric(handle);
     R_UNLESS(object, ResultInvalidHandle);
-    return Create(out, std::move(object));
+    return Create(out_handle, std::move(object));
 }
 
 Result HandleTable::Close(Handle handle) {

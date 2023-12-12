@@ -41,7 +41,7 @@ public:
      * Accepts a pending incoming connection on this port. If there are no pending sessions, will
      * return ResultNoPendingSessions.
      */
-    Result Accept(std::shared_ptr<ServerSession>& session);
+    Result Accept(std::shared_ptr<ServerSession>* out_server_session);
 
     /**
      * Sets the HLE handler template for the port. ServerSessions crated by connecting to this port

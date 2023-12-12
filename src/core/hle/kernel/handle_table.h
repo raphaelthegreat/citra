@@ -61,7 +61,7 @@ public:
      *           - `ResultInvalidHandle`: an invalid handle was passed in.
      *           - Any errors returned by `Create()`.
      */
-    Result Duplicate(Handle* out, Handle handle);
+    Result Duplicate(Handle* out_handle, Handle handle);
 
     /**
      * Closes a handle, removing it from the table and decreasing the object's ref-count.
