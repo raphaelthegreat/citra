@@ -67,9 +67,9 @@ ResultVal<std::shared_ptr<SharedMemory>> KernelSystem::CreateSharedMemory(
         auto& vm_manager = owner_process->vm_manager;
         // The memory is already available and mapped in the owner process.
 
-        CASCADE_CODE(vm_manager.ChangeMemoryState(address, size, MemoryState::Private,
-                                                  VMAPermission::ReadWrite, MemoryState::Locked,
-                                                  SharedMemory::ConvertPermissions(permissions)));
+        R_TRY(vm_manager.ChangeMemoryState(address, size, MemoryState::Private,
+                                           VMAPermission::ReadWrite, MemoryState::Locked,
+                                           SharedMemory::ConvertPermissions(permissions)));
 
         auto backing_blocks = vm_manager.GetBackingBlocksForRange(address, size);
         ASSERT(backing_blocks.Succeeded()); // should success after verifying memory state above

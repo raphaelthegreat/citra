@@ -502,8 +502,8 @@ Result Process::Map(VAddr target, VAddr source, u32 size, VMAPermission perms, b
     VMAPermission source_perm = privileged ? VMAPermission::None : VMAPermission::ReadWrite;
 
     // Mark source region as Aliased
-    CASCADE_CODE(vm_manager.ChangeMemoryState(source, size, MemoryState::Private,
-                                              VMAPermission::ReadWrite, source_state, source_perm));
+    R_TRY(vm_manager.ChangeMemoryState(source, size, MemoryState::Private, VMAPermission::ReadWrite,
+                                       source_state, source_perm));
 
     CASCADE_RESULT(auto backing_blocks, vm_manager.GetBackingBlocksForRange(source, size));
     VAddr interval_target = target;
@@ -549,11 +549,11 @@ Result Process::Unmap(VAddr target, VAddr source, u32 size, VMAPermission perms,
 
     MemoryState source_state = privileged ? MemoryState::Locked : MemoryState::Aliased;
 
-    CASCADE_CODE(vm_manager.UnmapRange(target, size));
+    R_TRY(vm_manager.UnmapRange(target, size));
 
     // Change back source region state. Note that the permission is reprotected according to param
-    CASCADE_CODE(vm_manager.ChangeMemoryState(source, size, source_state, VMAPermission::None,
-                                              MemoryState::Private, perms));
+    R_TRY(vm_manager.ChangeMemoryState(source, size, source_state, VMAPermission::None,
+                                       MemoryState::Private, perms));
 
     return ResultSuccess;
 }

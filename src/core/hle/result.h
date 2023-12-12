@@ -400,15 +400,6 @@ private:
         return CONCAT2(check_result_L, __LINE__).Code();                                           \
     target = std::move(*CONCAT2(check_result_L, __LINE__))
 
-/**
- * Analogous to CASCADE_RESULT, but for a bare Result. The code will be propagated if
- * non-success, or discarded otherwise.
- */
-#define CASCADE_CODE(source)                                                                       \
-    auto CONCAT2(check_result_L, __LINE__) = source;                                               \
-    if (CONCAT2(check_result_L, __LINE__).IsError())                                               \
-        return CONCAT2(check_result_L, __LINE__);
-
 #define R_SUCCEEDED(res) (static_cast<Result>(res).IsSuccess())
 #define R_FAILED(res) (static_cast<Result>(res).IsError())
 
