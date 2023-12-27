@@ -19,7 +19,7 @@ int GPUCommandStreamItemModel::rowCount([[maybe_unused]] const QModelIndex& pare
 }
 
 QVariant GPUCommandStreamItemModel::data(const QModelIndex& index, int role) const {
-    if (!index.isValid())
+    if (!index.isValid() || !GetDebugger())
         return QVariant();
 
     int command_index = index.row();
@@ -74,16 +74,26 @@ GPUCommandStreamWidget::GPUCommandStreamWidget(Core::System& system_, QWidget* p
     setWidget(command_list);
 }
 
+void GPUCommandStreamWidget::Register() {
+    auto& debugger = system.GPU().Debugger();
+    debugger.RegisterObserver(&model);
+}
+
+void GPUCommandStreamWidget::Unregister() {
+    auto& debugger = system.GPU().Debugger();
+    debugger.UnregisterObserver(&model);
+}
+
 void GPUCommandStreamWidget::showEvent(QShowEvent* event) {
     if (system.IsPoweredOn()) {
-        system.GPU().Debugger().RegisterObserver(&model);
+        Register();
     }
     QDockWidget::showEvent(event);
 }
 
 void GPUCommandStreamWidget::hideEvent(QHideEvent* event) {
     if (system.IsPoweredOn()) {
-        system.GPU().Debugger().UnregisterObserver(&model);
+        Unregister();
     }
     QDockWidget::hideEvent(event);
 }

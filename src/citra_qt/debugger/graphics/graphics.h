@@ -41,6 +41,9 @@ class GPUCommandStreamWidget : public QDockWidget {
 public:
     GPUCommandStreamWidget(Core::System& system, QWidget* parent = nullptr);
 
+    void Register();
+    void Unregister();
+
 protected:
     void showEvent(QShowEvent* event) override;
     void hideEvent(QHideEvent* event) override;

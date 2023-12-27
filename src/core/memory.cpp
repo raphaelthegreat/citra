@@ -346,7 +346,7 @@ std::shared_ptr<PageTable> MemorySystem::GetCurrentPageTable() const {
 }
 
 void RasterizerFlushVirtualRegion(VAddr start, u32 size, FlushMode mode) {
-    VAddr end = start + size;
+    const VAddr end = start + size;
 
     auto CheckRegion = [&](VAddr region_start, VAddr region_end, PAddr paddr_region_start) {
         if (start >= region_end || end <= region_start) {

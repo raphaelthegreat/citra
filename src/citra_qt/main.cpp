@@ -1237,6 +1237,11 @@ void GMainWindow::BootGame(const QString& filename) {
         video_dumping_path.clear();
     }
 
+    // Register debug widgets
+    if (graphicsWidget->isVisible()) {
+        graphicsWidget->Register();
+    }
+
     // Create and start the emulation thread
     emu_thread = std::make_unique<EmuThread>(system, *render_window);
     emit EmulationStarting(emu_thread.get());
@@ -1314,6 +1319,11 @@ void GMainWindow::ShutdownGame() {
     // to continue out to the main loop and terminate. Thus wait() would hang forever.
     // TODO(bunnei): This function is not thread safe, but it's being used as if it were
     Pica::g_debug_context->ClearBreakpoints();
+
+    // Unregister debug widgets
+    if (graphicsWidget->isVisible()) {
+        graphicsWidget->Unregister();
+    }
 
     // Frame advancing must be cancelled in order to release the emu thread from waiting
     system.frame_limiter.SetFrameAdvancing(false);
