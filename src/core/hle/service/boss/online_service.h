@@ -168,7 +168,7 @@ public:
     u16 GetNsDataIdList(const u32 filter, const u32 max_entries, Kernel::MappedBuffer& buffer);
     std::optional<NsDataEntry> GetNsDataEntryFromId(const u32 ns_data_id);
     Result GetNsDataHeaderInfo(const u32 ns_data_id, const NsDataHeaderInfoType type,
-                                   const u32 size, Kernel::MappedBuffer& buffer);
+                               const u32 size, Kernel::MappedBuffer& buffer);
     ResultVal<size_t> ReadNsData(const u32 ns_data_id, const u64 offset, const u32 size,
                                  Kernel::MappedBuffer& buffer);
     Result SendProperty(const u16 id, const u32 size, Kernel::MappedBuffer& buffer);

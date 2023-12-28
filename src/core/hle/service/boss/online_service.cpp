@@ -335,7 +335,7 @@ std::optional<NsDataEntry> OnlineService::GetNsDataEntryFromId(const u32 ns_data
 }
 
 Result OnlineService::GetNsDataHeaderInfo(const u32 ns_data_id, const NsDataHeaderInfoType type,
-                                              const u32 size, Kernel::MappedBuffer& buffer) {
+                                          const u32 size, Kernel::MappedBuffer& buffer) {
     const auto entry = GetNsDataEntryFromId(ns_data_id);
     if (!entry.has_value()) {
         LOG_WARNING(Service_BOSS, "Failed to find NsData entry for ID {:#010X}", ns_data_id);

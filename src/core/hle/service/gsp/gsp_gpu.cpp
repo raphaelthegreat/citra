@@ -96,7 +96,7 @@ void GSP_GPU::ClientDisconnected(std::shared_ptr<Kernel::ServerSession> server_s
  * @return ResultSuccess if the parameters are valid, error code otherwise
  */
 static Result WriteHWRegs(u32 base_address, u32 size_in_bytes, std::span<const u8> data,
-                              VideoCore::GPU& gpu) {
+                          VideoCore::GPU& gpu) {
     // This magic number is verified to be done by the gsp module
     const u32 max_size_in_bytes = 0x80;
 
@@ -142,7 +142,7 @@ static Result WriteHWRegs(u32 base_address, u32 size_in_bytes, std::span<const u
  * @return ResultSuccess if the parameters are valid, error code otherwise
  */
 static Result WriteHWRegsWithMask(u32 base_address, u32 size_in_bytes, std::span<const u8> data,
-                                      std::span<const u8> masks, VideoCore::GPU& gpu) {
+                                  std::span<const u8> masks, VideoCore::GPU& gpu) {
     // This magic number is verified to be done by the gsp module
     const u32 max_size_in_bytes = 0x80;
 
@@ -557,8 +557,8 @@ void GSP_GPU::RestoreVramSysArea(Kernel::HLERequestContext& ctx) {
 }
 
 Result GSP_GPU::AcquireGpuRight(const Kernel::HLERequestContext& ctx,
-                                    const std::shared_ptr<Kernel::Process>& process, u32 flag,
-                                    bool blocking) {
+                                const std::shared_ptr<Kernel::Process>& process, u32 flag,
+                                bool blocking) {
     const auto session_data = GetSessionData(ctx.Session());
 
     LOG_DEBUG(Service_GSP, "called flag={:08X} process={} thread_id={}", flag, process->process_id,
@@ -653,7 +653,7 @@ void GSP_GPU::SetInternalPriorities(Kernel::HLERequestContext& ctx) {
     const auto priority_with_rights = rp.Pop<u32>();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
 
     LOG_DEBUG(Service_GSP, "(STUBBED) called priority={:#02X}, priority_with_rights={:#02X}",
               priority, priority_with_rights);

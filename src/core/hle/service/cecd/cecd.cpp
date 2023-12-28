@@ -842,7 +842,7 @@ void Module::Interface::GetCecInfoEventHandleSys(Kernel::HLERequestContext& ctx)
     rp.PopPID();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(RESULT_SUCCESS);
+    rb.Push(ResultSuccess);
     rb.PushCopyObjects(cecd->cecinfosys_event);
 
     LOG_WARNING(Service_CECD, "(STUBBED) called");

@@ -1783,7 +1783,7 @@ void SOC_U::InitializeSockets(Kernel::HLERequestContext& ctx) {
     const u32 pid = rp.PopPID();
     [[maybe_unused]] auto shared_memory = rp.PopObject<Kernel::SharedMemory>();
 
-    ResultCode res = ResultSuccess;
+    Result res = ResultSuccess;
     if (initialized_processes.find(pid) == initialized_processes.end()) {
         initialized_processes.insert(pid);
     } else {
