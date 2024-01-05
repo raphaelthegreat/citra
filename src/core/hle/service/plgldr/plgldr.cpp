@@ -288,10 +288,12 @@ void PLG_LDR::GetPluginPath(Kernel::HLERequestContext& ctx) {
 }
 
 std::shared_ptr<PLG_LDR> GetService(Core::System& system) {
-    if (!system.IsPoweredOn()) {
+    if (!system.KernelRunning())
         return nullptr;
-    }
-    return system.ServiceManager().GetService<PLG_LDR>("plg:ldr");
+    auto it = system.Kernel().named_ports.find("plg:ldr");
+    if (it != system.Kernel().named_ports.end())
+        return std::static_pointer_cast<PLG_LDR>(it->second->GetServerPort()->hle_handler);
+    return nullptr;
 }
 
 void InstallInterfaces(Core::System& system) {
