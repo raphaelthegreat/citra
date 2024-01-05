@@ -288,6 +288,9 @@ void PLG_LDR::GetPluginPath(Kernel::HLERequestContext& ctx) {
 }
 
 std::shared_ptr<PLG_LDR> GetService(Core::System& system) {
+    if (!system.IsPoweredOn()) {
+        return nullptr;
+    }
     return system.ServiceManager().GetService<PLG_LDR>("plg:ldr");
 }
 
