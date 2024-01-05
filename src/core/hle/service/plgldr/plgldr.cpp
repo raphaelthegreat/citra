@@ -26,12 +26,10 @@
 #include "common/settings.h"
 #include "core/core.h"
 #include "core/file_sys/plugin_3gx.h"
-#include "core/hle/ipc.h"
 #include "core/hle/ipc_helpers.h"
 #include "core/hle/kernel/event.h"
 #include "core/hle/kernel/handle_table.h"
 #include "core/hle/kernel/kernel.h"
-#include "core/hle/kernel/shared_memory.h"
 #include "core/hle/service/plgldr/plgldr.h"
 #include "core/loader/loader.h"
 
@@ -290,12 +288,7 @@ void PLG_LDR::GetPluginPath(Kernel::HLERequestContext& ctx) {
 }
 
 std::shared_ptr<PLG_LDR> GetService(Core::System& system) {
-    if (!system.KernelRunning())
-        return nullptr;
-    auto it = system.Kernel().named_ports.find("plg:ldr");
-    if (it != system.Kernel().named_ports.end())
-        return std::static_pointer_cast<PLG_LDR>(it->second->GetServerPort()->hle_handler);
-    return nullptr;
+    return system.ServiceManager().GetService<PLG_LDR>("plg:ldr");
 }
 
 void InstallInterfaces(Core::System& system) {
