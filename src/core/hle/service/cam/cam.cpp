@@ -260,21 +260,26 @@ void Module::Interface::StartCapture(Kernel::HLERequestContext& ctx) {
 
     if (port_select.IsValid()) {
         for (int i : port_select) {
-            if (!cam->ports[i].is_busy) {
-                if (!cam->ports[i].is_active) {
-                    // This doesn't return an error, but seems to put the camera in an undefined
-                    // state
-                    LOG_ERROR(Service_CAM, "port {} hasn't been activated", i);
-                } else {
-                    cam->cameras[cam->ports[i].camera_id].impl->StartCapture();
-                    cam->ports[i].is_busy = true;
-                    if (cam->ports[i].is_pending_receiving) {
-                        cam->ports[i].is_pending_receiving = false;
-                        cam->StartReceiving(i);
-                    }
-                }
-            } else {
+            auto& port = cam->ports[i];
+            if (port.is_busy) {
                 LOG_WARNING(Service_CAM, "port {} already started", i);
+                continue;
+            }
+            if (!port.is_active) {
+                // This doesn't return an error, but seems to put the camera in an undefined
+                // state
+                LOG_ERROR(Service_CAM, "port {} hasn't been activated", i);
+                continue;
+            }
+            auto& camera = cam->cameras[port.camera_id];
+            if (!camera.impl) {
+                cam->LoadCameraImplementation(camera, port.camera_id);
+            }
+            camera.impl->StartCapture();
+            port.is_busy = true;
+            if (port.is_pending_receiving) {
+                port.is_pending_receiving = false;
+                cam->StartReceiving(i);
             }
         }
         rb.Push(ResultSuccess);
@@ -742,12 +747,17 @@ void Module::Interface::FlipImage(Kernel::HLERequestContext& ctx) {
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
     if (camera_select.IsValid() && context_select.IsValid()) {
-        for (int camera : camera_select) {
+        for (int index : camera_select) {
+            auto& camera = cam->cameras[index];
             for (int context : context_select) {
-                cam->cameras[camera].contexts[context].flip = flip;
-                if (cam->cameras[camera].current_context == context) {
-                    cam->cameras[camera].impl->SetFlip(flip);
+                camera.contexts[context].flip = flip;
+                if (camera.current_context != context) {
+                    continue;
                 }
+                if (!camera.impl) {
+                    cam->LoadCameraImplementation(camera, index);
+                }
+                camera.impl->SetFlip(flip);
             }
         }
         rb.Push(ResultSuccess);
@@ -775,12 +785,17 @@ void Module::Interface::SetDetailSize(Kernel::HLERequestContext& ctx) {
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
     if (camera_select.IsValid() && context_select.IsValid()) {
-        for (int camera : camera_select) {
+        for (int index : camera_select) {
+            auto& camera = cam->cameras[index];
             for (int context : context_select) {
-                cam->cameras[camera].contexts[context].resolution = resolution;
-                if (cam->cameras[camera].current_context == context) {
-                    cam->cameras[camera].impl->SetResolution(resolution);
+                camera.contexts[context].resolution = resolution;
+                if (camera.current_context != context) {
+                    continue;
                 }
+                if (!camera.impl) {
+                    cam->LoadCameraImplementation(camera, index);
+                }
+                camera.impl->SetResolution(resolution);
             }
         }
         rb.Push(ResultSuccess);
@@ -805,12 +820,17 @@ void Module::Interface::SetSize(Kernel::HLERequestContext& ctx) {
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
     if (camera_select.IsValid() && context_select.IsValid()) {
-        for (int camera : camera_select) {
+        for (int index : camera_select) {
+            auto& camera = cam->cameras[index];
             for (int context : context_select) {
-                cam->cameras[camera].contexts[context].resolution = PRESET_RESOLUTION[size];
-                if (cam->cameras[camera].current_context == context) {
-                    cam->cameras[camera].impl->SetResolution(PRESET_RESOLUTION[size]);
+                camera.contexts[context].resolution = PRESET_RESOLUTION[size];
+                if (camera.current_context != context) {
+                    continue;
                 }
+                if (!camera.impl) {
+                    cam->LoadCameraImplementation(camera, index);
+                }
+                camera.impl->SetResolution(PRESET_RESOLUTION[size]);
             }
         }
         rb.Push(ResultSuccess);
@@ -831,9 +851,13 @@ void Module::Interface::SetFrameRate(Kernel::HLERequestContext& ctx) {
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
     if (camera_select.IsValid()) {
-        for (int camera : camera_select) {
-            cam->cameras[camera].frame_rate = frame_rate;
-            cam->cameras[camera].impl->SetFrameRate(frame_rate);
+        for (int index : camera_select) {
+            auto& camera = cam->cameras[index];
+            camera.frame_rate = frame_rate;
+            if (!camera.impl) {
+                cam->LoadCameraImplementation(camera, index);
+            }
+            camera.impl->SetFrameRate(frame_rate);
         }
         rb.Push(ResultSuccess);
     } else {
@@ -853,12 +877,17 @@ void Module::Interface::SetEffect(Kernel::HLERequestContext& ctx) {
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
     if (camera_select.IsValid() && context_select.IsValid()) {
-        for (int camera : camera_select) {
+        for (int index : camera_select) {
+            auto& camera = cam->cameras[index];
             for (int context : context_select) {
-                cam->cameras[camera].contexts[context].effect = effect;
-                if (cam->cameras[camera].current_context == context) {
-                    cam->cameras[camera].impl->SetEffect(effect);
+                camera.contexts[context].effect = effect;
+                if (camera.current_context != context) {
+                    continue;
                 }
+                if (!camera.impl) {
+                    cam->LoadCameraImplementation(camera, index);
+                }
+                camera.impl->SetEffect(effect);
             }
         }
         rb.Push(ResultSuccess);
@@ -880,12 +909,17 @@ void Module::Interface::SetOutputFormat(Kernel::HLERequestContext& ctx) {
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
     if (camera_select.IsValid() && context_select.IsValid()) {
-        for (int camera : camera_select) {
+        for (int index : camera_select) {
+            auto& camera = cam->cameras[index];
             for (int context : context_select) {
-                cam->cameras[camera].contexts[context].format = format;
-                if (cam->cameras[camera].current_context == context) {
-                    cam->cameras[camera].impl->SetFormat(format);
+                camera.contexts[context].format = format;
+                if (camera.current_context != context) {
+                    continue;
                 }
+                if (!camera.impl) {
+                    cam->LoadCameraImplementation(camera, index);
+                }
+                camera.impl->SetFormat(format);
             }
         }
         rb.Push(ResultSuccess);
