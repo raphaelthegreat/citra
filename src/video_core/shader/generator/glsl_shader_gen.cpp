@@ -63,7 +63,7 @@ static std::string GetVertexInterfaceDeclaration(bool is_output, bool use_clip_p
     if (is_output && separable_shader) {
         // gl_PerVertex redeclaration is required for separate shader object
         out += "out gl_PerVertex {\n";
-        out += "    invariant vec4 gl_Position;\n";
+        out += "    vec4 gl_Position;\n";
         if (use_clip_planes) {
             out += "    float gl_ClipDistance[2];\n";
         }
