@@ -78,8 +78,10 @@ void PicaCore::InitializeRegs() {
     framebuffer_sub.color_format.Assign(PixelFormat::RGB8);
     framebuffer_sub.active_fb = 0;
 
-    // Tales of Abyss expects this register to have the following default value.
-    regs.internal.gs.input_buffer_config = 0xa0000001;
+    // Tales of Abyss expects this register to have the following default values.
+    auto& gs = regs.internal.gs;
+    gs.max_input_attribute_index.Assign(1);
+    gs.shader_mode.Assign(ShaderRegs::ShaderMode::VS);
 }
 
 void PicaCore::BindRasterizer(VideoCore::RasterizerInterface* rasterizer) {
