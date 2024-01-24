@@ -254,6 +254,13 @@ void PicaCore::WriteInternalReg(u32 id, u32 value, u32 mask) {
         break;
     }
 
+    case PICA_REG_INDEX(vs.output_mask):
+        if (!regs.internal.pipeline.gs_unit_exclusive_configuration &&
+            regs.internal.pipeline.use_gs == PipelineRegs::UseGS::No) {
+            regs.internal.gs.output_mask.Assign(value);
+        }
+        break;
+
     case PICA_REG_INDEX(vs.bool_uniforms):
         vs_setup.WriteUniformBoolReg(regs.internal.vs.bool_uniforms.Value());
         if (!regs.internal.pipeline.gs_unit_exclusive_configuration &&
