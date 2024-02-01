@@ -1,7 +1,7 @@
 // Copyright 2014 Citra Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
-
+#pragma clang optimize off
 #include <algorithm>
 #include <cmath>
 #include <numeric>
@@ -13,6 +13,9 @@
 #include "common/logging/log.h"
 #include "common/microprofile.h"
 #include "common/vector_math.h"
+#include "core/core.h"
+#include "video_core/gpu.h"
+#include "video_core/pica/pica_core.h"
 #include "video_core/pica/shader_setup.h"
 #include "video_core/pica/shader_unit.h"
 #include "video_core/pica_types.h"
@@ -295,6 +298,15 @@ static void RunInterpreter(const ShaderSetup& setup, ShaderUnit& state,
                     src1[3] = f24::One();
 
                 int num_components = (opcode == OpCode::Id::DP3) ? 3 : 4;
+                if (src1[0].ToFloat32() == 0.f && src1[1].ToFloat32() == 0.0f &&
+                    std::abs(src1[2].ToFloat32() - 1.00098) < 0.0001f &&
+                    std::abs(src1[3].ToFloat32() - 1.00098) < 0.0001f &&
+                    Core::System::GetInstance()
+                            .GPU()
+                            .PicaCore()
+                            .regs.internal.pipeline.num_vertices == 24) {
+                    printf("HIT\n");
+                }
                 f24 dot = std::inner_product(src1, src1 + num_components, src2, f24::Zero());
 
                 for (int i = 0; i < 4; ++i) {

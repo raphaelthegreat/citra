@@ -41,16 +41,18 @@ private:
     /// Writes the code to emulate PICA min/max blending factors
     void WriteBlending();
 
-    /// Writes the specified TEV stage source component(s)
-    void AppendSource(Pica::TexturingRegs::TevStageConfig::Source source, u32 tev_index);
+    /// Returns the specified TEV stage source component(s)
+    std::string GetSource(Pica::TexturingRegs::TevStageConfig::Source source, u32 tev_index);
 
     /// Writes the color components to use for the specified TEV stage color modifier
     void AppendColorModifier(Pica::TexturingRegs::TevStageConfig::ColorModifier modifier,
-                             Pica::TexturingRegs::TevStageConfig::Source source, u32 tev_index);
+                             Pica::TexturingRegs::TevStageConfig::Source source, u32 tev_index,
+                             u32 source_index);
 
     /// Writes the alpha component to use for the specified TEV stage alpha modifier
     void AppendAlphaModifier(Pica::TexturingRegs::TevStageConfig::AlphaModifier modifier,
-                             Pica::TexturingRegs::TevStageConfig::Source source, u32 tev_index);
+                             Pica::TexturingRegs::TevStageConfig::Source source, u32 tev_index,
+                             u32 source_index);
 
     /// Writes the combiner function for the color components for the specified TEV stage operation
     void AppendColorCombiner(Pica::TexturingRegs::TevStageConfig::Operation operation);
