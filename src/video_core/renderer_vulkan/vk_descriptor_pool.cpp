@@ -2,14 +2,10 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include "common/microprofile.h"
 #include "video_core/renderer_vulkan/vk_descriptor_pool.h"
 #include "video_core/renderer_vulkan/vk_instance.h"
 
 namespace Vulkan {
-
-MICROPROFILE_DEFINE(Vulkan_DescriptorSetAcquire, "Vulkan", "Descriptor Set Acquire",
-                    MP_RGB(64, 128, 256));
 
 constexpr u32 MAX_BATCH_SIZE = 8;
 
@@ -107,7 +103,6 @@ DescriptorSetProvider::DescriptorSetProvider(
 DescriptorSetProvider::~DescriptorSetProvider() = default;
 
 vk::DescriptorSet DescriptorSetProvider::Acquire(std::span<const DescriptorData> data) {
-    MICROPROFILE_SCOPE(Vulkan_DescriptorSetAcquire);
     DescriptorSetData key{};
     std::memcpy(key.data(), data.data(), data.size_bytes());
     const auto [it, new_set] = descriptor_set_map.try_emplace(key);
