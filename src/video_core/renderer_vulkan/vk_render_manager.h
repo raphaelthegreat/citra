@@ -34,13 +34,12 @@ struct RenderPass {
     }
 };
 
-class RenderpassCache {
-    static constexpr std::size_t MAX_COLOR_FORMATS = 13;
-    static constexpr std::size_t MAX_DEPTH_FORMATS = 4;
-
+class RenderManager {
+    static constexpr u32 NumColorFormats = 13;
+    static constexpr u32 NumDepthFormats = 4;
 public:
-    explicit RenderpassCache(const Instance& instance, Scheduler& scheduler);
-    ~RenderpassCache();
+    explicit RenderManager(const Instance& instance, Scheduler& scheduler);
+    ~RenderManager();
 
     /// Begins a new renderpass with the provided framebuffer as render target.
     void BeginRendering(const Framebuffer* framebuffer, Common::Rectangle<u32> draw_rect);
@@ -63,7 +62,7 @@ private:
 private:
     const Instance& instance;
     Scheduler& scheduler;
-    vk::UniqueRenderPass cached_renderpasses[MAX_COLOR_FORMATS + 1][MAX_DEPTH_FORMATS + 1][2];
+    vk::UniqueRenderPass cached_renderpasses[NumColorFormats + 1][NumDepthFormats + 1][2];
     std::mutex cache_mutex;
     std::array<vk::Image, 2> images;
     std::array<vk::ImageAspectFlags, 2> aspects;

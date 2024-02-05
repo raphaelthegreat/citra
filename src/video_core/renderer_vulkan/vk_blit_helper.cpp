@@ -5,7 +5,7 @@
 #include "common/vector_math.h"
 #include "video_core/renderer_vulkan/vk_blit_helper.h"
 #include "video_core/renderer_vulkan/vk_instance.h"
-#include "video_core/renderer_vulkan/vk_renderpass_cache.h"
+#include "video_core/renderer_vulkan/vk_render_manager.h"
 #include "video_core/renderer_vulkan/vk_scheduler.h"
 #include "video_core/renderer_vulkan/vk_shader_util.h"
 #include "video_core/renderer_vulkan/vk_texture_runtime.h"
@@ -178,7 +178,7 @@ constexpr vk::PipelineShaderStageCreateInfo MakeStages(vk::ShaderModule compute_
 } // Anonymous namespace
 
 BlitHelper::BlitHelper(const Instance& instance_, Scheduler& scheduler_, DescriptorPool& pool,
-                       RenderpassCache& renderpass_cache_)
+                       RenderManager& renderpass_cache_)
     : instance{instance_}, scheduler{scheduler_}, renderpass_cache{renderpass_cache_},
       device{instance.GetDevice()}, compute_provider{instance, pool, COMPUTE_BINDINGS},
       compute_buffer_provider{instance, pool, COMPUTE_BUFFER_BINDINGS},

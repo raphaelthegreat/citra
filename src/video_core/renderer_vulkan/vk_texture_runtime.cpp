@@ -13,7 +13,7 @@
 #include "video_core/renderer_vulkan/pica_to_vk.h"
 #include "video_core/renderer_vulkan/vk_descriptor_pool.h"
 #include "video_core/renderer_vulkan/vk_instance.h"
-#include "video_core/renderer_vulkan/vk_renderpass_cache.h"
+#include "video_core/renderer_vulkan/vk_render_manager.h"
 #include "video_core/renderer_vulkan/vk_scheduler.h"
 #include "video_core/renderer_vulkan/vk_texture_runtime.h"
 
@@ -249,7 +249,7 @@ constexpr u64 DOWNLOAD_BUFFER_SIZE = 16_MiB;
 } // Anonymous namespace
 
 TextureRuntime::TextureRuntime(const Instance& instance, Scheduler& scheduler,
-                               RenderpassCache& renderpass_cache, DescriptorPool& pool,
+                               RenderManager& renderpass_cache, DescriptorPool& pool,
                                DescriptorSetProvider& texture_provider_, u32 num_swapchain_images_)
     : instance{instance}, scheduler{scheduler}, renderpass_cache{renderpass_cache},
       texture_provider{texture_provider_}, blit_helper{instance, scheduler, pool, renderpass_cache},

@@ -22,7 +22,7 @@ struct Material;
 namespace Vulkan {
 
 class Instance;
-class RenderpassCache;
+class RenderManager;
 class DescriptorPool;
 class DescriptorSetProvider;
 class Surface;
@@ -42,7 +42,7 @@ class TextureRuntime {
 
 public:
     explicit TextureRuntime(const Instance& instance, Scheduler& scheduler,
-                            RenderpassCache& renderpass_cache, DescriptorPool& pool,
+                            RenderManager& renderpass_cache, DescriptorPool& pool,
                             DescriptorSetProvider& texture_provider, u32 num_swapchain_images);
     ~TextureRuntime();
 
@@ -54,7 +54,7 @@ public:
         return scheduler;
     }
 
-    RenderpassCache& GetRenderpassCache() {
+    RenderManager& GetRenderpassCache() {
         return renderpass_cache;
     }
 
@@ -95,7 +95,7 @@ private:
 private:
     const Instance& instance;
     Scheduler& scheduler;
-    RenderpassCache& renderpass_cache;
+    RenderManager& renderpass_cache;
     DescriptorSetProvider& texture_provider;
     BlitHelper blit_helper;
     StreamBuffer upload_buffer;

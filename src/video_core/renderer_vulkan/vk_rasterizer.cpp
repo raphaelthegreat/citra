@@ -59,7 +59,7 @@ RasterizerVulkan::RasterizerVulkan(Memory::MemorySystem& memory, Pica::PicaCore&
                                    VideoCore::RendererBase& renderer,
                                    Frontend::EmuWindow& emu_window, const Instance& instance,
                                    Scheduler& scheduler, DescriptorPool& pool,
-                                   RenderpassCache& renderpass_cache, u32 image_count)
+                                   RenderManager& renderpass_cache, u32 image_count)
     : RasterizerAccelerated{memory, pica}, instance{instance}, scheduler{scheduler},
       renderpass_cache{renderpass_cache}, pipeline_cache{instance, scheduler, renderpass_cache,
                                                          pool},

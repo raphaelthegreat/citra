@@ -13,7 +13,7 @@
 #include "video_core/renderer_vulkan/pica_to_vk.h"
 #include "video_core/renderer_vulkan/vk_instance.h"
 #include "video_core/renderer_vulkan/vk_pipeline_cache.h"
-#include "video_core/renderer_vulkan/vk_renderpass_cache.h"
+#include "video_core/renderer_vulkan/vk_render_manager.h"
 #include "video_core/renderer_vulkan/vk_scheduler.h"
 #include "video_core/renderer_vulkan/vk_shader_util.h"
 #include "video_core/shader/generator/glsl_fs_shader_gen.h"
@@ -80,7 +80,7 @@ constexpr std::array<vk::DescriptorSetLayoutBinding, 7> SHADOW_BINDINGS = {{
 }};
 
 PipelineCache::PipelineCache(const Instance& instance_, Scheduler& scheduler_,
-                             RenderpassCache& renderpass_cache_, DescriptorPool& pool_)
+                             RenderManager& renderpass_cache_, DescriptorPool& pool_)
     : instance{instance_}, scheduler{scheduler_}, renderpass_cache{renderpass_cache_}, pool{pool_},
       num_worker_threads{std::max(std::thread::hardware_concurrency(), 2U)},
       workers{num_worker_threads, "Pipeline workers"},
