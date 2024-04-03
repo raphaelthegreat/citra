@@ -21,7 +21,7 @@ TEST_CASE("Memory Basics", "[kernel][memory]") {
     Kernel::Process process(kernel);
     SECTION("mapping memory") {
         // Because of the PageTable, Kernel::VMManager is too big to be created on the stack.
-        auto manager = std::make_unique<Kernel::VMManager>(memory, process);
+        auto manager = std::make_unique<Kernel::VMManager>(kernel, process);
         auto result = manager->MapBackingMemory(
             Memory::HEAP_VADDR, mem.get(), Memory::CITRA_PAGE_SIZE, Kernel::MemoryState::Private);
         REQUIRE(result.Code() == ResultSuccess);
@@ -36,7 +36,7 @@ TEST_CASE("Memory Basics", "[kernel][memory]") {
 
     SECTION("unmapping memory") {
         // Because of the PageTable, Kernel::VMManager is too big to be created on the stack.
-        auto manager = std::make_unique<Kernel::VMManager>(memory, process);
+        auto manager = std::make_unique<Kernel::VMManager>(kernel, process);
         auto result = manager->MapBackingMemory(
             Memory::HEAP_VADDR, mem.get(), Memory::CITRA_PAGE_SIZE, Kernel::MemoryState::Private);
         REQUIRE(result.Code() == ResultSuccess);
@@ -52,7 +52,7 @@ TEST_CASE("Memory Basics", "[kernel][memory]") {
 
     SECTION("changing memory permissions") {
         // Because of the PageTable, Kernel::VMManager is too big to be created on the stack.
-        auto manager = std::make_unique<Kernel::VMManager>(memory, process);
+        auto manager = std::make_unique<Kernel::VMManager>(kernel, process);
         auto result = manager->MapBackingMemory(
             Memory::HEAP_VADDR, mem.get(), Memory::CITRA_PAGE_SIZE, Kernel::MemoryState::Private);
         REQUIRE(result.Code() == ResultSuccess);
@@ -71,7 +71,7 @@ TEST_CASE("Memory Basics", "[kernel][memory]") {
 
     SECTION("changing memory state") {
         // Because of the PageTable, Kernel::VMManager is too big to be created on the stack.
-        auto manager = std::make_unique<Kernel::VMManager>(memory, process);
+        auto manager = std::make_unique<Kernel::VMManager>(kernel, process);
         auto result = manager->MapBackingMemory(
             Memory::HEAP_VADDR, mem.get(), Memory::CITRA_PAGE_SIZE, Kernel::MemoryState::Private);
         REQUIRE(result.Code() == ResultSuccess);

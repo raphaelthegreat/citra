@@ -275,7 +275,7 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
         restore_deliver_arg.reset();
     }
     if (restore_plugin_context.has_value()) {
-        if (auto plg_ldr = Service::PLGLDR::GetService(*this)) {
+        if (auto plg_ldr = Service::PLGLDR::GetService(*kernel)) {
             plg_ldr->SetPluginLoaderContext(restore_plugin_context.value());
         }
         restore_plugin_context.reset();
@@ -429,7 +429,7 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window,
     gpu->SetInterruptHandler(
         [gsp](Service::GSP::InterruptId interrupt_id) { gsp->SignalInterrupt(interrupt_id); });
 
-    auto plg_ldr = Service::PLGLDR::GetService(*this);
+    auto plg_ldr = Service::PLGLDR::GetService(*kernel);
     if (plg_ldr) {
         plg_ldr->SetEnabled(Settings::values.plugin_loader_enabled.GetValue());
         plg_ldr->SetAllowGameChangeState(Settings::values.allow_plugin_loader.GetValue());
@@ -468,10 +468,6 @@ Kernel::KernelSystem& System::Kernel() {
 
 const Kernel::KernelSystem& System::Kernel() const {
     return *kernel;
-}
-
-bool System::KernelRunning() {
-    return kernel != nullptr;
 }
 
 Timing& System::CoreTiming() {
@@ -577,7 +573,7 @@ void System::Reset() {
     if (auto apt = Service::APT::GetModule(*this)) {
         restore_deliver_arg = apt->GetAppletManager()->ReceiveDeliverArg();
     }
-    if (auto plg_ldr = Service::PLGLDR::GetService(*this)) {
+    if (auto plg_ldr = Service::PLGLDR::GetService(*kernel)) {
         restore_plugin_context = plg_ldr->GetPluginLoaderContext();
     }
 
@@ -634,7 +630,11 @@ void System::ApplySettings() {
         Service::MIC::ReloadMic(*this);
     }
 
-    auto plg_ldr = Service::PLGLDR::GetService(*this);
+    if (!kernel) {
+        return;
+    }
+
+    auto plg_ldr = Service::PLGLDR::GetService(*kernel);
     if (plg_ldr) {
         plg_ldr->SetEnabled(Settings::values.plugin_loader_enabled.GetValue());
         plg_ldr->SetAllowGameChangeState(Settings::values.allow_plugin_loader.GetValue());

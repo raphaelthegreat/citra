@@ -201,7 +201,7 @@ public:
             return vram.get() + addr - VRAM_VADDR;
         }
         if (addr >= PLUGIN_3GX_FB_VADDR && addr < PLUGIN_3GX_FB_VADDR_END) {
-            auto plg_ldr = Service::PLGLDR::GetService(system);
+            auto plg_ldr = Service::PLGLDR::GetService(system.Kernel());
             if (plg_ldr) {
                 return fcram.get() + addr - PLUGIN_3GX_FB_VADDR + plg_ldr->GetPluginFBAddr() -
                        FCRAM_PADDR;
@@ -244,7 +244,7 @@ public:
         CheckRegion(LINEAR_HEAP_VADDR, LINEAR_HEAP_VADDR_END, FCRAM_PADDR);
         CheckRegion(NEW_LINEAR_HEAP_VADDR, NEW_LINEAR_HEAP_VADDR_END, FCRAM_PADDR);
         CheckRegion(VRAM_VADDR, VRAM_VADDR_END, VRAM_PADDR);
-        auto plg_ldr = Service::PLGLDR::GetService(system);
+        auto plg_ldr = Service::PLGLDR::GetService(system.Kernel());
         if (plg_ldr && plg_ldr->GetPluginFBAddr()) {
             CheckRegion(PLUGIN_3GX_FB_VADDR, PLUGIN_3GX_FB_VADDR_END, plg_ldr->GetPluginFBAddr());
         }
@@ -569,7 +569,7 @@ std::vector<VAddr> MemorySystem::PhysicalToVirtualAddressForRasterizer(PAddr add
         return {addr - VRAM_PADDR + VRAM_VADDR};
     }
     // NOTE: Order matters here.
-    auto plg_ldr = Service::PLGLDR::GetService(impl->system);
+    auto plg_ldr = Service::PLGLDR::GetService(impl->system.Kernel());
     if (plg_ldr) {
         auto fb_addr = plg_ldr->GetPluginFBAddr();
         if (addr >= fb_addr && addr < fb_addr + PLUGIN_3GX_FB_SIZE) {

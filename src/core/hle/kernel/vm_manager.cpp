@@ -35,8 +35,8 @@ bool VirtualMemoryArea::CanBeMergedWith(const VirtualMemoryArea& next) const {
     return true;
 }
 
-VMManager::VMManager(Memory::MemorySystem& memory, Kernel::Process& proc)
-    : page_table(std::make_shared<Memory::PageTable>()), memory(memory), process(proc) {
+VMManager::VMManager(Kernel::KernelSystem& kernel, Kernel::Process& proc)
+    : page_table(std::make_shared<Memory::PageTable>()), kernel(kernel), process(proc) {
     // Initialize the map with a single free region covering the entire managed space.
     VirtualMemoryArea initial_vma;
     initial_vma.size = MAX_ADDRESS;
@@ -318,16 +318,16 @@ VMManager::VMAIter VMManager::MergeAdjacent(VMAIter iter) {
 void VMManager::UpdatePageTableForVMA(const VirtualMemoryArea& vma) {
     switch (vma.type) {
     case VMAType::Free:
-        memory.UnmapRegion(*page_table, vma.base, vma.size);
+        kernel.memory.UnmapRegion(*page_table, vma.base, vma.size);
         break;
     case VMAType::BackingMemory:
-        memory.MapMemoryRegion(*page_table, vma.base, vma.size, vma.backing_memory);
+        kernel.memory.MapMemoryRegion(*page_table, vma.base, vma.size, vma.backing_memory);
         break;
     }
 
-    auto plgldr = Service::PLGLDR::GetService(Core::System::GetInstance());
+    auto plgldr = Service::PLGLDR::GetService(kernel);
     if (plgldr)
-        plgldr->OnMemoryChanged(process, Core::System::GetInstance().Kernel());
+        plgldr->OnMemoryChanged(process, kernel);
 }
 
 ResultVal<VMManager::BackingBlocks> VMManager::GetBackingBlocksForRange(VAddr address, u32 size) {

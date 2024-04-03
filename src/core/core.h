@@ -236,9 +236,6 @@ public:
     /// Gets a const reference to the kernel
     [[nodiscard]] const Kernel::KernelSystem& Kernel() const;
 
-    /// Get kernel is running
-    [[nodiscard]] bool KernelRunning();
-
     /// Gets a reference to the timing system
     [[nodiscard]] Timing& CoreTiming();
 
@@ -436,17 +433,5 @@ private:
     std::optional<Service::APT::DeliverArg> restore_deliver_arg;
     std::optional<Service::PLGLDR::PLG_LDR::PluginLoaderContext> restore_plugin_context;
 };
-
-[[nodiscard]] inline ARM_Interface& GetRunningCore() {
-    return System::GetInstance().GetRunningCore();
-}
-
-[[nodiscard]] inline ARM_Interface& GetCore(u32 core_id) {
-    return System::GetInstance().GetCore(core_id);
-}
-
-[[nodiscard]] inline u32 GetNumCores() {
-    return System::GetInstance().GetNumCores();
-}
 
 } // namespace Core
