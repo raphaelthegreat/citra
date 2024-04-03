@@ -98,7 +98,6 @@ void ARM_DynCom::ExecuteInstructions(u64 num_instructions) {
     if (timer) {
         timer->AddTicks(ticks_executed);
     }
-    state->ServeBreak();
 }
 
 void ARM_DynCom::SaveContext(ThreadContext& ctx) {

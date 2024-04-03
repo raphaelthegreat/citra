@@ -21,7 +21,6 @@
 #include <unordered_map>
 #include "common/common_types.h"
 #include "core/arm/skyeye_common/arm_regformat.h"
-#include "core/gdbstub/gdbstub.h"
 
 namespace Core {
 class System;
@@ -199,13 +198,6 @@ public:
         return TFlag ? 2 : 4;
     }
 
-    void RecordBreak(GDBStub::BreakpointAddress bkpt) {
-        last_bkpt = bkpt;
-        last_bkpt_hit = true;
-    }
-
-    void ServeBreak();
-
     Core::System& system;
     Memory::MemorySystem& memory;
 
@@ -266,7 +258,4 @@ private:
 
     u32 exclusive_tag; // The address for which the local monitor is in exclusive access mode
     bool exclusive_state;
-
-    GDBStub::BreakpointAddress last_bkpt{};
-    bool last_bkpt_hit = false;
 };

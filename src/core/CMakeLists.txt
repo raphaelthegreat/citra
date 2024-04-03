@@ -112,10 +112,6 @@ add_library(citra_core STATIC
     frontend/image_interface.cpp
     frontend/image_interface.h
     frontend/input.h
-    gdbstub/gdbstub.cpp
-    gdbstub/gdbstub.h
-    gdbstub/hio.cpp
-    gdbstub/hio.h
     hle/applets/applet.cpp
     hle/applets/applet.h
     hle/applets/erreula.cpp

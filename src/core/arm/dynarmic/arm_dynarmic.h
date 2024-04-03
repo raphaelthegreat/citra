@@ -57,8 +57,6 @@ public:
     void SetPageTable(const std::shared_ptr<Memory::PageTable>& page_table) override;
 
 private:
-    void ServeBreak();
-
     friend class DynarmicUserCallbacks;
     Core::System& system;
     Memory::MemorySystem& memory;

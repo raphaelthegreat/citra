@@ -23,7 +23,6 @@
 #include "core/core_timing.h"
 #include "core/dumping/backend.h"
 #include "core/frontend/image_interface.h"
-#include "core/gdbstub/gdbstub.h"
 
 #include "core/hle/kernel/kernel.h"
 #include "core/hle/kernel/process.h"
@@ -62,24 +61,6 @@ System::ResultStatus System::RunLoop(bool tight_loop) {
     status = ResultStatus::Success;
     if (!IsPoweredOn()) {
         return ResultStatus::ErrorNotInitialized;
-    }
-
-    if (GDBStub::IsServerEnabled()) {
-        Kernel::Thread* thread = kernel->GetCurrentThreadManager().GetCurrentThread();
-        if (thread && running_core) {
-            running_core->SaveContext(thread->context);
-        }
-        GDBStub::HandlePacket(*this);
-
-        // If the loop is halted and we want to step, use a tiny (1) number of instructions to
-        // execute. Otherwise, get out of the loop function.
-        if (GDBStub::GetCpuHaltFlag()) {
-            if (GDBStub::GetCpuStepFlag()) {
-                tight_loop = false;
-            } else {
-                return ResultStatus::Success;
-            }
-        }
     }
 
     Signal signal{Signal::None};
@@ -210,10 +191,6 @@ System::ResultStatus System::RunLoop(bool tight_loop) {
             }
             max_slice = cpu_core->GetTimer().GetTicks() - start_ticks;
         }
-    }
-
-    if (GDBStub::IsServerEnabled()) {
-        GDBStub::SetCpuStepFlag(false);
     }
 
     Reschedule();
@@ -440,7 +417,6 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window,
 
     HW::AES::InitKeys();
     Service::Init(*this);
-    GDBStub::DeferStart();
 
     if (!registered_image_interface) {
         registered_image_interface = std::make_shared<Frontend::ImageInterface>();
@@ -559,7 +535,6 @@ void System::Shutdown() {
     is_powered_on = false;
 
     gpu.reset();
-    GDBStub::Shutdown();
     perf_stats.reset();
     app_loader.reset();
     custom_tex_manager.reset();
@@ -619,9 +594,6 @@ void System::Reset() {
 }
 
 void System::ApplySettings() {
-    GDBStub::SetServerPort(Settings::values.gdbstub_port.GetValue());
-    GDBStub::ToggleServer(Settings::values.use_gdbstub.GetValue());
-
     if (gpu) {
 #ifndef ANDROID
         gpu->Renderer().UpdateCurrentFramebufferLayout();

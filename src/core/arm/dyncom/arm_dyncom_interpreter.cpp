@@ -19,7 +19,6 @@
 #include "core/arm/skyeye_common/vfp/vfp.h"
 #include "core/core.h"
 #include "core/core_timing.h"
-#include "core/gdbstub/gdbstub.h"
 #include "core/hle/kernel/svc.h"
 #include "core/memory.h"
 
@@ -918,10 +917,6 @@ MICROPROFILE_DEFINE(DynCom_Execute, "DynCom", "Execute", MP_RGB(255, 0, 0));
 unsigned InterpreterMainLoop(ARMul_State* cpu) {
     MICROPROFILE_SCOPE(DynCom_Execute);
 
-    /// Nearest upcoming GDB code execution breakpoint, relative to the last dispatch's address.
-    GDBStub::BreakpointAddress breakpoint_data;
-    breakpoint_data.type = GDBStub::BreakpointType::None;
-
 #undef RM
 #undef RS
 
@@ -948,35 +943,16 @@ unsigned InterpreterMainLoop(ARMul_State* cpu) {
 #define INC_PC(l) ptr += sizeof(arm_inst) + l
 #define INC_PC_STUB ptr += sizeof(arm_inst)
 
-#ifdef ANDROID
-#define GDB_BP_CHECK
-#else
-#define GDB_BP_CHECK                                                                               \
-    cpu->Cpsr &= ~(1 << 5);                                                                        \
-    cpu->Cpsr |= cpu->TFlag << 5;                                                                  \
-    if (GDBStub::IsServerEnabled()) {                                                              \
-        if (GDBStub::IsMemoryBreak()) {                                                            \
-            goto END;                                                                              \
-        } else if (breakpoint_data.type != GDBStub::BreakpointType::None &&                        \
-                   PC == breakpoint_data.address) {                                                \
-            cpu->RecordBreak(breakpoint_data);                                                     \
-            goto END;                                                                              \
-        }                                                                                          \
-    }
-#endif
-
 // GCC and Clang have a C++ extension to support a lookup table of labels. Otherwise, fallback to a
 // clunky switch statement.
 #if defined __GNUC__ || (defined __clang__ && !defined _MSC_VER)
 #define GOTO_NEXT_INST                                                                             \
-    GDB_BP_CHECK;                                                                                  \
     if (num_instrs >= cpu->NumInstrsToExecute)                                                     \
         goto END;                                                                                  \
     num_instrs++;                                                                                  \
     goto* InstLabel[inst_base->idx]
 #else
 #define GOTO_NEXT_INST                                                                             \
-    GDB_BP_CHECK;                                                                                  \
     if (num_instrs >= cpu->NumInstrsToExecute)                                                     \
         goto END;                                                                                  \
     num_instrs++;                                                                                  \
@@ -1650,14 +1626,6 @@ DISPATCH : {
         if (InterpreterTranslateSingle(cpu, ptr, cpu->Reg[15]) == FETCH_EXCEPTION)
             goto END;
     }
-
-#ifndef ANDROID
-    // Find breakpoint if one exists within the block
-    if (GDBStub::IsConnected()) {
-        breakpoint_data =
-            GDBStub::GetNextBreakpointFromAddress(cpu->Reg[15], GDBStub::BreakpointType::Execute);
-    }
-#endif
 
     inst_base = (arm_inst*)&trans_cache_buf[ptr];
     GOTO_NEXT_INST;

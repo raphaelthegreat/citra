@@ -13,7 +13,6 @@
 #include "core/arm/dynarmic/arm_tick_counts.h"
 #include "core/core.h"
 #include "core/core_timing.h"
-#include "core/gdbstub/gdbstub.h"
 #include "core/hle/kernel/svc.h"
 #include "core/memory.h"
 
@@ -82,12 +81,6 @@ public:
         case Dynarmic::A32::Exception::NoExecuteFault:
             break;
         case Dynarmic::A32::Exception::Breakpoint:
-            if (GDBStub::IsConnected()) {
-                parent.jit->HaltExecution();
-                parent.SetPC(pc);
-                parent.ServeBreak();
-                return;
-            }
             break;
         case Dynarmic::A32::Exception::SendEvent:
         case Dynarmic::A32::Exception::SendEventLocal:
@@ -141,10 +134,6 @@ void ARM_Dynarmic::Run() {
 
 void ARM_Dynarmic::Step() {
     jit->Step();
-
-    if (GDBStub::IsConnected()) {
-        ServeBreak();
-    }
 }
 
 void ARM_Dynarmic::SetPC(u32 pc) {
@@ -285,13 +274,6 @@ void ARM_Dynarmic::SetPageTable(const std::shared_ptr<Memory::PageTable>& page_t
     jit = new_jit.get();
     LoadContext(ctx);
     jits.emplace(current_page_table, std::move(new_jit));
-}
-
-void ARM_Dynarmic::ServeBreak() {
-    Kernel::Thread* thread = system.Kernel().GetCurrentThreadManager().GetCurrentThread();
-    SaveContext(thread->context);
-    GDBStub::Break();
-    GDBStub::SendTrap(thread, 5);
 }
 
 std::unique_ptr<Dynarmic::A32::Jit> ARM_Dynarmic::MakeJit() {

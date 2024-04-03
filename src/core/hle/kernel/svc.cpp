@@ -13,7 +13,6 @@
 #include "core/arm/arm_interface.h"
 #include "core/core.h"
 #include "core/core_timing.h"
-#include "core/gdbstub/hio.h"
 #include "core/hle/kernel/address_arbiter.h"
 #include "core/hle/kernel/client_port.h"
 #include "core/hle/kernel/client_session.h"
@@ -1063,11 +1062,6 @@ void SVC::Break(u8 break_reason) {
 void SVC::OutputDebugString(VAddr address, s32 len) {
     if (!memory.IsValidVirtualAddress(*kernel.GetCurrentProcess(), address)) {
         LOG_WARNING(Kernel_SVC, "OutputDebugString called with invalid address {:X}", address);
-        return;
-    }
-
-    if (len == 0) {
-        GDBStub::SetHioRequest(system, address);
         return;
     }
 
