@@ -303,11 +303,11 @@ Result ArchiveFactory_ExtSaveData::FormatAsExtData(const Path& path,
 
         auto req = artic_client->NewRequest("FSUSER_CreateExtSaveData");
 
-        req.AddParameterBuffer(&artic_extdata_path, sizeof(artic_extdata_path));
-        req.AddParameterU32(format_info.number_directories);
-        req.AddParameterU32(format_info.number_files);
-        req.AddParameterU64(total_size);
-        req.AddParameterBuffer(icon.data(), icon.size());
+        req.AddParameterBuffer(artic_extdata_path);
+        req.AddParameter(format_info.number_directories);
+        req.AddParameter(format_info.number_files);
+        req.AddParameter(total_size);
+        req.AddParameterBuffer(icon);
 
         return ArticArchive::RespResult(artic_client->Send(req));
     } else {
@@ -349,8 +349,7 @@ Result ArchiveFactory_ExtSaveData::DeleteExtData(Service::FS::MediaType media_ty
         artic_extdata_path.save_id_high = high;
 
         auto req = artic_client->NewRequest("FSUSER_DeleteExtSaveData");
-
-        req.AddParameterBuffer(&artic_extdata_path, sizeof(artic_extdata_path));
+        req.AddParameterBuffer(artic_extdata_path);
 
         return ArticArchive::RespResult(artic_client->Send(req));
     } else {
@@ -383,15 +382,12 @@ ResultVal<ArchiveFormatInfo> ArchiveFactory_ExtSaveData::GetFormatInfo(const Pat
     if (IsUsingArtic()) {
         auto req = artic_client->NewRequest("FSUSER_GetFormatInfo");
 
-        req.AddParameterS32(static_cast<u32>(ExtSaveDataTypeToArchiveID(type)));
+        req.AddParameter(ExtSaveDataTypeToArchiveID(type));
         auto path_artic = ArticArchive::BuildFSPath(path);
-        req.AddParameterBuffer(path_artic.data(), path_artic.size());
+        req.AddParameterBuffer(path_artic);
 
         auto resp = artic_client->Send(req);
-        Result res = ArticArchive::RespResult(resp);
-        if (R_FAILED(res)) {
-            return res;
-        }
+        R_TRY(ArticArchive::RespResult(resp));
 
         auto info_buf = resp->GetResponseBuffer(0);
         if (!info_buf.has_value() || info_buf->second != sizeof(ArchiveFormatInfo)) {

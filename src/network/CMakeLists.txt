@@ -1,9 +1,12 @@
 add_library(network STATIC
     announce_multiplayer_session.cpp
     announce_multiplayer_session.h
-    artic_base/artic_base_client.cpp
-    artic_base/artic_base_client.h
-    artic_base/artic_base_common.h
+    artic_base/client.cpp
+    artic_base/client.h
+    artic_base/common.h
+    artic_base/request.cpp
+    artic_base/request.h
+    artic_base/response.h
     network.cpp
     network.h
     network_settings.cpp

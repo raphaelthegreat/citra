@@ -14,7 +14,7 @@
 #include "core/file_sys/artic_cache.h"
 #include "core/hle/result.h"
 #include "core/hle/service/fs/archive.h"
-#include "network/artic_base/artic_base_client.h"
+#include "network/artic_base/client.h"
 
 namespace FileSys {
 

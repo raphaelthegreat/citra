@@ -70,15 +70,15 @@ Result ArchiveSource_SDSaveData::Format(u64 program_id,
         ClearAllCache();
         auto req = artic_client->NewRequest("FSUSER_FormatSaveData");
 
-        req.AddParameterS32(static_cast<u32>(archive_id));
+        req.AddParameter(static_cast<u32>(archive_id));
         auto artic_path = ArticArchive::BuildFSPath(path);
-        req.AddParameterBuffer(artic_path.data(), artic_path.size());
-        req.AddParameterU32(format_info.total_size / 512);
-        req.AddParameterU32(format_info.number_directories);
-        req.AddParameterU32(format_info.number_files);
-        req.AddParameterU32(directory_buckets);
-        req.AddParameterU32(file_buckets);
-        req.AddParameterU8(format_info.duplicate_data);
+        req.AddParameterBuffer(artic_path);
+        req.AddParameter(format_info.total_size / 512);
+        req.AddParameter(format_info.number_directories);
+        req.AddParameter(format_info.number_files);
+        req.AddParameter(directory_buckets);
+        req.AddParameter(file_buckets);
+        req.AddParameter(format_info.duplicate_data);
 
         auto resp = artic_client->Send(req);
         return ArticArchive::RespResult(resp);
@@ -104,9 +104,9 @@ ResultVal<ArchiveFormatInfo> ArchiveSource_SDSaveData::GetFormatInfo(
     if (IsUsingArtic()) {
         auto req = artic_client->NewRequest("FSUSER_GetFormatInfo");
 
-        req.AddParameterS32(static_cast<u32>(archive_id));
+        req.AddParameter(static_cast<u32>(archive_id));
         auto path_artic = ArticArchive::BuildFSPath(path);
-        req.AddParameterBuffer(path_artic.data(), path_artic.size());
+        req.AddParameterBuffer(path_artic);
 
         auto resp = artic_client->Send(req);
         Result res = ArticArchive::RespResult(resp);

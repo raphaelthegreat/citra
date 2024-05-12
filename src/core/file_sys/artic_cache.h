@@ -6,7 +6,8 @@
 
 #include <array>
 #include <shared_mutex>
-#include "vector"
+#include <vector>
+#include <map>
 
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/base_object.hpp>
@@ -16,7 +17,7 @@
 #include "common/static_lru_cache.h"
 #include "core/file_sys/archive_backend.h"
 #include "core/hle/result.h"
-#include "network/artic_base/artic_base_client.h"
+#include "network/artic_base/client.h"
 
 namespace FileSys {
 class ArticCache {
@@ -92,6 +93,7 @@ protected:
 };
 
 class ArticCacheProvider {
+    using FileCaches = std::map<std::vector<u8>, std::shared_ptr<ArticCache>>;
 public:
     virtual ~ArticCacheProvider() {}
 
@@ -126,15 +128,14 @@ public:
     }
 
     virtual void ClearAllCache() {
-        if (file_caches != nullptr) {
+        if (file_caches) {
             file_caches->clear();
         }
     }
 
     virtual void EnsureCacheCreated() {
-        if (file_caches == nullptr) {
-            file_caches =
-                std::make_unique<std::map<std::vector<u8>, std::shared_ptr<ArticCache>>>();
+        if (!file_caches) {
+            file_caches = std::make_unique<FileCaches>();
         }
     }
 
@@ -144,7 +145,7 @@ protected:
     friend class boost::serialization::access;
 
 private:
-    std::unique_ptr<std::map<std::vector<u8>, std::shared_ptr<ArticCache>>> file_caches = nullptr;
+    std::unique_ptr<FileCaches> file_caches = nullptr;
     std::shared_ptr<Network::ArticBase::Client> client;
 };
 

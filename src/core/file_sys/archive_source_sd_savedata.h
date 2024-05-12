@@ -11,7 +11,7 @@
 #include "core/file_sys/archive_backend.h"
 #include "core/file_sys/artic_cache.h"
 #include "core/hle/result.h"
-#include "network/artic_base/artic_base_client.h"
+#include "network/artic_base/client.h"
 
 namespace Service::FS {
 enum class ArchiveIdCode : u32;

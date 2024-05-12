@@ -123,15 +123,15 @@ ArticRomFSReader::ArticRomFSReader(std::shared_ptr<Network::ArticBase::Client>& 
     fileVec[0] = static_cast<u8>(is_update_romfs ? 5 : 0);
     FileSys::Path file(FileSys::LowPathType::Binary, fileVec);
 
-    req.AddParameterS32(static_cast<s32>(Service::FS::ArchiveIdCode::SelfNCCH));
+    req.AddParameter(static_cast<s32>(Service::FS::ArchiveIdCode::SelfNCCH));
 
     auto archive_buf = ArticArchive::BuildFSPath(archive);
-    req.AddParameterBuffer(archive_buf.data(), archive_buf.size());
+    req.AddParameterBuffer(archive_buf);
     auto file_buf = ArticArchive::BuildFSPath(file);
-    req.AddParameterBuffer(file_buf.data(), file_buf.size());
+    req.AddParameterBuffer(file_buf);
 
-    req.AddParameterS32(1);
-    req.AddParameterS32(0);
+    req.AddParameter(1);
+    req.AddParameter(0);
 
     auto resp = client->Send(req);
 
@@ -154,7 +154,7 @@ ArticRomFSReader::ArticRomFSReader(std::shared_ptr<Network::ArticBase::Client>& 
 
     req = client->NewRequest("FSFILE_GetSize");
 
-    req.AddParameterS32(romfs_handle);
+    req.AddParameter(romfs_handle);
 
     resp = client->Send(req);
 
@@ -180,7 +180,7 @@ ArticRomFSReader::ArticRomFSReader(std::shared_ptr<Network::ArticBase::Client>& 
 ArticRomFSReader::~ArticRomFSReader() {
     if (romfs_handle != -1) {
         auto req = client->NewRequest("FSFILE_Close");
-        req.AddParameterS32(romfs_handle);
+        req.AddParameter(romfs_handle);
         client->Send(req);
         romfs_handle = -1;
     }
@@ -205,7 +205,7 @@ bool ArticRomFSReader::CacheReady(std::size_t file_offset, std::size_t length) {
 void ArticRomFSReader::CloseFile() {
     if (romfs_handle != -1) {
         auto req = client->NewRequest("FSFILE_Close");
-        req.AddParameterS32(romfs_handle);
+        req.AddParameter(romfs_handle);
         client->Send(req);
         romfs_handle = -1;
     }

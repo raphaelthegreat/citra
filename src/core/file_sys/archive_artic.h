@@ -12,14 +12,14 @@
 #include "core/file_sys/file_backend.h"
 #include "core/hle/service/fs/archive.h"
 #include "core/perf_stats.h"
-#include "network/artic_base/artic_base_client.h"
+#include "network/artic_base/client.h"
 
 namespace FileSys {
 
 class ArticArchive : public ArchiveBackend {
 public:
     static std::vector<u8> BuildFSPath(const Path& path);
-    static Result RespResult(const std::optional<Network::ArticBase::Client::Response>& resp);
+    static Result RespResult(const std::optional<Network::ArticBase::Response>& resp);
 
     explicit ArticArchive(std::shared_ptr<Network::ArticBase::Client>& _client, s64 _archive_handle,
                           Core::PerfStats::PerfArticEventBits _report_artic_event,

@@ -3,11 +3,12 @@
 // Refer to the license.txt file included.
 
 #pragma once
+
 #include <array>
 #include "common/common_types.h"
 
-namespace Network {
-namespace ArticBaseCommon {
+namespace Network::ArticBaseCommon {
+
 enum class MethodState : int {
     PARSING_INPUT = 0,
     PARAMETER_TYPE_MISMATCH = 1,
@@ -35,15 +36,18 @@ struct RequestParameter {
     RequestParameterType type{};
     union {
         u16 parameterSize{};
-        u16 bigBufferID;
+        u16 big_buffer_id;
     };
 
     char data[0x1C]{};
 };
+
+static constexpr size_t MaxMethodSize = 0x20;
+
 struct RequestPacket {
-    u32 requestID{};
-    std::array<char, 0x20> method{};
-    u32 parameterCount{};
+    u32 request_id{};
+    std::array<char, MaxMethodSize> method{};
+    u32 parameter_count{};
 };
 static_assert(sizeof(RequestPacket) == 0x28);
 
@@ -68,7 +72,7 @@ struct ResponseMethod {
         METHOD_ERROR = 2,
         PROVIDE_INPUT = 3,
     };
-    ArticResult articResult{};
+    ArticResult artic_result{};
     union {
         int methodResult{};
         int provideInputBufferID;
@@ -78,15 +82,12 @@ struct ResponseMethod {
 };
 
 struct DataPacket {
-    DataPacket() {}
-    u32 requestID{};
-
+    u32 request_id{};
     union {
-        char dataRaw[0x1C]{};
+        char data_raw[0x1C]{};
         ResponseMethod resp;
     };
 };
-
 static_assert(sizeof(DataPacket) == 0x20);
-}; // namespace ArticBaseCommon
-} // namespace Network
+
+}; // namespace Network::ArticBaseCommon

@@ -2,7 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include "archive_artic.h"
+#include "core/file_sys/archive_artic.h"
 
 namespace FileSys {
 
@@ -46,7 +46,7 @@ ArticArchive::~ArticArchive() {
     }
     if (archive_handle != -1) {
         auto req = client->NewRequest("FSUSER_CloseArchive");
-        req.AddParameterS64(archive_handle);
+        req.AddParameter(archive_handle);
         client->Send(req);
         if (report_artic_event != Core::PerfStats::PerfArticEventBits::NONE) {
             client->ReportArticEvent(static_cast<u64>(report_artic_event));
@@ -61,9 +61,9 @@ ResultVal<std::unique_ptr<ArchiveBackend>> ArticArchive::Open(
 
     auto req = client->NewRequest("FSUSER_OpenArchive");
 
-    req.AddParameterS32(static_cast<s32>(archive_id));
+    req.AddParameter(static_cast<s32>(archive_id));
     auto path_buf = BuildFSPath(path);
-    req.AddParameterBuffer(path_buf.data(), path_buf.size());
+    req.AddParameterBuffer(path_buf);
 
     auto resp = client->Send(req);
     if (!resp.has_value() || !resp->Succeeded()) {
@@ -88,7 +88,7 @@ void ArticArchive::Close() {
     }
 
     auto req = client->NewRequest("FSUSER_CloseArchive");
-    req.AddParameterS64(archive_handle);
+    req.AddParameter(archive_handle);
     if (RespResult(client->Send(req)).IsSuccess()) {
         archive_handle = -1;
         if (report_artic_event != Core::PerfStats::PerfArticEventBits::NONE) {
@@ -112,11 +112,11 @@ ResultVal<std::unique_ptr<FileBackend>> ArticArchive::OpenFile(const Path& path,
     }
     auto req = client->NewRequest("FSUSER_OpenFile");
 
-    req.AddParameterS64(archive_handle);
+    req.AddParameter(archive_handle);
     auto path_buf = BuildFSPath(path);
-    req.AddParameterBuffer(path_buf.data(), path_buf.size());
-    req.AddParameterU32(mode.hex);
-    req.AddParameterU32(attributes);
+    req.AddParameterBuffer(path_buf);
+    req.AddParameter(mode.hex);
+    req.AddParameter(attributes);
 
     auto resp = client->Send(req);
     auto res = RespResult(resp);
@@ -154,9 +154,9 @@ Result ArticArchive::DeleteFile(const Path& path) const {
 
     auto req = client->NewRequest("FSUSER_DeleteFile");
 
-    req.AddParameterS64(archive_handle);
+    req.AddParameter(archive_handle);
     auto path_buf = BuildFSPath(path);
-    req.AddParameterBuffer(path_buf.data(), path_buf.size());
+    req.AddParameterBuffer(path_buf);
 
     return RespResult(client->Send(req));
 }
@@ -175,12 +175,12 @@ Result ArticArchive::RenameFile(const Path& src_path, const Path& dest_path) con
 
     auto req = client->NewRequest("FSUSER_RenameFile");
 
-    req.AddParameterS64(archive_handle);
+    req.AddParameter(archive_handle);
     auto src_path_buf = BuildFSPath(src_path);
-    req.AddParameterBuffer(src_path_buf.data(), src_path_buf.size());
-    req.AddParameterS64(archive_handle);
+    req.AddParameterBuffer(src_path_buf);
+    req.AddParameter(archive_handle);
     auto dest_path_buf = BuildFSPath(dest_path);
-    req.AddParameterBuffer(dest_path_buf.data(), dest_path_buf.size());
+    req.AddParameterBuffer(dest_path_buf);
 
     return RespResult(client->Send(req));
 }
@@ -190,9 +190,9 @@ Result ArticArchive::DeleteDirectory(const Path& path) const {
 
     auto req = client->NewRequest("FSUSER_DeleteDirectory");
 
-    req.AddParameterS64(archive_handle);
+    req.AddParameter(archive_handle);
     auto path_buf = BuildFSPath(path);
-    req.AddParameterBuffer(path_buf.data(), path_buf.size());
+    req.AddParameterBuffer(path_buf);
 
     return RespResult(client->Send(req));
 }
@@ -202,9 +202,9 @@ Result ArticArchive::DeleteDirectoryRecursively(const Path& path) const {
 
     auto req = client->NewRequest("FSUSER_DeleteDirectoryRec");
 
-    req.AddParameterS64(archive_handle);
+    req.AddParameter(archive_handle);
     auto path_buf = BuildFSPath(path);
-    req.AddParameterBuffer(path_buf.data(), path_buf.size());
+    req.AddParameterBuffer(path_buf);
 
     return RespResult(client->Send(req));
 }
@@ -218,11 +218,11 @@ Result ArticArchive::CreateFile(const Path& path, u64 size, u32 attributes) cons
 
     auto req = client->NewRequest("FSUSER_CreateFile");
 
-    req.AddParameterS64(archive_handle);
+    req.AddParameter(archive_handle);
     auto path_buf = BuildFSPath(path);
-    req.AddParameterBuffer(path_buf.data(), path_buf.size());
-    req.AddParameterU32(attributes);
-    req.AddParameterU64(size);
+    req.AddParameterBuffer(path_buf);
+    req.AddParameter(attributes);
+    req.AddParameter(size);
 
     return RespResult(client->Send(req));
 }
@@ -230,10 +230,10 @@ Result ArticArchive::CreateFile(const Path& path, u64 size, u32 attributes) cons
 Result ArticArchive::CreateDirectory(const Path& path, u32 attributes) const {
     auto req = client->NewRequest("FSUSER_CreateDirectory");
 
-    req.AddParameterS64(archive_handle);
+    req.AddParameter(archive_handle);
     auto path_buf = BuildFSPath(path);
-    req.AddParameterBuffer(path_buf.data(), path_buf.size());
-    req.AddParameterU32(attributes);
+    req.AddParameterBuffer(path_buf);
+    req.AddParameter(attributes);
 
     return RespResult(client->Send(req));
 }
@@ -243,12 +243,12 @@ Result ArticArchive::RenameDirectory(const Path& src_path, const Path& dest_path
 
     auto req = client->NewRequest("FSUSER_RenameDirectory");
 
-    req.AddParameterS64(archive_handle);
+    req.AddParameter(archive_handle);
     auto src_path_buf = BuildFSPath(src_path);
-    req.AddParameterBuffer(src_path_buf.data(), src_path_buf.size());
-    req.AddParameterS64(archive_handle);
+    req.AddParameterBuffer(src_path_buf);
+    req.AddParameter(archive_handle);
     auto dest_path_buf = BuildFSPath(dest_path);
-    req.AddParameterBuffer(dest_path_buf.data(), dest_path_buf.size());
+    req.AddParameterBuffer(dest_path_buf);
 
     return RespResult(client->Send(req));
 }
@@ -256,9 +256,9 @@ Result ArticArchive::RenameDirectory(const Path& src_path, const Path& dest_path
 ResultVal<std::unique_ptr<DirectoryBackend>> ArticArchive::OpenDirectory(const Path& path) {
     auto req = client->NewRequest("FSUSER_OpenDirectory");
 
-    req.AddParameterS64(archive_handle);
+    req.AddParameter(archive_handle);
     auto path_buf = BuildFSPath(path);
-    req.AddParameterBuffer(path_buf.data(), path_buf.size());
+    req.AddParameterBuffer(path_buf);
 
     auto resp = client->Send(req);
     auto res = RespResult(resp);
@@ -281,7 +281,7 @@ ResultVal<std::unique_ptr<DirectoryBackend>> ArticArchive::OpenDirectory(const P
 u64 ArticArchive::GetFreeBytes() const {
     auto req = client->NewRequest("FSUSER_GetFreeBytes");
 
-    req.AddParameterS64(archive_handle);
+    req.AddParameter(archive_handle);
 
     auto resp = client->Send(req);
     auto res = RespResult(resp);
@@ -296,10 +296,10 @@ Result ArticArchive::Control(u32 action, u8* input, size_t input_size, u8* outpu
                              size_t output_size) {
     auto req = client->NewRequest("FSUSER_ControlArchive");
 
-    req.AddParameterS64(archive_handle);
-    req.AddParameterU32(action);
-    req.AddParameterBuffer(input, input_size);
-    req.AddParameterU32(static_cast<u32>(output_size));
+    req.AddParameter(archive_handle);
+    req.AddParameter(action);
+    req.AddParameterBuffer(std::span{input, input_size});
+    req.AddParameter(static_cast<u32>(output_size));
 
     auto resp = client->Send(req);
     auto res = RespResult(resp);
@@ -320,10 +320,10 @@ Result ArticArchive::Control(u32 action, u8* input, size_t input_size, u8* outpu
 Result ArticArchive::SetSaveDataSecureValue(u32 secure_value_slot, u64 secure_value, bool flush) {
     auto req = client->NewRequest("FSUSER_SetSaveDataSecureValue");
 
-    req.AddParameterS64(archive_handle);
-    req.AddParameterU32(secure_value_slot);
-    req.AddParameterU64(secure_value);
-    req.AddParameterS8(flush != 0);
+    req.AddParameter(archive_handle);
+    req.AddParameter(secure_value_slot);
+    req.AddParameter(secure_value);
+    req.AddParameter(flush != 0);
 
     return RespResult(client->Send(req));
 }
@@ -331,8 +331,8 @@ Result ArticArchive::SetSaveDataSecureValue(u32 secure_value_slot, u64 secure_va
 ResultVal<std::tuple<bool, bool, u64>> ArticArchive::GetSaveDataSecureValue(u32 secure_value_slot) {
     auto req = client->NewRequest("FSUSER_GetSaveDataSecureValue");
 
-    req.AddParameterS64(archive_handle);
-    req.AddParameterU32(secure_value_slot);
+    req.AddParameter(archive_handle);
+    req.AddParameter(secure_value_slot);
 
     auto resp = client->Send(req);
     auto res = RespResult(resp);
@@ -373,7 +373,7 @@ void ArticArchive::OpenFileReporter::OnDirectoryClosed() {
 ArticFileBackend::~ArticFileBackend() {
     if (file_handle != -1) {
         auto req = client->NewRequest("FSFILE_Close");
-        req.AddParameterS32(file_handle);
+        req.AddParameter(file_handle);
         client->Send(req);
         open_reporter->OnFileClosed();
     }
@@ -389,9 +389,9 @@ ResultVal<std::size_t> ArticFileBackend::Read(u64 offset, std::size_t length, u8
 
     auto req = client->NewRequest("FSFILE_Read");
 
-    req.AddParameterS32(file_handle);
-    req.AddParameterU64(offset);
-    req.AddParameterU32(static_cast<u32>(length));
+    req.AddParameter(file_handle);
+    req.AddParameter(offset);
+    req.AddParameter(static_cast<u32>(length));
 
     auto resp = client->Send(req);
     auto res = ArticArchive::RespResult(resp);
@@ -417,11 +417,11 @@ ResultVal<std::size_t> ArticFileBackend::Write(u64 offset, std::size_t length, b
     } else {
         auto req = client->NewRequest("FSFILE_Write");
 
-        req.AddParameterS32(file_handle);
-        req.AddParameterU64(offset);
-        req.AddParameterU32(static_cast<u32>(length));
-        req.AddParameterU32(flags);
-        req.AddParameterBuffer(buffer, length);
+        req.AddParameter(file_handle);
+        req.AddParameter(offset);
+        req.AddParameter(static_cast<u32>(length));
+        req.AddParameter(flags);
+        req.AddParameterBuffer(std::span{buffer, length});
 
         auto resp = client->Send(req);
         auto res = ArticArchive::RespResult(resp);
@@ -449,7 +449,7 @@ u64 ArticFileBackend::GetSize() const {
 
         auto req = client->NewRequest("FSFILE_GetSize");
 
-        req.AddParameterS32(file_handle);
+        req.AddParameter(file_handle);
 
         auto resp = client->Send(req);
         auto res = ArticArchive::RespResult(resp);
@@ -467,15 +467,15 @@ u64 ArticFileBackend::GetSize() const {
 bool ArticFileBackend::SetSize(u64 size) const {
     auto req = client->NewRequest("FSFILE_SetSize");
 
-    req.AddParameterS32(file_handle);
-    req.AddParameterU64(size);
+    req.AddParameter(file_handle);
+    req.AddParameter(size);
 
     return ArticArchive::RespResult(client->Send(req)).IsSuccess();
 }
 
 bool ArticFileBackend::Close() {
     auto req = client->NewRequest("FSFILE_Close");
-    req.AddParameterS32(file_handle);
+    req.AddParameter(file_handle);
     bool ret = ArticArchive::RespResult(client->Send(req)).IsSuccess();
     if (ret) {
         file_handle = -1;
@@ -487,7 +487,7 @@ bool ArticFileBackend::Close() {
 void ArticFileBackend::Flush() const {
     auto req = client->NewRequest("FSFILE_Flush");
 
-    req.AddParameterS32(file_handle);
+    req.AddParameter(file_handle);
 
     client->Send(req);
 }
@@ -495,7 +495,7 @@ void ArticFileBackend::Flush() const {
 ArticDirectoryBackend::~ArticDirectoryBackend() {
     if (dir_handle != -1) {
         auto req = client->NewRequest("FSDIR_Close");
-        req.AddParameterS32(dir_handle);
+        req.AddParameter(dir_handle);
         client->Send(req);
         open_reporter->OnDirectoryClosed();
     }
@@ -504,8 +504,8 @@ ArticDirectoryBackend::~ArticDirectoryBackend() {
 u32 ArticDirectoryBackend::Read(const u32 count, Entry* entries) {
     auto req = client->NewRequest("FSDIR_Read");
 
-    req.AddParameterS32(dir_handle);
-    req.AddParameterU32(count);
+    req.AddParameter(dir_handle);
+    req.AddParameter(count);
 
     auto resp = client->Send(req);
     auto res = ArticArchive::RespResult(resp);
@@ -524,7 +524,7 @@ u32 ArticDirectoryBackend::Read(const u32 count, Entry* entries) {
 
 bool ArticDirectoryBackend::Close() {
     auto req = client->NewRequest("FSDIR_Close");
-    req.AddParameterS32(dir_handle);
+    req.AddParameter(dir_handle);
     bool ret = ArticArchive::RespResult(client->Send(req)).IsSuccess();
     if (ret) {
         dir_handle = -1;

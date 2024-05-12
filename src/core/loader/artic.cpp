@@ -369,8 +369,8 @@ ResultStatus Apploader_Artic::ReadCode(std::vector<u8>& buffer) {
             std::min<size_t>(client->GetServerRequestMaxSize() - 0x100, code_size - read_amount);
 
         auto req = client->NewRequest("Process_ReadCode");
-        req.AddParameterS32(static_cast<s32>(read_amount));
-        req.AddParameterS32(static_cast<s32>(to_read));
+        req.AddParameter(static_cast<s32>(read_amount));
+        req.AddParameter(static_cast<s32>(to_read));
         auto resp = client->Send(req);
         if (!resp.has_value() || !resp->Succeeded() || resp->GetMethodResult() != 0)
             return ResultStatus::ErrorArtic;

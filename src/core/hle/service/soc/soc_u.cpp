@@ -2222,12 +2222,12 @@ SOC_U::SOC_U() : ServiceFramework("soc:U", 18) {
 
     RegisterHandlers(functions);
 
-    Network::SocketManager::EnableSockets();
+    Network::Socket::EnableSockets();
 }
 
 SOC_U::~SOC_U() {
     CloseAndDeleteAllSockets();
-    Network::SocketManager::DisableSockets();
+    Network::Socket::DisableSockets();
 }
 
 std::optional<SOC_U::InterfaceInfo> SOC_U::GetDefaultInterfaceInfo() {

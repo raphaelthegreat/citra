@@ -16,7 +16,6 @@
 #include "core/hle/result.h"
 #include "core/hle/service/fs/directory.h"
 #include "core/hle/service/fs/file.h"
-#include "network/artic_base/artic_base_client.h"
 
 /// The unique system identifier hash, also known as ID0
 static constexpr char SYSTEM_ID[]{"00000000000000000000000000000000"};

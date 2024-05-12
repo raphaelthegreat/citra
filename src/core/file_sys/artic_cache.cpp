@@ -127,10 +127,10 @@ ResultVal<size_t> ArticCache::Write(s32 file_handle, std::size_t offset, std::si
             std::min<size_t>(client->GetServerRequestMaxSize() - 0x100, length - written_amount);
 
         auto req = client->NewRequest("FSFILE_Write");
-        req.AddParameterS32(file_handle);
-        req.AddParameterS64(static_cast<s64>(offset + written_amount));
-        req.AddParameterS32(static_cast<s32>(to_write));
-        req.AddParameterS32(static_cast<s32>(flags));
+        req.AddParameter(file_handle);
+        req.AddParameter(static_cast<s64>(offset + written_amount));
+        req.AddParameter(static_cast<s32>(to_write));
+        req.AddParameter(static_cast<s32>(flags));
         req.AddParameterBuffer(buffer + written_amount, to_write);
         auto resp = client->Send(req);
         if (!resp.has_value() || !resp->Succeeded())
@@ -161,7 +161,7 @@ ResultVal<size_t> ArticCache::GetSize(s32 file_handle) {
 
     auto req = client->NewRequest("FSFILE_GetSize");
 
-    req.AddParameterS32(file_handle);
+    req.AddParameter(file_handle);
 
     auto resp = client->Send(req);
     if (!resp.has_value() || !resp->Succeeded())
@@ -188,9 +188,9 @@ ResultVal<size_t> ArticCache::ReadFromArtic(s32 file_handle, u8* buffer, size_t 
             std::min<size_t>(client->GetServerRequestMaxSize() - 0x100, len - read_amount);
 
         auto req = client->NewRequest("FSFILE_Read");
-        req.AddParameterS32(file_handle);
-        req.AddParameterS64(static_cast<s64>(offset + read_amount));
-        req.AddParameterS32(static_cast<s32>(to_read));
+        req.AddParameter(file_handle);
+        req.AddParameter(static_cast<s64>(offset + read_amount));
+        req.AddParameter(static_cast<s32>(to_read));
         auto resp = client->Send(req);
         if (!resp.has_value() || !resp->Succeeded())
             return Result(-1);

@@ -14,10 +14,10 @@ Result ArticSecureValueBackend::ObsoletedSetSaveDataSecureValue(u32 unique_id, u
                                                                 u64 secure_value) {
     auto req = client->NewRequest("FSUSER_ObsSetSaveDataSecureVal");
 
-    req.AddParameterU64(secure_value);
-    req.AddParameterU32(secure_value_slot);
-    req.AddParameterU32(unique_id);
-    req.AddParameterU8(title_variation);
+    req.AddParameter(secure_value);
+    req.AddParameter(secure_value_slot);
+    req.AddParameter(unique_id);
+    req.AddParameter(title_variation);
 
     return ArticArchive::RespResult(client->Send(req));
 }
@@ -27,9 +27,9 @@ ResultVal<std::tuple<bool, u64>> ArticSecureValueBackend::ObsoletedGetSaveDataSe
 
     auto req = client->NewRequest("FSUSER_ObsGetSaveDataSecureVal");
 
-    req.AddParameterU32(secure_value_slot);
-    req.AddParameterU32(unique_id);
-    req.AddParameterU8(title_variation);
+    req.AddParameter(secure_value_slot);
+    req.AddParameter(unique_id);
+    req.AddParameter(title_variation);
 
     auto resp = client->Send(req);
     auto res = ArticArchive::RespResult(resp);
@@ -57,9 +57,9 @@ Result ArticSecureValueBackend::ControlSecureSave(u32 action, u8* input, size_t 
                                                   u8* output, size_t output_size) {
     auto req = client->NewRequest("FSUSER_ControlSecureSave");
 
-    req.AddParameterU32(action);
-    req.AddParameterBuffer(input, input_size);
-    req.AddParameterU32(static_cast<u32>(output_size));
+    req.AddParameter(action);
+    req.AddParameterBuffer(std::span{input, input_size});
+    req.AddParameter(static_cast<u32>(output_size));
 
     auto resp = client->Send(req);
     auto res = ArticArchive::RespResult(resp);
@@ -81,8 +81,8 @@ Result ArticSecureValueBackend::SetThisSaveDataSecureValue(u32 secure_value_slot
                                                            u64 secure_value) {
     auto req = client->NewRequest("FSUSER_SetThisSaveDataSecVal");
 
-    req.AddParameterU32(secure_value_slot);
-    req.AddParameterU64(secure_value);
+    req.AddParameter(secure_value_slot);
+    req.AddParameter(secure_value);
 
     return ArticArchive::RespResult(client->Send(req));
 }
@@ -91,7 +91,7 @@ ResultVal<std::tuple<bool, bool, u64>> ArticSecureValueBackend::GetThisSaveDataS
     u32 secure_value_slot) {
     auto req = client->NewRequest("FSUSER_GetThisSaveDataSecVal");
 
-    req.AddParameterU32(secure_value_slot);
+    req.AddParameter(secure_value_slot);
 
     auto resp = client->Send(req);
     auto res = ArticArchive::RespResult(resp);
