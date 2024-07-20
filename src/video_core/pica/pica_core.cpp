@@ -362,6 +362,7 @@ void PicaCore::WriteInternalReg(u32 id, u32 value, u32 mask) {
 
         lighting.luts[lut_config.type][lut_config.index].raw = value;
         lut_config.index.Assign(lut_config.index + 1);
+        rasterizer->MarkLightLutDirty();
         break;
     }
 
@@ -413,7 +414,7 @@ void PicaCore::WriteInternalReg(u32 id, u32 value, u32 mask) {
     }
 
     // Notify the rasterizer an internal register was updated.
-    rasterizer->NotifyPicaRegisterChanged(id);
+    //rasterizer->NotifyPicaRegisterChanged(id);
 }
 
 void PicaCore::SubmitImmediate(u32 value) {

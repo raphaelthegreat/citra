@@ -82,5 +82,7 @@ public:
                                    [[maybe_unused]] const DiskResourceLoadCallback& callback) {}
 
     virtual void SyncEntireState() {}
+
+    virtual void MarkLightLutDirty() {}
 };
 } // namespace VideoCore

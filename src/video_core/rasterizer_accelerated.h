@@ -27,6 +27,12 @@ public:
     void AddTriangle(const Pica::OutputVertex& v0, const Pica::OutputVertex& v1,
                      const Pica::OutputVertex& v2) override;
 
+    void MarkLightLutDirty() override {
+        const auto& lut_config = regs.lighting.lut_config;
+        fs_uniform_block_data.lighting_lut_dirty[lut_config.type] = true;
+        fs_uniform_block_data.lighting_lut_dirty_any = true;
+    }
+
     void NotifyPicaRegisterChanged(u32 id) override;
 
     void SyncEntireState() override;

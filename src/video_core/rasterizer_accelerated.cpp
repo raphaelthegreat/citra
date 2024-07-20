@@ -152,6 +152,7 @@ void RasterizerAccelerated::SyncEntireState() {
         SyncLightPosition(light_index);
         SyncLightDistanceAttenuationBias(light_index);
         SyncLightDistanceAttenuationScale(light_index);
+        SyncLightSpotDirection(light_index);
     }
 
     SyncFogColor();
