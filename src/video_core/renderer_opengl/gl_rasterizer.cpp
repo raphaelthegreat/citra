@@ -624,8 +624,8 @@ void RasterizerOpenGL::UnbindSpecial() {
     state.image_shadow_buffer = 0;
 }
 
-void RasterizerOpenGL::NotifyFixedFunctionPicaRegisterChanged(u32 id) {
-    switch (id) {
+void RasterizerOpenGL::SyncFixedDirtyFlags() {
+    /*switch (id) {
     // Clipping plane
     case PICA_REG_INDEX(rasterizer.clip_enable):
         SyncClipEnabled();
@@ -688,7 +688,7 @@ void RasterizerOpenGL::NotifyFixedFunctionPicaRegisterChanged(u32 id) {
         // Update since color write mask is used to emulate no-op.
         SyncColorWriteMask();
         break;
-    }
+    }*/
 }
 
 void RasterizerOpenGL::FlushAll() {

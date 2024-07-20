@@ -58,7 +58,7 @@ public:
 
 private:
     void SyncFixedState() override;
-    void NotifyFixedFunctionPicaRegisterChanged(u32 id) override;
+    void SyncFixedDirtyFlags() override;
 
     /// Syncs the clip enabled status to match the PICA register
     void SyncClipEnabled();

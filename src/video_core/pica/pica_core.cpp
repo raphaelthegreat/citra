@@ -362,6 +362,7 @@ void PicaCore::WriteInternalReg(u32 id, u32 value, u32 mask) {
 
         lighting.luts[lut_config.type][lut_config.index].raw = value;
         lut_config.index.Assign(lut_config.index + 1);
+        rasterizer->MarkLightLutDirty();
         break;
     }
 
@@ -387,7 +388,6 @@ void PicaCore::WriteInternalReg(u32 id, u32 value, u32 mask) {
     case PICA_REG_INDEX(texturing.proctex_lut_data[6]):
     case PICA_REG_INDEX(texturing.proctex_lut_data[7]): {
         auto& index = regs.internal.texturing.proctex_lut_config.index;
-
         switch (regs.internal.texturing.proctex_lut_config.ref_table.Value()) {
         case TexturingRegs::ProcTexLutTable::Noise:
             proctex.noise_table[index % proctex.noise_table.size()].raw = value;
@@ -412,8 +412,8 @@ void PicaCore::WriteInternalReg(u32 id, u32 value, u32 mask) {
         break;
     }
 
-    // Notify the rasterizer an internal register was updated.
-    rasterizer->NotifyPicaRegisterChanged(id);
+    // Mark register as dirty
+    dirty_flags.set(id);
 }
 
 void PicaCore::SubmitImmediate(u32 value) {

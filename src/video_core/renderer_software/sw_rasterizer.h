@@ -27,7 +27,6 @@ public:
     void AddTriangle(const Pica::OutputVertex& v0, const Pica::OutputVertex& v1,
                      const Pica::OutputVertex& v2) override;
     void DrawTriangles() override {}
-    void NotifyPicaRegisterChanged(u32 id) override {}
     void FlushAll() override {}
     void FlushRegion(PAddr addr, u32 size) override {}
     void InvalidateRegion(PAddr addr, u32 size) override {}

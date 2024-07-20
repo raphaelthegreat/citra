@@ -27,7 +27,13 @@ public:
     void AddTriangle(const Pica::OutputVertex& v0, const Pica::OutputVertex& v1,
                      const Pica::OutputVertex& v2) override;
 
-    void NotifyPicaRegisterChanged(u32 id) override;
+    void SyncDirtyFlags();
+
+    void MarkLightLutDirty() override {
+        const auto& lut_config = regs.lighting.lut_config;
+        fs_uniform_block_data.lighting_lut_dirty[lut_config.type] = true;
+        fs_uniform_block_data.lighting_lut_dirty_any = true;
+    }
 
     void SyncEntireState() override;
 
@@ -36,7 +42,7 @@ protected:
     virtual void SyncFixedState() = 0;
 
     /// Notifies that a fixed function PICA register changed to the video backend
-    virtual void NotifyFixedFunctionPicaRegisterChanged(u32 id) = 0;
+    virtual void SyncFixedDirtyFlags() = 0;
 
     /// Syncs the depth scale to match the PICA register
     void SyncDepthScale();

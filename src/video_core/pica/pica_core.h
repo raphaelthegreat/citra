@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <bitset>
 #include "core/hle/service/gsp/gsp_interrupt.h"
 #include "video_core/pica/geometry_pipeline.h"
 #include "video_core/pica/packed_attribute.h"
@@ -240,8 +241,11 @@ public:
         }
     };
 
+    using DirtyFlags = std::bitset<RegsInternal::NUM_REGS>;
+
     RegsLcd regs_lcd{};
     Regs regs{};
+    DirtyFlags dirty_flags{};
     // TODO: Move these to a separate shader scheduler class
     GeometryShaderUnit gs_unit;
     ShaderSetup vs_setup;

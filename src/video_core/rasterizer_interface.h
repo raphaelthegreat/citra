@@ -39,9 +39,6 @@ public:
     /// Draw the current batch of triangles
     virtual void DrawTriangles() = 0;
 
-    /// Notify rasterizer that the specified PICA register has been changed
-    virtual void NotifyPicaRegisterChanged(u32 id) = 0;
-
     /// Notify rasterizer that all caches should be flushed to 3DS memory
     virtual void FlushAll() = 0;
 
@@ -82,5 +79,7 @@ public:
                                    [[maybe_unused]] const DiskResourceLoadCallback& callback) {}
 
     virtual void SyncEntireState() {}
+
+    virtual void MarkLightLutDirty() {}
 };
 } // namespace VideoCore

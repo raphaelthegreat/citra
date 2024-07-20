@@ -64,7 +64,7 @@ public:
     void SyncFixedState() override;
 
 private:
-    void NotifyFixedFunctionPicaRegisterChanged(u32 id) override;
+    void SyncFixedDirtyFlags() override;
 
     /// Syncs the cull mode to match the PICA register
     void SyncCullMode();

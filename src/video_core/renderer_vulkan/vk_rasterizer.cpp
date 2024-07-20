@@ -467,6 +467,8 @@ void RasterizerVulkan::DrawTriangles() {
 bool RasterizerVulkan::Draw(bool accelerate, bool is_indexed) {
     MICROPROFILE_SCOPE(Vulkan_Drawing);
 
+    SyncDirtyFlags();
+
     const bool shadow_rendering = regs.framebuffer.IsShadowRendering();
     const bool has_stencil = regs.framebuffer.HasStencil();
 
@@ -664,66 +666,56 @@ void RasterizerVulkan::BindTextureCube(const Pica::TexturingRegs::FullTextureCon
     update_queue.AddImageSampler(texture_set, 0, 0, surface.ImageView(), sampler.Handle());
 }
 
-void RasterizerVulkan::NotifyFixedFunctionPicaRegisterChanged(u32 id) {
-    switch (id) {
-    // Culling
-    case PICA_REG_INDEX(rasterizer.cull_mode):
-        SyncCullMode();
-        break;
+void RasterizerVulkan::SyncFixedDirtyFlags() {
+#define IS_DIRTY(field_name, func, ...) \
+    if (pica.dirty_flags.test(PICA_REG_INDEX(field_name))) { \
+        func(__VA_ARGS__);                                   \
+        pica.dirty_flags.reset(PICA_REG_INDEX(field_name));  \
+        LOG_INFO(HW_GPU, "Resetting dirty flag for reg = {:#x}", PICA_REG_INDEX(field_name)); \
+    }                                                        \
 
+    // Culling
+    IS_DIRTY(rasterizer.cull_mode, SyncCullMode);
     // Blending
-    case PICA_REG_INDEX(framebuffer.output_merger.alphablend_enable):
+    IS_DIRTY(framebuffer.output_merger.alpha_blending, SyncBlendFuncs);
+    IS_DIRTY(framebuffer.output_merger.blend_const, SyncBlendColor);
+    IS_DIRTY(framebuffer.output_merger.alphablend_enable, [this] {
         SyncBlendEnabled();
         // Update since logic op emulation depends on alpha blend enable.
         SyncLogicOp();
         SyncColorWriteMask();
-        break;
-    case PICA_REG_INDEX(framebuffer.output_merger.alpha_blending):
-        SyncBlendFuncs();
-        break;
-    case PICA_REG_INDEX(framebuffer.output_merger.blend_const):
-        SyncBlendColor();
-        break;
-
+    });
     // Sync VK stencil test + stencil write mask
     // (Pica stencil test function register also contains a stencil write mask)
-    case PICA_REG_INDEX(framebuffer.output_merger.stencil_test.raw_func):
+    IS_DIRTY(framebuffer.output_merger.stencil_test.raw_func, [this] {
         SyncStencilTest();
         SyncStencilWriteMask();
-        break;
-    case PICA_REG_INDEX(framebuffer.output_merger.stencil_test.raw_op):
-    case PICA_REG_INDEX(framebuffer.framebuffer.depth_format):
-        SyncStencilTest();
-        break;
-
+    });
+    IS_DIRTY(framebuffer.output_merger.stencil_test.raw_op, SyncStencilTest);
+    IS_DIRTY(framebuffer.framebuffer.depth_format, SyncStencilTest);
     // Sync VK depth test + depth and color write mask
     // (Pica depth test function register also contains a depth and color write mask)
-    case PICA_REG_INDEX(framebuffer.output_merger.depth_test_enable):
+    IS_DIRTY(framebuffer.output_merger.depth_test_enable, [this] {
         SyncDepthTest();
         SyncDepthWriteMask();
         SyncColorWriteMask();
-        break;
-
+    });
     // Sync VK depth and stencil write mask
     // (This is a dedicated combined depth / stencil write-enable register)
-    case PICA_REG_INDEX(framebuffer.framebuffer.allow_depth_stencil_write):
+    IS_DIRTY(framebuffer.framebuffer.allow_depth_stencil_write, [this] {
         SyncDepthWriteMask();
         SyncStencilWriteMask();
-        break;
-
+    });
     // Sync VK color write mask
     // (This is a dedicated color write-enable register)
-    case PICA_REG_INDEX(framebuffer.framebuffer.allow_color_write):
-        SyncColorWriteMask();
-        break;
-
+    IS_DIRTY(framebuffer.framebuffer.allow_color_write, SyncColorWriteMask);
     // Logic op
-    case PICA_REG_INDEX(framebuffer.output_merger.logic_op):
+    IS_DIRTY(framebuffer.output_merger.logic_op, [this] {
         SyncLogicOp();
         // Update since color write mask is used to emulate no-op.
         SyncColorWriteMask();
-        break;
-    }
+    });
+#undef IS_DIRTY
 }
 
 void RasterizerVulkan::FlushAll() {
